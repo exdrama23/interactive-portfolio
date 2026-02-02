@@ -1,0 +1,75 @@
+// import React, { useEffect, useRef } from 'react';
+// import { gsap } from 'gsap';
+// import type { FlowingMenuProps } from './types';
+// import { demoItems } from './constants';
+// import MenuItem from './MenuItem';
+
+// const FlowingMenu: React.FC<FlowingMenuProps> = ({
+//   items = demoItems,
+//   speed = 10,
+//   isOpen
+// }) => {
+//   const containerRef = useRef<HTMLDivElement>(null);
+
+//   useEffect(() => {
+//     if (containerRef.current) {
+//       if (isOpen) {
+//         gsap.fromTo(containerRef.current,
+//           {
+//             x: 256,
+//             opacity: 0,
+//             scaleX: 0.9,
+//             scaleY: 1,
+//             borderRadius: '0 40px 40px 0',
+//           },
+//           {
+//             x: 0,
+//             opacity: 1,
+//             scaleX: 1,
+//             scaleY: 1,
+//             borderRadius: '0',
+//             duration: 0.8,
+//             ease: "power3.out",
+//             overwrite: "auto"
+//           }
+//         );
+//       } else {
+//         gsap.to(containerRef.current, {
+//           x: 256,
+//           opacity: 0,
+//           scaleX: 0.9,
+//           borderRadius: '0 40px 40px 0',
+//           duration: 0.6,
+//           ease: "power3.inOut",
+//           overwrite: "auto"
+//         });
+//       }
+//     }
+//   }, [isOpen]);
+
+//   return (
+//     <div
+//       ref={containerRef}
+//       className="fixed right-0 top-0 h-screen w-64 z-40 overflow-hidden bg-black border-l border-white/10 backdrop-blur-sm"
+//       style={{ 
+//         transformOrigin: 'right center',
+//         boxShadow: '-4px 0 30px rgba(0,0,0,0.2)',
+//         opacity: 0,
+//         x: 256
+//       }}
+//     >
+//       <nav className="flex flex-col h-full m-0 p-0">
+//         {items.map((item, idx) => (
+//           <MenuItem
+//             key={idx}
+//             {...item}
+//             speed={speed}
+//             isFirst={idx === 0}
+//           />
+//         ))}
+//       </nav>
+//     </div>
+//   );
+// };
+
+// export default FlowingMenu;

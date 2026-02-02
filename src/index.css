@@ -1,0 +1,152 @@
+@import "tailwindcss";
+
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* html, body, #root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: #000;
+  margin: 0;
+  min-height: 100vh;
+  color: white;
+  overflow-x: hidden;
+}
+
+/* Suaviza todas as animações 
+* {
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}*/
+
+ /*Estilo da scrollbar minimalista */
+/* ::-webkit-scrollbar {
+  background: transparent;
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: transparent;
+} */
+
+/* Suaviza os movimentos do cursor */
+* {
+  cursor: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="white" opacity="0.3"/><circle cx="16" cy="16" r="8" fill="white"/></svg>') 16 16, auto;
+}
+
+/* Efeito de transição suave para imagens 
+img {
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Melhora a renderização de fontes 
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* apagar*/
+
+/* Adicione ao seu arquivo de estilos global se necessário 
+@keyframes expand {
+  0% {
+    clip-path: circle(0% at var(--circle-center-x) var(--circle-center-y));
+  }
+  100% {
+    clip-path: circle(150% at var(--circle-center-x) var(--circle-center-y));
+  }
+}
+
+/* Animações do Tailwind que podem não estar disponíveis 
+.animate-in {
+  animation: enter 0.5s ease-out;
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.slide-in-from-right-8 {
+  animation: slideInFromRight 0.5s ease-out;
+}
+
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+} */
+
+/* Fim apagar */
+
+/* Esconde scrollbar visualmente */
+* {
+  scrollbar-width: none;      
+  -ms-overflow-style: none;    
+}
+
+*::-webkit-scrollbar {
+  display: none;               
+}
+.curved-sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  width: 420px;
+
+  background: black;
+
+  border-top-left-radius: 1000px;
+  border-bottom-left-radius: 1000px;
+
+  overflow: hidden;
+  pointer-events: none;
+}
+@keyframes organic-pulse {
+  0%, 100% { clip-path: url(#organicEdgeClip); }
+  50% { clip-path: url(#organicEdgeClipHover); }
+}
+
+.organic-pulse {
+  animation: organic-pulse 3s ease-in-out infinite;
+}
