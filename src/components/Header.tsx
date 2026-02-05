@@ -1,163 +1,205 @@
-// import React, { useState, useCallback, useEffect } from 'react';
-// import type { MenuState } from './headers/types';
-// import { useMouseMovement } from './headers/useMouseMovement';
-// import { useMagneticPosition } from './headers/useMagneticPosition';
-// import { 
-//   FLOATING_MENU_HEIGHT, 
-//   FLOATING_MENU_WIDTH,
-//   EDGE_ZONE_WIDTH,
-//   MAX_MOUSE_SPEED_FOR_MAGNETIC, 
-//   HOVER_INTENTION_DELAY, 
-//   EXPAND_ANIMATION_DURATION 
-// } from './headers/constants';
-// import EdgeZone from './headers/EdgeZone';
-// import FloatingMenu from './headers/FloatingMenu';
-// import ExpandingMenu from './headers/ExpandingMenu';
-// import FullscreenMenu from './headers/FullscreenMenu';
-// import DebugInfo from './headers/DebugInfo';
+import React, { useState, useEffect } from "react";
+import { 
+  Home, 
+  User, 
+  Cpu, 
+  GraduationCap, 
+  Award, 
+  Briefcase, 
+  Menu,
+  Grid 
+} from "lucide-react";
 
-// const EdgeMenu: React.FC = () => {
-//   const [state, setState] = useState<MenuState>('idle');
-//   const stateRef = React.useRef(state);
-//   const hoverTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+const useWindowSize = () => {
+  const [windowSize, setWindowSize] = useState({ width: 0 });
+  useEffect(() => {
+    function handleResize() {
+      setWindowSize({ width: window.innerWidth });
+    }
+    if (typeof window !== "undefined") {
+      window.addEventListener("resize", handleResize);
+      handleResize();
+    }
+    return () => {
+      if (typeof window !== "undefined") {
+        window.removeEventListener("resize", handleResize);
+      }
+    };
+  }, []);
+  return windowSize;
+};
+
+const NavButton = ({ 
+  icon, 
+  label, 
+  href, 
+  active = false 
+}: { 
+  icon: React.ReactNode, 
+  label: string, 
+  href: string, 
+  active?: boolean 
+}) => (
+    <a 
+      href={href}
+      className={`
+        flex flex-col items-center justify-center gap-1 w-24 h-16 rounded-xl transition-all duration-300 group cursor-pointer
+        ${active ? 'bg-white/10 text-white' : 'text-zinc-500 hover:text-zinc-200 hover:bg-white/5'}
+      `}
+    >
+        <div className={`transition-transform duration-300 ${active ? '-translate-y-1' : 'group-hover:-translate-y-1'} flex justify-center w-full`}>
+            {React.isValidElement(icon) 
+              ? React.cloneElement(icon as React.ReactElement<any>, { size: 20 }) 
+              : icon}
+        </div>
+        <span className="text-[10px] font-medium tracking-wide uppercase opacity-80 text-center leading-none w-full">
+            {label}
+        </span>
+        {active && (
+            <span className="w-1 h-1 rounded-full bg-blue-500 absolute bottom-3 shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
+        )}
+    </a>
+);
+
+export default function OrganicHeader() {
+  const { width } = useWindowSize();
   
-//   const { updateMousePosition, startMouseTracking, getMouseSpeed } = useMouseMovement();
-//   const { magneticY, updateMagneticPosition, setExactPosition, startAnimation, stopAnimation } = 
-//     useMagneticPosition(0);
+  const SIDE_HEIGHT = 64;
+  const CENTER_HEIGHT = 100;
+  const CENTER_WIDTH = 750;
+  const CURVE_WIDTH = 60;
+  
+  if (width === 0) return null;
 
-//   const handleMouseMove = useCallback((e: MouseEvent) => {
-//     updateMousePosition(e.clientY);
-    
-//     // Update magnetic position on both edgeHover and magneticFollow
-//     if (stateRef.current === 'magneticFollow' || stateRef.current === 'edgeHover') {
-//       const targetY = e.clientY - (FLOATING_MENU_HEIGHT / 2);
-//       updateMagneticPosition(targetY);
-//     }
-//   }, [updateMousePosition, updateMagneticPosition]);
+  const halfScreen = width / 2;
+  const halfCenter = CENTER_WIDTH / 2;
+  
+  const curveStartLeft = halfScreen - halfCenter - CURVE_WIDTH;
+  const curveEndLeft = halfScreen - halfCenter;
+  const curveStartRight = halfScreen + halfCenter;
+  const curveEndRight = halfScreen + halfCenter + CURVE_WIDTH;
 
-//   const handleMouseEnter = useCallback((e: React.MouseEvent) => {
-//     console.log('EdgeZone entered at Y:', e.clientY, 'Current state:', stateRef.current);
-//     startMouseTracking(e.clientY);
-    
-//     if (stateRef.current === 'idle') {
-//       console.log('Switching to edgeHover');
-//       setState('edgeHover');
-//       setExactPosition(e.clientY - (FLOATING_MENU_HEIGHT / 2));
+  const path = `
+    M 0 0 
+    L ${width} 0 
+    L ${width} ${SIDE_HEIGHT} 
+    L ${curveEndRight} ${SIDE_HEIGHT} 
+    C ${curveEndRight - CURVE_WIDTH / 2} ${SIDE_HEIGHT}, ${curveStartRight + CURVE_WIDTH / 2} ${CENTER_HEIGHT}, ${curveStartRight} ${CENTER_HEIGHT}
+    L ${curveEndLeft} ${CENTER_HEIGHT}
+    C ${curveEndLeft - CURVE_WIDTH / 2} ${CENTER_HEIGHT}, ${curveStartLeft + CURVE_WIDTH / 2} ${SIDE_HEIGHT}, ${curveStartLeft} ${SIDE_HEIGHT}
+    L 0 ${SIDE_HEIGHT} 
+    Z
+  `;
 
-//       // Clear previous timeout
-//       if (hoverTimeoutRef.current) {
-//         clearTimeout(hoverTimeoutRef.current);
-//       }
+  return (
+    <div className="fixed top-0 left-0 w-full z-50 flex justify-center text-white drop-shadow-2xl">
 
-//       // Set new timeout to check for magnetic follow
-//       hoverTimeoutRef.current = setTimeout(() => {
-//         console.log('Hover timeout - current state:', stateRef.current, 'mouse speed:', getMouseSpeed());
-//         if (stateRef.current === 'edgeHover' && getMouseSpeed() < MAX_MOUSE_SPEED_FOR_MAGNETIC) {
-//           console.log('Switching to magneticFollow');
-//           setState('magneticFollow');
-//         }
-//       }, HOVER_INTENTION_DELAY);
-//     }
-//   }, [startMouseTracking, setExactPosition, getMouseSpeed]);
+      <div className="absolute top-0 left-0 w-full h-[120px] pointer-events-none overflow-visible">
+        <svg
+          width={width}
+          height={CENTER_HEIGHT + 20}
+          viewBox={`0 0 ${width} ${CENTER_HEIGHT + 20}`}
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <filter id="glass-shadow" x="-50%" y="-50%" width="200%" height="200%">
+              <feDropShadow dx="0" dy="4" stdDeviation="10" floodColor="rgba(0,0,0,0.5)" />
+            </filter>
+            
+            <linearGradient id="glass-gradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="rgba(20, 20, 20, 0.95)" />
+              <stop offset="100%" stopColor="rgba(20, 20, 20, 0.85)" />
+            </linearGradient>
+            
+            <linearGradient id="border-gradient" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="rgba(255, 255, 255, 0)" />
+              <stop offset="20%" stopColor="rgba(255, 255, 255, 0.1)" />
+              <stop offset="50%" stopColor="rgba(255, 255, 255, 0.3)" />
+              <stop offset="80%" stopColor="rgba(255, 255, 255, 0.1)" />
+              <stop offset="100%" stopColor="rgba(255, 255, 255, 0)" />
+            </linearGradient>
+          </defs>
 
-//   const handleMouseLeave = useCallback(() => {
-//     console.log('EdgeZone left - current state:', stateRef.current);
-//     if (hoverTimeoutRef.current) {
-//       clearTimeout(hoverTimeoutRef.current);
-//       hoverTimeoutRef.current = null;
-//     }
-//     if (stateRef.current === 'edgeHover' || stateRef.current === 'magneticFollow') {
-//       console.log('Switching back to idle');
-//       setState('idle');
-//     }
-//   }, []);
+          <path
+            d={path}
+            fill="url(#glass-gradient)"
+            filter="url(#glass-shadow)"
+            className="backdrop-blur-xl" 
+          />
+          
+          <path
+            d={path}
+            stroke="url(#border-gradient)"
+            strokeWidth="1"
+            fill="none"
+            className="opacity-70"
+          />
+        </svg>
+      </div>
 
-//   const handleMenuClick = useCallback(() => {
-//     console.log('Menu clicked - current state:', stateRef.current);
-//     if (stateRef.current === 'magneticFollow' || stateRef.current === 'edgeHover') {
-//       console.log('Switching to expanding');
-//       setState('expanding');
-      
-//       setTimeout(() => {
-//         setState('fullscreen');
-//       }, EXPAND_ANIMATION_DURATION);
-//     }
-//   }, []);
+      <div 
+        className="relative w-full flex justify-between items-start px-8"
+        style={{ height: CENTER_HEIGHT }}
+      >
 
-//   const handleClose = useCallback(() => {
-//     console.log('Menu closed');
-//     setState('idle');
-//   }, []);
+        <div className="flex items-center h-[64px] gap-6">
+          <div className="font-bold text-xl tracking-tighter flex items-center gap-2">
+            <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-black">
+              <Grid size={18} />
+            </div>
+            Portfolio
+          </div>
+        </div>
 
-//   useEffect(() => {
-//     stateRef.current = state;
-//     console.log('State changed to:', state);
-//   }, [state]);
+        <div 
+            className="flex items-center justify-center gap-1"
+            style={{ 
+                height: CENTER_HEIGHT, 
+                width: CENTER_WIDTH,
+                marginTop: -4 
+            }}
+        >
+            <NavButton 
+                icon={<Home />} 
+                label="Início" 
+                href="#inicio" 
+                active 
+            />
+            <NavButton 
+                icon={<User />} 
+                label="Sobre" 
+                href="#sobre" 
+            />
+            <NavButton 
+                icon={<Cpu />} 
+                label="Hard-Skills" 
+                href="#skills" 
+            />
+            <NavButton 
+                icon={<GraduationCap />} 
+                label="Formações" 
+                href="#formacao" 
+            />
+            <NavButton 
+                icon={<Award />} 
+                label="Certificações" 
+                href="#certificacoes" 
+            />
+            <NavButton 
+                icon={<Briefcase />} 
+                label="Projetos" 
+                href="#projetos" 
+            />
+        </div>
 
-//   useEffect(() => {
-//     if (state === 'magneticFollow' || state === 'edgeHover') {
-//       const handleMouseMoveEvent = (e: MouseEvent) => handleMouseMove(e);
-//       window.addEventListener('mousemove', handleMouseMoveEvent, { passive: true });
-//       startAnimation();
-//       return () => {
-//         window.removeEventListener('mousemove', handleMouseMoveEvent);
-//       };
-//     } else {
-//       stopAnimation();
-//     }
-//   }, [state, handleMouseMove, startAnimation, stopAnimation]);
+        <div className="flex items-center h-[64px] gap-4">
+           <button className="md:hidden p-2 text-zinc-300 hover:text-white">
+             <Menu />
+           </button>
+        </div>
 
-//   useEffect(() => {
-//     return () => {
-//       if (hoverTimeoutRef.current) {
-//         clearTimeout(hoverTimeoutRef.current);
-//       }
-//       stopAnimation();
-//     };
-//   }, [stopAnimation]);
-
-//   const shouldShowFloatingMenu = state === 'edgeHover' || state === 'magneticFollow';
-//   const sidebarStripWidth = EDGE_ZONE_WIDTH + FLOATING_MENU_WIDTH;
-
-//   return (
-//     <>
-
-//       <EdgeZone
-//         onMouseEnter={handleMouseEnter}
-//         onMouseLeave={state !== 'idle' ? handleMouseLeave : undefined}
-//       />
-
-//       {shouldShowFloatingMenu && (
-//         <div
-//           className="fixed top-0 right-0 h-screen z-40"
-//           style={{ width: sidebarStripWidth }}
-//           onMouseLeave={handleMouseLeave}
-//           onClick={handleMenuClick}
-//         >
-//           <FloatingMenu
-//             magneticY={magneticY}
-//             onClick={handleMenuClick}
-//           />
-//         </div>
-//       )}
-
-//       {state === 'expanding' && (
-//         <ExpandingMenu magneticY={magneticY} />
-//       )}
-
-//       {state === 'fullscreen' && (
-//         <FullscreenMenu onClose={handleClose} />
-//       )}
-
-//       {import.meta.env.DEV && (
-//         <DebugInfo
-//           state={state}
-//           mouseSpeed={getMouseSpeed()}
-//           magneticY={magneticY}
-//         />
-//       )}
-//     </>
-//   );
-// };
-
-// export default EdgeMenu;
+      </div>
+    </div>
+  );
+}
