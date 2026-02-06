@@ -681,7 +681,7 @@ export default function ParticleGlobe({ children }: ParticleGlobeProps) {
     <div className="relative w-full h-screen">
       <div
         ref={containerRef}
-        className="fixed inset-0 bg-white z-0"
+        className="fixed inset-0 bg-black z-0"
         style={{ pointerEvents: 'auto' }}/>
       <div className="relative z-10 w-full h-full flex items-center justify-center pointer-events-none">
         <div className="max-w-4xl mx-auto px-6 py-12 text-white pointer-events-auto">

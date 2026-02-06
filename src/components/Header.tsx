@@ -123,27 +123,26 @@ export default function OrganicHeader() {
 
           <path
             d={path}
-            fill="url(#glass-gradient)"
+            fill="#141414"
             filter="url(#glass-shadow)"
             className="backdrop-blur-xl" 
           />
           
           <path
             d={path}
-            stroke="url(#border-gradient)"
+            stroke="rgba(255,255,255,0.03)"
             strokeWidth="1"
             fill="none"
-            className="opacity-70"
           />
         </svg>
       </div>
 
       <div 
-        className="relative w-full flex justify-between items-start px-8"
+        className="relative w-full flex justify-center items-start px-8"
         style={{ height: CENTER_HEIGHT }}
       >
 
-        <div className="flex items-center h-[64px] gap-6">
+        <div className="absolute left-8 flex items-center h-[64px] gap-6">
           <div className="font-bold text-xl tracking-tighter flex items-center gap-2">
             <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-black">
               <Grid size={18} />
@@ -193,7 +192,7 @@ export default function OrganicHeader() {
             />
         </div>
 
-        <div className="flex items-center h-[64px] gap-4">
+        <div className="absolute right-8 flex items-center h-[64px] gap-4">
            <button className="md:hidden p-2 text-zinc-300 hover:text-white">
              <Menu />
            </button>
