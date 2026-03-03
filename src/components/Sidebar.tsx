@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import type { MenuState } from './sidebar/types';
 import { 
   FLOATING_MENU_HEIGHT,
@@ -15,7 +15,7 @@ import FullscreenMenu from './sidebar/FullscreenMenu';
 // import FlowingMenu from './sidebar/FlowingMenu';
 import DebugInfo from './sidebar/DebugInfo';
 
-const Sidebar: React.FC = () => {
+const Sidebar = () => {
   const [state, setState] = useState<MenuState>('idle');
   // const [isMenuOpen, setIsMenuOpen] = useState(false);
   const stateRef = useRef<MenuState>(state);
@@ -41,7 +41,7 @@ const Sidebar: React.FC = () => {
     }
   }, [updateMousePosition, updateMagneticPosition]);
 
-  const handleMouseEnterEdgeZone = useCallback((e: React.MouseEvent) => {
+  const handleMouseEnterEdgeZone = useCallback((e: any) => {
     resetHoverIntent();
     startMouseTracking(e.clientY);
     
@@ -58,7 +58,7 @@ const Sidebar: React.FC = () => {
   }, [startMouseTracking, setExactPosition, getMouseSpeed, resetHoverIntent]);
 
   const handleMouseLeaveEdgeZone = useCallback(
-  (e: React.MouseEvent) => {
+  (e: any) => {
     const relatedTarget = e.relatedTarget;
 
     if (
