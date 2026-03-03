@@ -2,8 +2,6 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import type { MenuState } from './sidebar/types';
 import { 
   FLOATING_MENU_HEIGHT,
-  EDGE_ZONE_WIDTH, 
-  FLOATING_MENU_WIDTH, 
   HOVER_INTENTION_DELAY, 
   MAX_MOUSE_SPEED_FOR_MAGNETIC, 
   EXPAND_ANIMATION_DURATION,

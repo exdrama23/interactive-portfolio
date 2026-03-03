@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import { forwardRef } from 'react';
 import type { EdgeZoneProps } from './types';
 import { EDGE_ZONE_WIDTH } from './constants';
 
