@@ -2,6 +2,27 @@
 
 @import "tailwindcss";
 
+.snake-game-animation {
+  /* A cobra tem tamanho 10, e 90 de espaço vazio */
+  stroke-dasharray: 10 90; 
+  animation: snakeRun 8s linear infinite;
+}
+
+.mask-animation {
+  /* A máscara exibe os commits por 70% do caminho, e esconde eles (come) por 30% logo atrás da cobra */
+  stroke-dasharray: 70 30; 
+  animation: snakeRun 8s linear infinite;
+}
+
+/* Ambas usam a mesma animação para nunca saírem de sincronia! */
+@keyframes snakeRun {
+  from {
+    stroke-dashoffset: 100;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
 /* html, body, #root {
   width: 100%;
   height: 100%;

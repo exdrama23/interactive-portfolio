@@ -13,6 +13,7 @@ const FloatingMenu: React.FC<ExtendedFloatingMenuProps> = ({
   const curvedPath = "M 100 -110 L 100 210 Q 10 50 100 -110 Z";
   const flatPath = "M 100 -110 L 100 210 Q 100 50 100 -110 Z";
 
+
   return (
     <AnimatePresence>
       {isVisible && (
@@ -63,7 +64,7 @@ const FloatingMenu: React.FC<ExtendedFloatingMenuProps> = ({
                   d: flatPath,
                   transition: { duration: 0.15, ease: "easeIn" } 
                 }}
-                fill="white"
+                fill={"#191919"}
                 vectorEffect="non-scaling-stroke"/>
             </svg>
 
@@ -72,9 +73,9 @@ const FloatingMenu: React.FC<ExtendedFloatingMenuProps> = ({
               className="absolute inset-0 flex items-center justify-end pr-6 pl-4">
               <button className="relative w-10 h-10 rounded-full flex items-center justify-end bg-transparent pointer-events-none">
                 <div className="relative w-6 h-5 flex flex-col justify-between">
-                  <span className="w-full h-0.5 bg-black transition-all duration-300 group-hover:w-1/2 self-end" />
-                  <span className="w-full h-0.5 bg-black transition-all duration-300" />
-                  <span className="w-full h-0.5 bg-black transition-all duration-300 group-hover:w-1/2 self-end" />
+                  <span className="w-full h-0.5 bg-white transition-all duration-300 group-hover:w-1/2 self-end" />
+                  <span className="w-full h-0.5 bg-white transition-all duration-300" />
+                  <span className="w-full h-0.5 bg-white transition-all duration-300 group-hover:w-1/2 self-end" />
                 </div>
               </button>
             </motion.div>

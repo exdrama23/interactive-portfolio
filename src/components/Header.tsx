@@ -60,7 +60,7 @@ const NavButton = ({
         )}
     </a>
 );
-
+const ANIMATION_SPEED = 30;
 export default function OrganicHeader() {
   const { width } = useWindowSize();
   
@@ -92,7 +92,8 @@ export default function OrganicHeader() {
   `;
 
   return (
-    <div className="fixed top-0 left-0 w-full z-50 flex justify-center text-white drop-shadow-2xl">
+    <div className="fixed top-0 left-0 w-full z-50 flex justify-center text-white drop-shadow-2xl group">
+      
 
       <div className="absolute top-0 left-0 w-full h-[120px] pointer-events-none overflow-visible">
         <svg
@@ -111,7 +112,7 @@ export default function OrganicHeader() {
               <stop offset="0%" stopColor="rgba(20, 20, 20, 0.95)" />
               <stop offset="100%" stopColor="rgba(20, 20, 20, 0.85)" />
             </linearGradient>
-            
+
             <linearGradient id="border-gradient" x1="0" y1="0" x2="1" y2="0">
               <stop offset="0%" stopColor="rgba(255, 255, 255, 0)" />
               <stop offset="20%" stopColor="rgba(255, 255, 255, 0.1)" />
@@ -119,6 +120,31 @@ export default function OrganicHeader() {
               <stop offset="80%" stopColor="rgba(255, 255, 255, 0.1)" />
               <stop offset="100%" stopColor="rgba(255, 255, 255, 0)" />
             </linearGradient>
+
+            <linearGradient id="vermilion-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#b30000" />
+              <stop offset="50%" stopColor="#800000" />
+              <stop offset="100%" stopColor="#4d0000" />
+            </linearGradient>
+            
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+              <feMerge>
+                <feMergeNode in="coloredBlur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+
+            <mask id="pacman-mask">
+              <path
+                d={path}
+                stroke="white"
+                strokeWidth="10"
+                fill="none"
+                pathLength="100"
+                className="mask-animation"
+              />
+            </mask>
           </defs>
 
           <path
@@ -127,12 +153,39 @@ export default function OrganicHeader() {
             filter="url(#glass-shadow)"
             className="backdrop-blur-xl" 
           />
-          
+
           <path
             d={path}
-            stroke="rgba(255,255,255,0.03)"
-            strokeWidth="1"
+            stroke="#10b981"
+            strokeWidth="4"
+            strokeLinecap="round"
+            strokeDasharray="0 5"
             fill="none"
+            pathLength="100"
+            className="opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+          />
+
+          <path
+            d={path}
+            stroke="#10b981"
+            strokeWidth="4"
+            strokeLinecap="round"
+            strokeDasharray="0 5"
+            fill="none"
+            pathLength="100"
+            mask="url(#pacman-mask)"
+            className="opacity-100 transition-opacity duration-500 group-hover:opacity-0"
+          />
+
+          <path
+            d={path}
+            stroke="url(#vermilion-gradient)"
+            strokeWidth="3.5"
+            strokeLinecap="round"
+            fill="none"
+            style={{ filter: 'url(#glow)' }}
+            className="snake-game-animation"
+            pathLength="100"
           />
         </svg>
       </div>
