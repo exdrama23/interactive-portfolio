@@ -43,31 +43,32 @@ const NavButton = ({
     <a 
       href={href}
       className={`
-        flex flex-col items-center justify-center gap-1 w-24 h-16 rounded-xl transition-all duration-300 group cursor-pointer
-        ${active ? 'bg-white/10 text-white' : 'text-zinc-500 hover:text-zinc-200 hover:bg-white/5'}
+        flex flex-col items-center justify-center gap-1 w-20 h-14 rounded-xl transition-all duration-300 group cursor-pointer
+        ${active ? 'bg-white/10 dark:bg-black/10 text-white dark:text-zinc-900' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-200 dark:hover:text-zinc-700 hover:bg-white/5 dark:hover:bg-black/5'}
       `}
     >
         <div className={`transition-transform duration-300 ${active ? '-translate-y-1' : 'group-hover:-translate-y-1'} flex justify-center w-full`}>
             {React.isValidElement(icon) 
-              ? React.cloneElement(icon as React.ReactElement<any>, { size: 20 }) 
+              ? React.cloneElement(icon as React.ReactElement<any>, { size: 18 }) 
               : icon}
         </div>
-        <span className="text-[10px] font-medium tracking-wide uppercase opacity-80 text-center leading-none w-full">
+        <span className="text-[9px] font-medium tracking-wide uppercase opacity-80 text-center leading-none w-full">
             {label}
         </span>
         {active && (
-            <span className="w-1 h-1 rounded-full bg-blue-500 absolute bottom-3 shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
+            <span className="w-1 h-1 rounded-full bg-blue-500 absolute bottom-2 shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
         )}
     </a>
 );
-const ANIMATION_SPEED = 30;
+
 export default function OrganicHeader() {
   const { width } = useWindowSize();
   
-  const SIDE_HEIGHT = 64;
-  const CENTER_HEIGHT = 100;
-  const CENTER_WIDTH = 750;
-  const CURVE_WIDTH = 60;
+  // Constantes de tamanho reduzidas
+  const SIDE_HEIGHT = 48; 
+  const CENTER_HEIGHT = 75; 
+  const CENTER_WIDTH = 550; 
+  const CURVE_WIDTH = 45; 
   
   if (width === 0) return null;
 
@@ -92,10 +93,13 @@ export default function OrganicHeader() {
   `;
 
   return (
-    <div className="fixed top-0 left-0 w-full z-50 flex justify-center text-white drop-shadow-2xl group">
+    <div className="fadeable fixed top-0 left-0 w-full z-50 flex justify-center text-white dark:text-zinc-900 drop-shadow-2xl group">
       
-
-      <div className="absolute top-0 left-0 w-full h-[120px] pointer-events-none overflow-visible">
+      {/* Wrapper do SVG ajustado dinamicamente */}
+      <div 
+        className="absolute top-0 left-0 w-full pointer-events-none overflow-visible"
+        style={{ height: CENTER_HEIGHT + 20 }}
+      >
         <svg
           width={width}
           height={CENTER_HEIGHT + 20}
@@ -108,17 +112,14 @@ export default function OrganicHeader() {
               <feDropShadow dx="0" dy="4" stdDeviation="10" floodColor="rgba(0,0,0,0.5)" />
             </filter>
             
-            <linearGradient id="glass-gradient" x1="0" y1="0" x2="0" y2="1">
+            <linearGradient id="glass-gradient-light" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="rgba(20, 20, 20, 0.95)" />
               <stop offset="100%" stopColor="rgba(20, 20, 20, 0.85)" />
             </linearGradient>
 
-            <linearGradient id="border-gradient" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="rgba(255, 255, 255, 0)" />
-              <stop offset="20%" stopColor="rgba(255, 255, 255, 0.1)" />
-              <stop offset="50%" stopColor="rgba(255, 255, 255, 0.3)" />
-              <stop offset="80%" stopColor="rgba(255, 255, 255, 0.1)" />
-              <stop offset="100%" stopColor="rgba(255, 255, 255, 0)" />
+            <linearGradient id="glass-gradient-dark" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="rgba(255, 255, 255, 0.95)" />
+              <stop offset="100%" stopColor="rgba(255, 255, 255, 0.85)" />
             </linearGradient>
 
             <linearGradient id="vermilion-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -134,24 +135,19 @@ export default function OrganicHeader() {
                 <feMergeNode in="SourceGraphic" />
               </feMerge>
             </filter>
-
-            <mask id="pacman-mask">
-              <path
-                d={path}
-                stroke="white"
-                strokeWidth="10"
-                fill="none"
-                pathLength="100"
-                className="mask-animation"
-              />
-            </mask>
           </defs>
 
           <path
             d={path}
-            fill="#141414"
+            fill="url(#glass-gradient-light)"
             filter="url(#glass-shadow)"
-            className="backdrop-blur-xl" 
+            className="backdrop-blur-xl dark:hidden"
+          />
+          <path
+            d={path}
+            fill="url(#glass-gradient-dark)"
+            filter="url(#glass-shadow)"
+            className="backdrop-blur-xl hidden dark:block"
           />
 
           <path
@@ -163,18 +159,6 @@ export default function OrganicHeader() {
             fill="none"
             pathLength="100"
             className="opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-          />
-
-          <path
-            d={path}
-            stroke="#10b981"
-            strokeWidth="4"
-            strokeLinecap="round"
-            strokeDasharray="0 5"
-            fill="none"
-            pathLength="100"
-            mask="url(#pacman-mask)"
-            className="opacity-100 transition-opacity duration-500 group-hover:opacity-0"
           />
 
           <path
@@ -194,60 +178,29 @@ export default function OrganicHeader() {
         className="relative w-full flex justify-center items-start px-8"
         style={{ height: CENTER_HEIGHT }}
       >
-
-        <div className="absolute left-8 flex items-center h-[64px] gap-6">
-          <div className="font-bold text-xl tracking-tighter flex items-center gap-2">
-            <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-black">
-              <Grid size={18} />
-            </div>
-            Portfolio
-          </div>
-        </div>
-
         <div 
             className="flex items-center justify-center gap-1"
             style={{ 
                 height: CENTER_HEIGHT, 
                 width: CENTER_WIDTH,
-                marginTop: -4 
+                marginTop: -2 
             }}
         >
-            <NavButton 
-                icon={<Home />} 
-                label="Início" 
-                href="#inicio" 
-                active 
-            />
-            <NavButton 
-                icon={<User />} 
-                label="Sobre" 
-                href="#sobre" 
-            />
-            <NavButton 
-                icon={<Cpu />} 
-                label="Hard-Skills" 
-                href="#skills" 
-            />
-            <NavButton 
-                icon={<GraduationCap />} 
-                label="Formações" 
-                href="#formacao" 
-            />
-            <NavButton 
-                icon={<Award />} 
-                label="Certificações" 
-                href="#certificacoes" 
-            />
-            <NavButton 
-                icon={<Briefcase />} 
-                label="Projetos" 
-                href="#projetos" 
-            />
+            <NavButton icon={<Home />} label="Início" href="#inicio" active />
+            <NavButton icon={<User />} label="Sobre" href="#sobre" />
+            <NavButton icon={<Cpu />} label="Hard-Skills" href="#skills" />
+            <NavButton icon={<GraduationCap />} label="Formações" href="#formacao" />
+            <NavButton icon={<Award />} label="Certificações" href="#certificacoes" />
+            <NavButton icon={<Briefcase />} label="Projetos" href="#projetos" />
         </div>
 
-        <div className="absolute right-8 flex items-center h-[64px] gap-4">
-           <button className="md:hidden p-2 text-zinc-300 hover:text-white">
-             <Menu />
+        {/* Botão hamburguer alinhado com a nova altura lateral */}
+        <div 
+          className="fixed top-0 right-8 flex items-center gap-4"
+          style={{ height: SIDE_HEIGHT }}
+        >
+           <button className="md:hidden p-2 text-zinc-300 dark:text-zinc-600 hover:text-white dark:hover:text-zinc-900">
+             <Menu size={20} />
            </button>
         </div>
 

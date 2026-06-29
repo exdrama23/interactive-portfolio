@@ -64,7 +64,7 @@ const FloatingMenu: React.FC<ExtendedFloatingMenuProps> = ({
                   d: flatPath,
                   transition: { duration: 0.15, ease: "easeIn" } 
                 }}
-                fill={"#191919"}
+                fill={"#191919"} className="dark:fill-[#e6e6e6]"
                 vectorEffect="non-scaling-stroke"/>
             </svg>
 
@@ -73,9 +73,9 @@ const FloatingMenu: React.FC<ExtendedFloatingMenuProps> = ({
               className="absolute inset-0 flex items-center justify-end pr-6 pl-4">
               <button className="relative w-10 h-10 rounded-full flex items-center justify-end bg-transparent pointer-events-none">
                 <div className="relative w-6 h-5 flex flex-col justify-between">
-                  <span className="w-full h-0.5 bg-white transition-all duration-300 group-hover:w-1/2 self-end" />
-                  <span className="w-full h-0.5 bg-white transition-all duration-300" />
-                  <span className="w-full h-0.5 bg-white transition-all duration-300 group-hover:w-1/2 self-end" />
+                  <span className="w-full h-0.5 bg-white dark:bg-zinc-800 transition-all duration-300 group-hover:w-1/2 self-end" />
+                  <span className="w-full h-0.5 bg-white dark:bg-zinc-800 transition-all duration-300" />
+                  <span className="w-full h-0.5 bg-white dark:bg-zinc-800 transition-all duration-300 group-hover:w-1/2 self-end" />
                 </div>
               </button>
             </motion.div>

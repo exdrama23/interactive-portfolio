@@ -1,25 +1,24 @@
 // import { FlowingSidebar } from '../components/Header';
-import SecaoSobre from '../components/GithubPessoal';
+import { Sobre } from './sobre';
 import Header from '../components/Header';
 import ParticleText from '../components/ParticleText';
 import Sidebar from '../components/Sidebar';
 
 export function Index() {
   return (
-    <div className="relative min-h-screen  bg-white">
-      <div className="relative z-20">
-        <Header />
-      </div>
-      <div className="absolute inset-0 z-0">
+    <div className="w-full">
+      <Header />
+      <main className="relative z-10">
         <ParticleText />
-      </div>
+        <Sobre />
+      {/* <section className="h-screen flex flex-col items-center justify-center px-6 text-center">
+        <ParticleText />
+      </section> */}
 
+      {/* <section className="py-32 bg-gradient-to-b from-transparent via-purple-900/10 to-transparent relative overflow-hidden">
+        
+      </section> */}
       <Sidebar />
-
-      <main className="relative z-10 ml-20 p-5 text-white ">
-        <div className="pointer-events-auto">
-        </div>
-        {/* <SecaoSobre /> */}
       </main>
     </div>
   );

@@ -23,7 +23,7 @@ const ExpandingMenu: React.FC<ExpandingMenuProps> = ({ magneticY }) => {
           }
         }
       `}</style>
-      <div className="h-full w-full bg-black" />
+      <div className="h-full w-full bg-black dark:bg-white" />
     </div>
   );
 };

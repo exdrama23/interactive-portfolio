@@ -131,7 +131,7 @@ const Sidebar = () => {
   // const sidebarStripWidth = EDGE_ZONE_WIDTH + FLOATING_MENU_WIDTH;
 const isMenuVisible = state === 'edgeHover' || state === 'magneticFollow';
   return (
-    <>
+    <div className="fadeable">
       <EdgeZone 
         ref={edgeZoneRef}
         onMouseEnter={handleMouseEnterEdgeZone} 
@@ -185,7 +185,7 @@ const isMenuVisible = state === 'edgeHover' || state === 'magneticFollow';
       </button> */}
 
       {import.meta.env.DEV && <DebugInfo state={state} mouseSpeed={getMouseSpeed()} magneticY={magneticY} />}
-    </>
+    </div>
   );
 };
 

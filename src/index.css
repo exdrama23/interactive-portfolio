@@ -2,6 +2,19 @@
 
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+.fadeable {
+  transition: opacity 0.3s ease;
+}
+html.transitioning .fadeable {
+  opacity: 0;
+  pointer-events: none;
+}
+html.no-scroll {
+  overflow: hidden;
+}
+
 .snake-game-animation {
   /* A cobra tem tamanho 10, e 90 de espaço vazio */
   stroke-dasharray: 10 90; 
