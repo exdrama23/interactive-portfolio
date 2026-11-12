@@ -1,43 +1,33 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useRef, type ReactNode } from 'react'
 import * as THREE from 'three'
-import { createSynapticDark } from '../effects/SynapticDark'
 
-const PARTICLE_COUNT = 3000
-const CAMERA_Z       = 44
+// ── Grade de pontos (superfície ondulada) ───────────────────────────────────
+const GRID_X      = 120
+const GRID_Y      = 66
+const SEPARATION  = 56
+const GRID_START_Z = -2600
 
-const WAVE_FREQ  = 0.80
-const WAVE_SPEED = 0.60
-const WAVE_AMP   = 0.50
+const WAVE_AMP      = 26
+const MOUSE_RADIUS  = 620
+const MOUSE_LERP    = 0.08
+const MOUSE_BUMP    = 55
 
-const RIPPLE_FREQ      = 1.5
-const RIPPLE_SPEED     = 1.2
-const RIPPLE_AMP       = 1.0
-const RIPPLE_PEAK_DIST = 8.0
-
-const SIZE_SPEED = 0.45
-const SIZE_MIN   = 0.70
-const SIZE_MAX   = 1.40
-
-const MOUSE_LERP   = 0.08
-const MOUSE_RADIUS = 15.0
-
-const TRACE_RADIUS = 0.007
-const TRACE_LENGTH = 0.05
+const POINT_COLOR   = 0x0f172a
 
 interface ParticleGlobeProps {
   children?: ReactNode
+  /** Preenche a altura do contêiner em vez de usar 100vh. */
+  fill?: boolean
 }
 
-export default function ParticleGlobe({ children }: ParticleGlobeProps) {
-  const containerRef              = useRef<HTMLDivElement>(null)
-  const [contentOpacity, setContentOpacity] = useState(1)
-  const [isDarkMode, setIsDarkMode]         = useState(false)
-  const [showHint, setShowHint]             = useState(false)
+export default function ParticleGlobe({ children, fill = false }: ParticleGlobeProps) {
+  const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const container = containerRef.current
     if (!container) return
 
+    // ── Renderer / cena / câmera ─────────────────────────────────────────
     const renderer = new THREE.WebGLRenderer({
       antialias:       true,
       alpha:           true,
@@ -52,258 +42,180 @@ export default function ParticleGlobe({ children }: ParticleGlobeProps) {
     scene.background = new THREE.Color(0xffffff)
 
     const camera = new THREE.PerspectiveCamera(
-      45,
+      55,
       container.clientWidth / container.clientHeight,
-      0.1,
-      1000,
+      1,
+      12000,
     )
-    camera.position.z = CAMERA_Z
+    camera.position.set(0, 380, 900)
+    camera.lookAt(0, 0, -200)
 
-    const fovRad = THREE.MathUtils.degToRad(45)
-    const halfH  = CAMERA_Z * Math.tan(fovRad / 2)
-    const halfW  = halfH * (container.clientWidth / container.clientHeight)
+    // ── Geometria: grade no plano XZ ─────────────────────────────────────
+    const count     = GRID_X * GRID_Y
+    const positions = new Float32Array(count * 3)
+    const grid      = new Float32Array(count * 2)
 
-    const mouse2D        = new THREE.Vector2(-9999, -9999)
-    const targetMouse3D  = new THREE.Vector3(0, 0, 0)
-    const currentMouse3D = new THREE.Vector3(0, 0, 0)
-    const raycaster      = new THREE.Raycaster()
-    const intersectPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0)
+    let i = 0
+    for (let ix = 0; ix < GRID_X; ix++) {
+      for (let iy = 0; iy < GRID_Y; iy++) {
+        positions[i * 3]     = ix * SEPARATION - (GRID_X * SEPARATION) / 2
+        positions[i * 3 + 1] = 0
+        positions[i * 3 + 2] = iy * SEPARATION + GRID_START_Z
 
-    const synaptic = createSynapticDark(renderer, scene, camera)
-
-    synaptic.setOnVacuumStart(() => {
-      document.documentElement.classList.add('transitioning')
-      setTimeout(() => {
-        window.scrollTo(0, 0)
-        document.documentElement.classList.add('no-scroll')
-      }, 300)
-    })
-
-    synaptic.setOnDarkModeActivated(() => {
-      document.documentElement.classList.remove('transitioning', 'no-scroll')
-      document.documentElement.classList.add('dark')
-      setIsDarkMode(true)
-      scene.background = new THREE.Color(0x000000)
-      renderer.setClearColor(0x000000, 1)
-      material.color.setHex(0xffffff)
-    })
-
-    const whiteColor = new THREE.Color(0xffffff)
-    const darkColor = new THREE.Color(0x222222)
-    const blackColor = new THREE.Color(0x000000)
-
-    synaptic.setOnReverseStart(() => {
-      document.documentElement.classList.add('transitioning')
-      setTimeout(() => {
-        window.scrollTo(0, 0)
-        document.documentElement.classList.add('no-scroll')
-      }, 300)
-    })
-
-    synaptic.setOnReverseProgress((p: number) => {
-      material.color.copy(whiteColor).lerp(darkColor, p)
-
-      scene.background = new THREE.Color().copy(blackColor).lerp(whiteColor, p)
-      setContentOpacity(Math.min(1, (p - 0.3) / 0.5))
-    })
-
-    synaptic.setOnReverseComplete(() => {
-      document.documentElement.classList.remove('transitioning', 'no-scroll')
-      document.documentElement.classList.remove('dark')
-      setIsDarkMode(false)
-      scene.background = new THREE.Color(0xffffff)
-      renderer.setClearColor(0xffffff, 1)
-      material.color.setHex(0x222222)
-      material.opacity = 0.8
-      setContentOpacity(1)
-    })
-
-    const geometry = new THREE.CylinderGeometry(TRACE_RADIUS, TRACE_RADIUS, TRACE_LENGTH, 5)
-    geometry.rotateX(Math.PI / 2)
-
-    const shaderUniforms = {
-      uTime:  { value: 0 },
-      uMouse: { value: new THREE.Vector3(0, 0, 0) },
+        grid[i * 2]     = ix
+        grid[i * 2 + 1] = iy
+        i++
+      }
     }
 
-    const material = new THREE.MeshBasicMaterial({
-      color:       0x222222,
+    const geometry = new THREE.BufferGeometry()
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+    geometry.setAttribute('aGrid', new THREE.BufferAttribute(grid, 2))
+
+    // ── Material: ondas em shader + reação ao mouse ──────────────────────
+    const uniforms = {
+      uTime:       { value: 0 },
+      uMouse:      { value: new THREE.Vector2(99999, 99999) },
+      uPixelRatio: { value: Math.min(window.devicePixelRatio, 2) },
+      uColor:      { value: new THREE.Color(POINT_COLOR) },
+    }
+
+    const material = new THREE.ShaderMaterial({
+      uniforms,
       transparent: true,
-      opacity:     0.80,
+      depthWrite:  false,
+      vertexShader: /* glsl */ `
+        uniform float uTime;
+        uniform vec2  uMouse;
+        uniform float uPixelRatio;
+
+        attribute vec2 aGrid;
+
+        varying float vProx;
+        varying float vHeight;
+
+        void main() {
+          vec3 pos = position;
+
+          // Ondas senoidais da superfície pontilhada
+          float waveA = sin((aGrid.x + uTime * 0.45) * 0.32) * ${WAVE_AMP.toFixed(1)};
+          float waveB = sin((aGrid.y + uTime * 0.60) * 0.45) * ${WAVE_AMP.toFixed(1)};
+          pos.y += waveA + waveB;
+
+          // Proximidade do mouse (plano XZ)
+          float d    = distance(pos.xz, uMouse);
+          float prox = 1.0 - smoothstep(0.0, ${MOUSE_RADIUS.toFixed(1)}, d);
+          prox = prox * prox;
+
+          // Elevação + ondulação ao redor do cursor
+          float ripple = sin(d * 0.018 - uTime * 2.2) * 12.0;
+          pos.y += prox * ${MOUSE_BUMP.toFixed(1)} + ripple * prox;
+
+          vProx   = prox;
+          vHeight = clamp((pos.y + 60.0) / 120.0, 0.0, 1.0);
+
+          vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+          gl_Position = projectionMatrix * mvPosition;
+
+          float size = 3.0 + prox * 6.5;
+          gl_PointSize = clamp(
+            size * (1000.0 / max(-mvPosition.z, 1.0)) * uPixelRatio,
+            1.2 * uPixelRatio,
+            18.0 * uPixelRatio
+          );
+        }
+      `,
+      fragmentShader: /* glsl */ `
+        uniform vec3 uColor;
+
+        varying float vProx;
+        varying float vHeight;
+
+        void main() {
+          vec2 uv = gl_PointCoord - 0.5;
+          float d = length(uv);
+          if (d > 0.5) discard;
+
+          float edge  = smoothstep(0.5, 0.18, d);
+          float alpha = edge * (0.44 + vProx * 0.45 + vHeight * 0.10);
+
+          gl_FragColor = vec4(uColor, alpha);
+        }
+      `,
     })
 
-    material.onBeforeCompile = (shader) => {
-      shader.uniforms.uTime  = shaderUniforms.uTime
-      shader.uniforms.uMouse = shaderUniforms.uMouse
+    const points = new THREE.Points(geometry, material)
+    scene.add(points)
 
-      shader.vertexShader = `
-        uniform float uTime;
-        uniform vec3  uMouse;
-        varying float vAlpha;
-        float hash11(float p) {
-          return fract(sin(p * 127.1) * 43758.5453);
-        }
-        ${shader.vertexShader}
-      `
-      shader.fragmentShader = `
-        varying float vAlpha;
-        ${shader.fragmentShader}
-      `
+    // ── Interação com o mouse ────────────────────────────────────────────
+    const raycaster      = new THREE.Raycaster()
+    const mouseNDC       = new THREE.Vector2()
+    const intersectPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0)
+    const targetMouse    = new THREE.Vector2(99999, 99999)
+    const currentMouse   = new THREE.Vector2(99999, 99999)
+    const hitPoint       = new THREE.Vector3()
 
-      shader.vertexShader = shader.vertexShader.replace(
-        '#include <begin_vertex>',
-        `
-        #include <begin_vertex>
-        vec3 instPos  = (instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
-        float mMag    = distance(instPos.xy, uMouse.xy);
-        float mouseProx = 1.0 - smoothstep(0.0, ${MOUSE_RADIUS.toFixed(4)}, mMag);
-        float sizeOffset = hash11(float(gl_InstanceID) * 3.0) * 6.283;
-        float sizePhase  = uTime * ${SIZE_SPEED.toFixed(4)} + sizeOffset;
-        float sizeWave   = sin(sizePhase);
-        float sizeScale  = smoothstep(-1.0, 1.0, sizeWave)
-                           * ${(SIZE_MAX - SIZE_MIN).toFixed(4)}
-                           + ${SIZE_MIN.toFixed(4)};
-        float sizeBoost  = 1.0 + 6.0 * mouseProx;
-        transformed *= sizeScale * sizeBoost;
-        `,
-      )
+    const handlePointerMove = (e: PointerEvent) => {
+      const rect = container.getBoundingClientRect()
+      mouseNDC.x =  ((e.clientX - rect.left) / container.clientWidth)  * 2 - 1
+      mouseNDC.y = -((e.clientY - rect.top)  / container.clientHeight) * 2 + 1
 
-      shader.vertexShader = shader.vertexShader.replace(
-        '#include <project_vertex>',
-        `
-        vec4 mvPosition = vec4(transformed, 1.0);
-        #ifdef USE_INSTANCING
-          mvPosition = instanceMatrix * mvPosition;
-        #endif
-        vec4 worldPos  = modelMatrix * mvPosition;
-        float wDist    = length(worldPos.xyz);
-        vec3 radialDir = normalize(worldPos.xyz);
-        float ambientOffset = hash11(float(gl_InstanceID)) * 6.283;
-        float ambient = sin(wDist * ${WAVE_FREQ.toFixed(4)} - uTime * ${WAVE_SPEED.toFixed(4)} + ambientOffset);
-        worldPos.xyz += radialDir * ambient * ${WAVE_AMP.toFixed(4)};
-        float mDist       = distance(worldPos.xyz, uMouse);
-        float rippleOffset = hash11(float(gl_InstanceID) * 2.0) * 6.283;
-        float ripple = sin(mDist * ${RIPPLE_FREQ.toFixed(4)} - uTime * ${RIPPLE_SPEED.toFixed(4)} + rippleOffset);
-        float env    = (mDist / ${RIPPLE_PEAK_DIST.toFixed(4)})
-                       * exp(1.0 - mDist / ${RIPPLE_PEAK_DIST.toFixed(4)});
-        env = clamp(env, 0.0, 1.0);
-        vec3 rippleDir = normalize(worldPos.xyz - uMouse);
-        worldPos.xyz  += rippleDir * ripple * env * ${RIPPLE_AMP.toFixed(4)};
-        float _mProx = 1.0 - smoothstep(0.0, ${MOUSE_RADIUS.toFixed(4)}, mDist);
-        vAlpha = clamp(0.04 + 0.71 * _mProx, 0.0, 1.0);
-        mvPosition  = viewMatrix * worldPos;
-        gl_Position = projectionMatrix * mvPosition;
-        `,
-      )
-
-      shader.fragmentShader = shader.fragmentShader.replace(
-        'gl_FragColor = vec4( outgoingLight, diffuseColor.a );',
-        'gl_FragColor = vec4( outgoingLight, vAlpha );',
-      )
+      raycaster.setFromCamera(mouseNDC, camera)
+      if (raycaster.ray.intersectPlane(intersectPlane, hitPoint)) {
+        targetMouse.set(hitPoint.x, hitPoint.z)
+      }
     }
 
-    const mesh  = new THREE.InstancedMesh(geometry, material, PARTICLE_COUNT)
-    const dummy = new THREE.Object3D()
-
-    let added = 0
-    while (added < PARTICLE_COUNT) {
-      const x = (Math.random() * 2 - 1) * halfW
-      const y = (Math.random() * 2 - 1) * halfH
-      dummy.position.set(x, y, 0)
-      const thickness = 0.5 + Math.random() * 1.0
-      const len       = 0.5 + Math.random() * 1.0
-      dummy.scale.set(thickness, thickness, len)
-      dummy.updateMatrix()
-      mesh.setMatrixAt(added, dummy.matrix)
-      added++
+    const handlePointerLeave = () => {
+      targetMouse.set(99999, 99999)
     }
-    mesh.instanceMatrix.needsUpdate = true
-    scene.add(mesh)
 
-    let frameId: number
-    const clock = new THREE.Clock()
+    // ── Loop de animação ─────────────────────────────────────────────────
+    const clock   = new THREE.Clock()
+    let   frameId = 0
 
     function animate() {
       frameId = requestAnimationFrame(animate)
-      const dt = clock.getDelta()
-      const t  = clock.elapsedTime
 
-      shaderUniforms.uTime.value = t
-      currentMouse3D.lerp(targetMouse3D, MOUSE_LERP)
-      shaderUniforms.uMouse.value.copy(currentMouse3D)
+      const t = clock.getElapsedTime()
+      uniforms.uTime.value = t
 
-      if (synaptic.state.stage === 3) {
-        const vp = synaptic.state.vacuumProgress
-        setContentOpacity(Math.max(0, 1.0 - vp * 3.5))
-      } else if (synaptic.state.stage === 0 || synaptic.state.stage === 1) {
-        setContentOpacity(1)
-      }
+      currentMouse.lerp(targetMouse, MOUSE_LERP)
+      uniforms.uMouse.value.copy(currentMouse)
 
       renderer.render(scene, camera)
-
-      synaptic.update(dt, t)
-      synaptic.render(scene, camera)
     }
 
     animate()
 
-    const handlePointerMove = (e: PointerEvent) => {
-      const rect = container.getBoundingClientRect()
-      mouse2D.x =  ((e.clientX - rect.left)  / container.clientWidth)  * 2 - 1
-      mouse2D.y = -((e.clientY - rect.top)   / container.clientHeight) * 2 + 1
-      raycaster.setFromCamera(mouse2D, camera)
-      raycaster.ray.intersectPlane(intersectPlane, targetMouse3D)
-    }
-
-    const handlePointerDown = (e: PointerEvent) => {
-      if (synaptic.state.stage === 3 || synaptic.state.stage === 4) return
-
-      const rect = container.getBoundingClientRect()
-      const mx =  ((e.clientX - rect.left)  / container.clientWidth)  * 2 - 1
-      const my = -((e.clientY - rect.top)   / container.clientHeight) * 2 + 1
-      mouse2D.set(mx, my)
-      raycaster.setFromCamera(mouse2D, camera)
-      const hit = new THREE.Vector3()
-      raycaster.ray.intersectPlane(intersectPlane, hit)
-
-      const wasStage0or1 = synaptic.state.stage === 0 || synaptic.state.stage === 1
-
-      synaptic.registerClick(
-        e.clientX, e.clientY,
-        hit,
-        container.clientWidth, container.clientHeight,
-        mx, my,
-      )
-
-      if (wasStage0or1 && synaptic.state.stage === 1) {
-        setShowHint(true)
-        setTimeout(() => setShowHint(false), 2200)
-      }
-    }
-
+    // ── Resize ───────────────────────────────────────────────────────────
     const handleResize = () => {
       const w = container.clientWidth
       const h = container.clientHeight
+      if (w === 0 || h === 0) return
+
       camera.aspect = w / h
       camera.updateProjectionMatrix()
       renderer.setSize(w, h)
-      synaptic.resize(w, h)
+
+      const dpr = Math.min(window.devicePixelRatio, 2)
+      renderer.setPixelRatio(dpr)
+      uniforms.uPixelRatio.value = dpr
     }
 
     container.addEventListener('pointermove', handlePointerMove)
-    container.addEventListener('pointerdown', handlePointerDown)
+    container.addEventListener('pointerleave', handlePointerLeave)
     const resizeObserver = new ResizeObserver(handleResize)
     resizeObserver.observe(container)
 
     return () => {
       cancelAnimationFrame(frameId)
       container.removeEventListener('pointermove', handlePointerMove)
-      container.removeEventListener('pointerdown', handlePointerDown)
+      container.removeEventListener('pointerleave', handlePointerLeave)
       resizeObserver.disconnect()
-      renderer.dispose()
       geometry.dispose()
       material.dispose()
-      synaptic.dispose()
+      renderer.dispose()
       if (container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement)
       }
@@ -312,52 +224,16 @@ export default function ParticleGlobe({ children }: ParticleGlobeProps) {
 
   return (
     <div
-      className={`relative w-full h-screen overflow-hidden ${
-        isDarkMode ? 'bg-black' : 'bg-white'
-      }`}
+      className={`relative w-full ${fill ? 'h-full' : 'h-screen'} overflow-hidden bg-white`}
       style={{ touchAction: 'none' }}
     >
-      <div
-        ref={containerRef}
-        className="absolute inset-0 z-0"
-        style={{ pointerEvents: 'auto' }}
-      />
+      <div ref={containerRef} className="absolute inset-0 z-0" />
 
-      <div
-        className="relative z-10 w-full h-full flex items-center pointer-events-none px-6 md:px-24"
-        style={{ opacity: contentOpacity, transition: 'opacity 0.2s ease' }}
-      >
-        <div
-          className={`max-w-2xl pointer-events-auto transition-colors duration-500 ${
-            isDarkMode ? 'text-white' : 'text-slate-900'
-          }`}
-        >
-          {children}
-        </div>
-      </div>
-
-      {showHint && (
-        <div
-          className="fixed bottom-8 left-1/2 -translate-x-1/2 z-20
-            px-5 py-2 rounded-full text-sm font-mono
-            pointer-events-none select-none
-            bg-black/6 text-slate-500 border border-black/8"
-          style={{ backdropFilter: 'blur(6px)' }}
-        >
-          clique novamente
-        </div>
-      )}
-
-      {!isDarkMode && (
-        <div
-          className="fixed bottom-6 right-6 z-20 pointer-events-none flex items-center gap-2"
-          style={{ opacity: contentOpacity }}
-        >
-          <span className="relative flex h-2.5 w-2.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-slate-300 opacity-75" />
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-slate-400" />
-          </span>
-          <span className="text-xs text-slate-400 font-mono tracking-widest">× 2</span>
+      {children && (
+        <div className="relative z-10 w-full h-full flex items-center pointer-events-none px-6 md:px-24">
+          <div className="max-w-2xl pointer-events-auto text-slate-900">
+            {children}
+          </div>
         </div>
       )}
     </div>

@@ -6,6 +6,7 @@ import {
   GraduationCap, 
   Award, 
   Briefcase, 
+  Mail,
   Menu,
   Grid 
 } from "lucide-react";
@@ -67,7 +68,7 @@ export default function OrganicHeader() {
   // Constantes de tamanho reduzidas
   const SIDE_HEIGHT = 48; 
   const CENTER_HEIGHT = 75; 
-  const CENTER_WIDTH = 550; 
+  const CENTER_WIDTH = 660; 
   const CURVE_WIDTH = 45; 
   
   if (width === 0) return null;
@@ -192,6 +193,7 @@ export default function OrganicHeader() {
             <NavButton icon={<GraduationCap />} label="Formações" href="#formacao" />
             <NavButton icon={<Award />} label="Certificações" href="#certificacoes" />
             <NavButton icon={<Briefcase />} label="Projetos" href="#projetos" />
+            <NavButton icon={<Mail />} label="Contato" href="#contato" />
         </div>
 
         {/* Botão hamburguer alinhado com a nova altura lateral */}

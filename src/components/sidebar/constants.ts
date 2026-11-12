@@ -10,11 +10,13 @@ export const FADE_IN_DURATION = 300;
 export const MAGNETIC_SMOOTHING_FACTOR = 0.35;
 
 export const demoItems: MenuItemData[] = [
-  { link: '#', text: 'Home',},
-  { link: '#', text: 'SoftSkils',},
-  { link: '#', text: 'HardSkils',  },
-  { link: '#', text: 'Stories',  },
-  { link: '#', text: 'Product',  },
+  { link: '#inicio', text: 'Início' },
+  { link: '#sobre', text: 'Sobre' },
+  { link: '#skills', text: 'Hard-Skills' },
+  { link: '#formacao', text: 'Formações' },
+  { link: '#certificacoes', text: 'Certificações' },
+  { link: '#projetos', text: 'Projetos' },
+  { link: '#contato', text: 'Contato' },
 ];
 
 export const SOCIAL_LINKS: SocialLink[] = [

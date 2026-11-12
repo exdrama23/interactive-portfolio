@@ -13,7 +13,6 @@ import FloatingMenu from './sidebar/FloatingMenu';
 import ExpandingMenu from './sidebar/ExpandingMenu';
 import FullscreenMenu from './sidebar/FullscreenMenu';
 // import FlowingMenu from './sidebar/FlowingMenu';
-import DebugInfo from './sidebar/DebugInfo';
 
 const Sidebar = () => {
   const [state, setState] = useState<MenuState>('idle');
@@ -184,7 +183,6 @@ const isMenuVisible = state === 'edgeHover' || state === 'magneticFollow';
         </div>
       </button> */}
 
-      {import.meta.env.DEV && <DebugInfo state={state} mouseSpeed={getMouseSpeed()} magneticY={magneticY} />}
     </div>
   );
 };
