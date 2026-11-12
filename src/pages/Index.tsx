@@ -1,16 +1,21 @@
 // import { FlowingSidebar } from '../components/Header';
-import { Sobre } from './sobre';
 import Header from '../components/Header';
-import ParticleText from '../components/ParticleText';
+import HeroPortal from '../components/HeroPortal';
 import Sidebar from '../components/Sidebar';
+import Contato from '../components/Contato';
+import Tecnologias from '../pages/tecnologias';
+import Formacao from '../pages/formacao';
+import Projetos from '../pages/projetos';
 
 export function Index() {
   return (
     <div className="w-full">
-      <Header />
       <main className="relative z-10">
-        <ParticleText />
-        <Sobre />
+        <HeroPortal />
+        <Tecnologias />
+        <Formacao />
+        <Projetos />
+        <Contato />
       {/* <section className="h-screen flex flex-col items-center justify-center px-6 text-center">
         <ParticleText />
       </section> */}

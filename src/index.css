@@ -1,11 +1,117 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=Fleur+De+Leah&family=Inter:wght@300;400;500;600;700&family=Oswald:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Space+Grotesk:wght@400;500&family=Space+Mono:wght@400&display=swap');
 
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+@theme {
+  --font-serif: 'Playfair Display', ui-serif, Georgia, serif;
+}
+
 .fadeable {
   transition: opacity 0.3s ease;
+}
+
+/* Texto "escrito" pelo scroll (Sobre): cada caractere acende em sequência.
+   --tw (0 → 1) vem do container; --tw-d é o atraso de cada caractere. */
+.tw-char {
+  opacity: clamp(0, calc((var(--tw, 0) - var(--tw-d, 0)) * 26), 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tw-char {
+    opacity: 1;
+  }
+}
+
+/* Zoom de tela no hover da imagem do Sobre. O wrapper inteiro escala a partir
+   do centro da imagem — o efeito é o de um zoom de navegador, não de uma
+   imagem que cresce sozinha. */
+.sobre-zoom {
+  transition: transform 650ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sobre-zoom[data-zoom-on='true'] {
+  will-change: transform;
+}
+
+/* Fundo do zoom: texto, traço e as outras imagens perdem foco juntos. */
+[data-zoom-dim] {
+  transition:
+    filter 500ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 500ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sobre-zoom[data-zoom-on='true'] [data-zoom-dim] {
+  filter: blur(6px) brightness(0.5);
+}
+
+/* Modal do Sobre: a foto aparece centralizada e é jogada para a esquerda; o
+   painel fica parado. Só depois que ela para é que o texto entra, com
+   animação própria (título sobe, descrição é "digitada" caractere a
+   caractere, tags fecham). Mesma ideia do `bento-gallery` do Landingpage,
+   mas com o painel `w-fit` (foto no tamanho natural). */
+.story-dialog-photo {
+  animation: story-dialog-photo 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes story-dialog-photo {
+  0% {
+    opacity: 0;
+    transform: translateX(var(--shift, 0px)) scale(0.99);
+  }
+  40% {
+    opacity: 1;
+    transform: translateX(var(--shift, 0px)) scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+.story-dialog-meta {
+  animation: story-dialog-rise 460ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.story-dialog-title {
+  animation: story-dialog-rise 520ms cubic-bezier(0.16, 1, 0.3, 1) 70ms both;
+}
+
+.story-dialog-tags {
+  animation: story-dialog-rise 500ms cubic-bezier(0.16, 1, 0.3, 1) 700ms both;
+}
+
+@keyframes story-dialog-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.story-char {
+  opacity: 0;
+  animation: story-char-in 320ms ease-out both;
+}
+
+@keyframes story-char-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* O canvas padrão do navegador é branco; o site é todo preto. */
+html,
+body,
+#root {
+  background: #000;
 }
 html.transitioning .fadeable {
   opacity: 0;
@@ -13,6 +119,77 @@ html.transitioning .fadeable {
 }
 html.no-scroll {
   overflow: hidden;
+}
+
+/* Entrada dos itens do menu lateral (sidebar) */
+@keyframes menuItemIn {
+  from {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.menu-item-in {
+  opacity: 0;
+  animation: menuItemIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Hero: portal tipográfico sobre a superfície de pontos.
+   Deixa apenas o texto centralizado + transição de scroll. */
+.hero-glyph {
+  pointer-events: none;
+}
+.hero-glyph [data-gp-content] {
+  padding: 0 !important;
+  display: block !important;
+  background: #000000 !important;
+  color: #ffffff !important;
+}
+.hero-glyph [data-gp-default-field] {
+  background: #000000 !important;
+}
+.hero-glyph [data-gp-caption],
+.hero-glyph [data-gp-touch-picker] {
+  display: none !important;
+}
+
+/* A colagem acompanha o zoom por mais tempo: sai derretendo enquanto a
+   câmera entra dentro da palavra (--gp-progress vai de 0 a 1). */
+.hero-glyph [data-gp-front] {
+  opacity: clamp(0, calc(1 - (var(--gp-progress, 0) - 0.28) / 0.24), 1);
+  transform: translateY(calc(var(--gp-progress, 0) * 46px))
+    scale(calc(1 + var(--gp-progress, 0) * 0.03));
+  transform-origin: 50% 50%;
+  will-change: opacity, transform;
+}
+
+/* O Sobre nasce do preto ainda durante a entrada na letra, sem trecho morto. */
+.hero-glyph[data-gp-motion="on"] [data-gp-content] {
+  opacity: clamp(0, calc((var(--gp-progress, 0) - 0.56) / 0.2), 1);
+}
+
+/* Entrada do palavra-ânima da hero (a surface de pontos aparece atrás). */
+@keyframes heroWordIn {
+  from {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.hero-glyph[data-gp-ready] [data-gp-field] {
+  animation: heroWordIn 1.7s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-glyph[data-gp-ready] [data-gp-field] {
+    animation: none;
+  }
 }
 
 .snake-game-animation {
