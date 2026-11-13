@@ -95,33 +95,50 @@ desktop; os textos escritos e a linha acelerada valem nas duas larguras.
 `transform` não altera layout: o handoff segue com os mesmos números.
 
 
-## 0.5. `formacao-lanyard/` — crachás por formação (`#formacao`)
+## 0.5. `formacao-lanyard/` — credenciais por formação (`#formacao`)
 
-Seção com um crachá pendurado por formação (componente `LanyardBadge`). O
-backup guarda o `Index.tsx` de antes, sem `<Formacao />`.
+Seção com as credenciais penduradas em um trilho (componente
+`CredentialRail`, em `src/components/ui/credential-rail.tsx`), agrupadas em
+**Formações / Certificados / Trabalhos** por um painel de abas. O backup guarda
+o `Index.tsx` de antes, sem `<Formacao />`.
 
-**Conteúdo** (`FORMACOES` em `src/pages/formacao.tsx`): UNIT (Ciência da
-Computação, 2026–2030), SENAI/CETAF (Técnico em Desenvolvimento de Sistemas,
-01/2023–12/2025) e duas formações da Inovase (Backend 10/2025–03/2026 e
-Frontend 07/2025–10/2025).
+**Conteúdo** (`CREDENCIAIS` em `src/pages/formacao.tsx`): 4 formações (UNIT
+Ciência da Computação 2026–2030; SENAI/CETAF Técnico em Desenvolvimento de
+Sistemas 01/2023–12/2025; Inovase Backend 10/2025–03/2026 e Frontend
+07/2025–10/2025), 1 certificado (SENAI — Inteligência Artificial Industrial,
+abr/2026) e 1 trabalho (Acesso — Desenvolvedor Júnior, fev/2026–o momento).
+São os dados reais do LinkedIn em `src/assets/img/pdf/`.
+
+**Painel de abas.** Cada botão mostra o nome do grupo e a quantidade de cartões
+(`04`, `01`, `01`). Ao trocar, o grupo atual sai para a esquerda
+(`.formacao-esteira-out`, 260 ms) e o próximo entra pela direita
+(`.formacao-esteira-in`, 520 ms) — o efeito de esteira. A contagem também
+aparece no topo da seção (`NN cartões`).
+
+**Trilho e cordões.** `CredentialRail` nasceu do modelo `SkateDeckRail`
+(pranchas no trilho) e foi adaptado: cada cartão tem o formato de credencial
+(proporção 0.62) e pende por um cordão em V — duas fitas com a cor e a impressão
+da instituição, fivela e clipe metálicos. O cordão acompanha o balanço; arrastar
+o cartão na horizontal o desloca e balança, e o hover traz o cartão à frente.
+No mobile o trilho vira carrossel (setas, pontos e swipe).
 
 **Identidade por instituição.** Cada item carrega um `tema` (`TEMAS`):
 `card`/`ink`/`accent` para o cartão e `strap`/`strapInk` para o cordão, mais o
 `pattern` do tecido. As paletas seguem as marcas oficiais: UNIT azul + dourado,
-SENAI azul + laranja, Inovase azul profundo + verde.
+SENAI azul + laranja, Inovase azul profundo + verde, Acesso grafite + verde
+claro.
 
-**Cordão.** `strapPattern` aceita `mandala` (padrão), `grid` (SENAI),
-`orbit` (UNIT) ou `circuit` (Inovase). Os motivos são desenhados em canvas
-(`drawGrid`, `drawOrbit`, `drawCircuit`) e repetidos ao longo do tecido, junto
-com `strapText` (linha manuscrita) e `strapLabel` (rótulo em caixa alta).
+**Cordão.** `pattern` aceita `mandala`, `grid` (SENAI), `orbit` (UNIT/Acesso) ou
+`circuit` (Inovase). A impressão é uma linha tracejada com o `strapInk` sobre a
+fita, com o traço variando por motivo.
 
-**Cartão.** `front`/`back` aceitam `ReactNode` **ou** uma função
-`(scale) => ReactNode` — a escala é `cardWidth / 240`, então o layout é
-desenhado em unidades de 240 px e encolhe junto com o crachá. `CredentialFront`
-mostra selo, instituição, curso, área e período; `CredentialBack` mostra status,
-período, local, curso e uma faixa inferior com o nome da instituição e um código
-de barras. Os selos (`SealSenai`, `SealInovase`, `SealUnit`) são SVG em
-`currentColor`, sem arquivo de logo.
+**Cartão.** `front`/`back` são funções `(w) => ReactNode`, onde `w` é a largura
+real em px — o layout é desenhado em unidades de 200 px (`s = w / 200`) e
+escala junto. `FormacaoFront/Back`, `CertificadoFront/Back` e
+`TrabalhoFront/Back` têm layouts próprios; todos usam os selos em SVG
+(`SealUnit`, `SealSenai`, `SealInovase`, `SealWork`) e a faixa inferior com
+logo/nome e código de barras. Clicar no cartão abre o detalhe com as duas faces
+(`Frente`/`Verso`) e a animação de elevação a partir do trilho.
 
 Restaurar:
 
