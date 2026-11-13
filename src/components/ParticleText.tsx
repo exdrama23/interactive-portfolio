@@ -171,22 +171,51 @@ export default function ParticleGlobe({ children, fill = false }: ParticleGlobeP
     }
 
     // ── Loop de animação ─────────────────────────────────────────────────
-    const clock   = new THREE.Clock()
-    let   frameId = 0
+    const clock          = new THREE.Clock()
+    const reducedMotion  = window.matchMedia('(prefers-reduced-motion: reduce)')
+    let   frameId        = 0
+    let   looping        = false
+    let   onScreen       = true
+    let   pageVisible    = document.visibilityState !== 'hidden'
+
+    function draw() {
+      currentMouse.lerp(targetMouse, MOUSE_LERP)
+      uniforms.uMouse.value.copy(currentMouse)
+      renderer.render(scene, camera)
+    }
 
     function animate() {
       frameId = requestAnimationFrame(animate)
 
-      const t = clock.getElapsedTime()
-      uniforms.uTime.value = t
-
-      currentMouse.lerp(targetMouse, MOUSE_LERP)
-      uniforms.uMouse.value.copy(currentMouse)
-
-      renderer.render(scene, camera)
+      uniforms.uTime.value = clock.getElapsedTime()
+      draw()
     }
 
-    animate()
+    function start() {
+      if (looping || !onScreen || !pageVisible) return
+      // Mesmo visual congelado para quem pediu menos movimento: um frame só.
+      if (reducedMotion.matches) {
+        draw()
+        return
+      }
+      looping = true
+      clock.start()
+      frameId = requestAnimationFrame(animate)
+    }
+
+    function stop() {
+      if (!looping) return
+      looping = false
+      cancelAnimationFrame(frameId)
+      clock.stop()
+    }
+
+    function sync() {
+      if (onScreen && pageVisible) start()
+      else stop()
+    }
+
+    start()
 
     // ── Resize ───────────────────────────────────────────────────────────
     const handleResize = () => {
@@ -201,17 +230,39 @@ export default function ParticleGlobe({ children, fill = false }: ParticleGlobeP
       const dpr = Math.min(window.devicePixelRatio, 2)
       renderer.setPixelRatio(dpr)
       uniforms.uPixelRatio.value = dpr
+      if (!looping) draw()
     }
+
+    const handleVisibility = () => {
+      pageVisible = document.visibilityState !== 'hidden'
+      sync()
+    }
+
+    const handleReducedMotion = () => sync()
+
+    const visibilityObserver = new IntersectionObserver(
+      (entries) => {
+        onScreen = entries[entries.length - 1]?.isIntersecting ?? true
+        sync()
+      },
+      { threshold: 0 },
+    )
 
     container.addEventListener('pointermove', handlePointerMove)
     container.addEventListener('pointerleave', handlePointerLeave)
+    document.addEventListener('visibilitychange', handleVisibility)
+    reducedMotion.addEventListener('change', handleReducedMotion)
     const resizeObserver = new ResizeObserver(handleResize)
     resizeObserver.observe(container)
+    visibilityObserver.observe(container)
 
     return () => {
-      cancelAnimationFrame(frameId)
+      stop()
+      visibilityObserver.disconnect()
       container.removeEventListener('pointermove', handlePointerMove)
       container.removeEventListener('pointerleave', handlePointerLeave)
+      document.removeEventListener('visibilitychange', handleVisibility)
+      reducedMotion.removeEventListener('change', handleReducedMotion)
       resizeObserver.disconnect()
       geometry.dispose()
       material.dispose()
