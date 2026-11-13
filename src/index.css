@@ -361,38 +361,51 @@ body {
   animation: organic-pulse 3s ease-in-out infinite;
 }
 
-/* Formação: troca de grupo em esteira. O grupo atual sai para a esquerda e o
-   próximo entra pela direita, como uma esteira de cabides. */
-.formacao-esteira-out {
-  transform: translateX(-88px);
+/* Formação: troca de grupo em esteira. A barra fica parada; apenas os cartões
+   correm para a esquerda (saindo) e voltam pela direita (entrando), como se
+   fossem arrastados pela fileira. Usamos a propriedade `translate`, que soma
+   com o `transform` da física dos crachás sem sobrescrevê-lo. */
+.formacao-esteira-out [data-deck] {
+  translate: calc(-1 * var(--esteira-x, 42vw)) 0;
   opacity: 0;
   transition:
-    transform 300ms cubic-bezier(0.4, 0, 0.6, 1),
-    opacity 200ms ease-in 100ms;
+    translate 380ms cubic-bezier(0.55, 0, 0.4, 1),
+    opacity 220ms ease-in 120ms;
 }
 
-.formacao-esteira-in {
-  animation: formacao-esteira-in 560ms cubic-bezier(0.16, 1, 0.3, 1) both;
+.formacao-esteira-in [data-deck] {
+  translate: 0 0;
+  opacity: 1;
+  animation: formacao-esteira-in 620ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 
 @keyframes formacao-esteira-in {
   from {
+    translate: var(--esteira-x, 42vw) 0;
     opacity: 0;
-    transform: translateX(88px);
   }
   to {
+    translate: 0 0;
     opacity: 1;
-    transform: translateX(0);
+  }
+}
+
+/* Em telas estreitas os cartões são maiores que a viewport; um deslocamento
+   maior garante que entrem e saiam de fora da tela. */
+@media (max-width: 640px) {
+  .formacao-esteira-out,
+  .formacao-esteira-in {
+    --esteira-x: 90vw;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .formacao-esteira-out {
-    transform: none;
+  .formacao-esteira-out [data-deck] {
+    translate: none;
     transition: opacity 120ms linear;
   }
 
-  .formacao-esteira-in {
+  .formacao-esteira-in [data-deck] {
     animation: none;
   }
 }

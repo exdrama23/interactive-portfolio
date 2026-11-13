@@ -1,31 +1,27 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion'
 import { Reveal } from '../components/ui/animations'
 import CredentialRail from '../components/ui/credential-rail'
 import type { RailItem } from '../components/ui/credential-rail'
+import HoverSlatButton from '../components/ui/hover-button'
 import type { StrapPattern } from '../components/ui/lanyard-badge'
 import inovaseLogo from '../assets/img/logos/inovase-light.png'
 import senaiLogo from '../assets/img/logos/senai.png'
 import senaiLogoLight from '../assets/img/logos/senai-light.png'
 import unitLogo from '../assets/img/logos/unit-light.png'
+import formacaoData from '../data/formacao.json'
 
 interface Tema {
-  /** Papelão do cartão. */
   card: string
-  /** Tinta principal. */
   ink: string
-  /** Cor de destaque (selo, pill, faixa). */
   accent: string
-  /** Cor do cordão / faixa inferior. */
   strap: string
-  /** Tinta impressa no cordão. */
   strapInk: string
-  /** Motivo repetido no cordão. */
   pattern: StrapPattern
-  /** Logo na frente do cartão (versão que contrasta com o papelão). */
+  seal: 'unit' | 'senai' | 'inovase' | 'work'
   logo?: string
-  /** Logo na faixa escura do verso. */
   logoBar?: string
-  /** Marca tipográfica quando não existe arquivo de logo. */
+  logoHeight?: number
   monogram?: string
 }
 
@@ -43,7 +39,6 @@ interface Credencial {
   periodo: string
   status: string
   local: string
-  /** Linha em caixa alta da faixa inferior. */
   strapLabel: string
   tema: Tema
   descricao: string
@@ -51,182 +46,61 @@ interface Credencial {
   codigo?: string
 }
 
-/**
- * Uma identidade por instituição: papelão, tinta, destaque e o motivo do
- * cordão. Os selos são desenhados em SVG (nítidos em qualquer tamanho e sem
- * depender de arquivo de logo).
- */
-const TEMAS: Record<'unit' | 'senai' | 'inovase' | 'acesso', Tema> = {
-  unit: {
-    card: '#0a2c56',
-    ink: '#eef4fb',
-    accent: '#f0b429',
-    strap: '#0b3a6b',
-    strapInk: '#f0b429',
-    pattern: 'orbit',
-    logo: unitLogo,
-    logoBar: unitLogo,
-  },
-  senai: {
-    card: '#f2ede3',
-    ink: '#0b4a9b',
-    accent: '#e8501e',
-    strap: '#0b4a9b',
-    strapInk: '#f6a01e',
-    pattern: 'grid',
-    logo: senaiLogo,
-    logoBar: senaiLogoLight,
-  },
-  inovase: {
-    card: '#062b45',
-    ink: '#eef8fb',
-    accent: '#63c46f',
-    strap: '#08334f',
-    strapInk: '#7fd39a',
-    pattern: 'circuit',
-    logo: inovaseLogo,
-    logoBar: inovaseLogo,
-  },
-  acesso: {
-    card: '#101413',
-    ink: '#f0f6f1',
-    accent: '#9be8b0',
-    strap: '#2c4136',
-    strapInk: '#b9f5c9',
-    pattern: 'orbit',
-    monogram: 'A',
-  },
+interface TemaData extends Omit<Tema, 'logo' | 'logoBar'> {
+  logo?: string
+  logoBar?: string
 }
 
-const CREDENCIAIS: Credencial[] = [
-  /* ---------------------------------------------------------------- formações */
-  {
-    id: 'unit-cc',
-    grupo: 'formacoes',
-    tipo: 'formacao',
-    titulo: 'Ciência da Computação',
-    instituicao: 'UNIT',
-    detalhe: 'Centro Universitário Tiradentes',
-    area: 'Bacharelado',
-    periodo: '2026 — 2030',
-    status: 'Cursando',
-    local: 'Aracaju, SE',
-    strapLabel: 'CENTRO UNIV. TIRADENTES',
-    tema: TEMAS.unit,
-    descricao:
-      'Bacharelado com foco em fundamentos da computação, algoritmos, estruturas de dados e engenharia de software.',
-    skills: ['Algoritmos', 'Estruturas de dados', 'POO', 'Engenharia de software'],
-  },
-  {
-    id: 'senai-tds',
-    grupo: 'formacoes',
-    tipo: 'formacao',
-    titulo: 'Técnico em Desenvolvimento de Sistemas',
-    instituicao: 'SENAI',
-    detalhe: 'CETAF · Aracaju',
-    area: 'Tecnologia da Informação',
-    periodo: '01/2023 — 12/2025',
-    status: 'Concluído',
-    local: 'Aracaju, SE',
-    strapLabel: 'CETAF · ARACAJU',
-    tema: TEMAS.senai,
-    descricao:
-      'Curso técnico com foco em desenvolvimento de software, lógica de programação, banco de dados e metodologias ágeis.',
-    skills: ['Desenvolvimento web', 'Metodologias ágeis', 'Banco de dados', 'Git'],
-  },
-  {
-    id: 'inovase-backend',
-    grupo: 'formacoes',
-    tipo: 'formacao',
-    titulo: 'Desenvolvimento de Sistemas',
-    instituicao: 'INOVASE',
-    detalhe: 'Instituto de Inovação de Sergipe',
-    area: 'Backend',
-    periodo: '10/2025 — 03/2026',
-    status: 'Cursando',
-    local: 'Aracaju, SE',
-    strapLabel: 'INOVAÇÃO · SE',
-    tema: TEMAS.inovase,
-    descricao:
-      'Formação em desenvolvimento backend com Python, construção de APIs, modelagem de dados e boas práticas de engenharia.',
-    skills: ['Python', 'APIs', 'Banco de dados', 'Docker'],
-  },
-  {
-    id: 'inovase-frontend',
-    grupo: 'formacoes',
-    tipo: 'formacao',
-    titulo: 'Desenvolvimento de Sistemas',
-    instituicao: 'INOVASE',
-    detalhe: 'Instituto de Inovação de Sergipe',
-    area: 'Frontend',
-    periodo: '07/2025 — 10/2025',
-    status: 'Concluído',
-    local: 'Aracaju, SE',
-    strapLabel: 'INOVAÇÃO · SE',
-    tema: TEMAS.inovase,
-    descricao:
-      'Formação em desenvolvimento frontend com React, TypeScript, HTML, CSS e integração com APIs.',
-    skills: ['React', 'TypeScript', 'CSS', 'APIs'],
-  },
-
-  /* ------------------------------------------------------------- certificados */
-  {
-    id: 'senai-ia-industrial',
-    grupo: 'certificados',
-    tipo: 'certificado',
-    titulo: 'Inteligência Artificial Industrial',
-    instituicao: 'SENAI',
-    detalhe: 'Serviço Nacional de Aprendizagem Industrial',
-    area: 'Inteligência Artificial',
-    periodo: 'abr. de 2026',
-    status: 'Emitido',
-    local: 'Sergipe',
-    strapLabel: 'SENAI · SERGIPE',
-    tema: TEMAS.senai,
-    descricao:
-      'Certificação em inteligência artificial aplicada à indústria, com Python, programação orientada a objetos, visão computacional e aprendizado de máquina.',
-    skills: ['Python', 'POO', 'Visão computacional', 'Aprendizado de máquina', 'IA industrial'],
-    codigo: '69d134af-42b8-44a5-89da-a5960a40004f',
-  },
-
-  /* ----------------------------------------------------------------- trabalhos */
-  {
-    id: 'acesso-dev-junior',
-    grupo: 'trabalhos',
-    tipo: 'trabalho',
-    titulo: 'Desenvolvedor Júnior',
-    instituicao: 'ACESSO',
-    detalhe: 'Acesso',
-    area: 'Tempo integral',
-    periodo: 'fev. 2026 — o momento',
-    status: 'Atual',
-    local: 'Aracaju, SE',
-    strapLabel: 'ACESSO · ARACAJU',
-    tema: TEMAS.acesso,
-    descricao:
-      'Desenvolvimento full-stack em ecossistemas web e backend, integrando tecnologias tradicionais a soluções de inteligência artificial.',
-    skills: ['React', 'Node.js', 'Python', 'AWS', 'Inteligência artificial'],
-  },
-]
-
-const GRUPOS: { id: Grupo; label: string }[] = [
-  { id: 'formacoes', label: 'Formações' },
-  { id: 'certificados', label: 'Certificados' },
-  { id: 'trabalhos', label: 'Trabalhos' },
-]
-
-const DESCRICAO_GRUPO: Record<Grupo, string> = {
-  formacoes:
-    'Graduação e formação técnica, cada uma com a identidade da instituição: o curso na frente, o status e o período no verso.',
-  certificados:
-    'Certificações que complementam a base técnica — a credencial na frente, as competências e o código no verso.',
-  trabalhos:
-    'Onde a formação vira prática: o cargo na frente, a atuação e as tecnologias no verso.',
+interface CredencialData extends Omit<Credencial, 'tema' | 'grupo' | 'tipo'> {
+  grupo: string
+  tipo: string
+  theme: string
 }
 
-/* --------------------------------------------------------------------------
-   Selos (SVG, currentColor)
-   -------------------------------------------------------------------------- */
+interface FormacaoData {
+  eyebrow: string
+  title: string
+  groups: { id: string; label: string; hover: string }[]
+  themes: Record<string, TemaData>
+  credentials: CredencialData[]
+}
+
+const DATA = formacaoData as unknown as FormacaoData
+
+const LOGOS: Record<string, string> = {
+  unit: unitLogo,
+  senai: senaiLogo,
+  senaiLight: senaiLogoLight,
+  inovase: inovaseLogo,
+}
+
+function resolveLogo(ref?: string) {
+  if (!ref) return undefined
+  return LOGOS[ref] ?? ref
+}
+
+const TEMAS: Record<string, Tema> = Object.fromEntries(
+  Object.entries(DATA.themes).map(([key, tema]) => [
+    key,
+    {
+      ...tema,
+      logo: resolveLogo(tema.logo),
+      logoBar: resolveLogo(tema.logoBar),
+    },
+  ]),
+)
+
+const CREDENCIAIS: Credencial[] = DATA.credentials.map((c) => ({
+  ...c,
+  grupo: c.grupo as Grupo,
+  tipo: c.tipo as Tipo,
+  tema: TEMAS[c.theme] ?? TEMAS.unit,
+}))
+
+const GRUPOS: { id: Grupo; label: string; hover: string }[] = DATA.groups.map((g) => ({
+  ...g,
+  id: g.id as Grupo,
+}))
 
 function SealSenai({ size }: { size: number }) {
   return (
@@ -340,15 +214,12 @@ function SealWork({ letter, size }: { letter: string; size: number }) {
 }
 
 function Seal({ item, size }: { item: Credencial; size: number }) {
-  if (item.id.startsWith('unit')) return <SealUnit size={size} />
-  if (item.id.startsWith('senai')) return <SealSenai size={size} />
-  if (item.id.startsWith('inovase')) return <SealInovase size={size} />
+  const seal = item.tema.seal
+  if (seal === 'unit') return <SealUnit size={size} />
+  if (seal === 'senai') return <SealSenai size={size} />
+  if (seal === 'inovase') return <SealInovase size={size} />
   return <SealWork letter={item.tema.monogram ?? '•'} size={size} />
 }
-
-/* --------------------------------------------------------------------------
-   Peças comuns
-   -------------------------------------------------------------------------- */
 
 function MonoBadge({ tema, s }: { tema: Tema; s: number }) {
   return (
@@ -499,10 +370,6 @@ function Chip({ children, accent, s }: { children: ReactNode; accent: string; s:
   )
 }
 
-/* --------------------------------------------------------------------------
-   Frentes e versos
-   -------------------------------------------------------------------------- */
-
 function FormacaoFront({ item, s }: { item: Credencial; s: number }) {
   const { tema } = item
 
@@ -524,7 +391,7 @@ function FormacaoFront({ item, s }: { item: Credencial; s: number }) {
             alt={item.instituicao}
             style={{
               display: 'block',
-              height: (item.id.startsWith('senai') ? 36 : 40) * s,
+              height: (tema.logoHeight ?? 40) * s,
               width: 'auto',
               maxWidth: '100%',
               objectFit: 'contain',
@@ -654,18 +521,20 @@ function CertificadoFront({ item, s }: { item: Credencial; s: number }) {
       <div className="absolute" style={{ left: 22 * s, right: 22 * s, top: 30 * s }}>
         <CardHeader s={s} left="Certificado" right={item.status} />
 
-        <img
-          src={tema.logo}
-          alt={item.instituicao}
-          style={{
-            display: 'block',
-            height: 34 * s,
-            width: 'auto',
-            maxWidth: '100%',
-            objectFit: 'contain',
-            marginTop: 16 * s,
-          }}
-        />
+        {tema.logo && (
+          <img
+            src={tema.logo}
+            alt={item.instituicao}
+            style={{
+              display: 'block',
+              height: 34 * s,
+              width: 'auto',
+              maxWidth: '100%',
+              objectFit: 'contain',
+              marginTop: 16 * s,
+            }}
+          />
+        )}
 
         <div style={{ width: 34 * s, height: 2 * s, background: tema.accent, marginTop: 14 * s }} />
 
@@ -883,15 +752,47 @@ function CardFace({ item, side, w }: { item: Credencial; side: 'front' | 'back';
   return side === 'front' ? <TrabalhoFront item={item} s={s} /> : <TrabalhoBack item={item} s={s} />
 }
 
-/* --------------------------------------------------------------------------
-   Seção
-   -------------------------------------------------------------------------- */
-
 export function Formacao() {
   const [grupo, setGrupo] = useState<Grupo>('formacoes')
   const [shown, setShown] = useState<Grupo>('formacoes')
   const [out, setOut] = useState(false)
   const timer = useRef<number | null>(null)
+  const storyRef = useRef<HTMLDivElement>(null)
+  const reduceMotion = useReducedMotion()
+  const { scrollY } = useScroll()
+  const [entry, setEntry] = useState({ start: 0, end: 1 })
+  const [exit, setExit] = useState({ start: 0, span: 1 })
+
+  useEffect(() => {
+    const measure = () => {
+      const el = storyRef.current
+      if (!el) return
+      const vh = window.innerHeight
+      const top = el.getBoundingClientRect().top + window.scrollY
+      setEntry({ start: top - vh, end: top - vh * 0.25 })
+      const bottom = el.getBoundingClientRect().bottom + window.scrollY
+      const next = document.querySelector<HTMLElement>('#projetos')
+      const start = next
+        ? next.getBoundingClientRect().top + window.scrollY
+        : bottom - vh
+      const span = next ? Math.max(1, next.offsetHeight - vh) : vh
+      setExit({ start, span })
+    }
+    measure()
+    window.addEventListener('resize', measure)
+    const timer = window.setTimeout(measure, 900)
+    return () => {
+      window.removeEventListener('resize', measure)
+      window.clearTimeout(timer)
+    }
+  }, [grupo])
+
+  const entryRotate = useTransform(scrollY, [entry.start, entry.end], [30, 0])
+  const exitX = useTransform(
+    scrollY,
+    [exit.start, exit.start + exit.span],
+    ['0vw', '-100vw'],
+  )
 
   useEffect(() => () => {
     if (timer.current) window.clearTimeout(timer.current)
@@ -933,92 +834,155 @@ export function Formacao() {
     timer.current = window.setTimeout(() => {
       setShown(next)
       setOut(false)
-    }, 300)
+    }, 380)
   }
 
-  const quantidade = contagem[grupo]
+  const layoutSlots = useMemo(
+    () => Math.max(1, ...GRUPOS.map((g) => contagem[g.id])),
+    [contagem],
+  )
+
+  const irParaCertificacoes = useRef<() => void>(() => {})
+  irParaCertificacoes.current = () => {
+    trocar('certificados')
+    window.requestAnimationFrame(() => {
+      const el = document.getElementById('certificacoes')
+      if (!el) return
+      let top = 0
+      let node: HTMLElement | null = el
+      while (node) {
+        top += node.offsetTop
+        node = node.offsetParent as HTMLElement | null
+      }
+      const centred = top - Math.max(80, (window.innerHeight - el.offsetHeight) / 2)
+      window.scrollTo({
+        top: Math.max(0, centred),
+        behavior: reduceMotion ? 'auto' : 'smooth',
+      })
+    })
+  }
+
+  useEffect(() => {
+    const hash = '#certificacoes'
+    const onHash = () => {
+      if (window.location.hash === hash) irParaCertificacoes.current()
+    }
+    const onClick = (event: MouseEvent) => {
+      const target = event.target as Element | null
+      if (!target?.closest?.(`a[href="${hash}"]`)) return
+      event.preventDefault()
+      if (window.location.hash !== hash) window.history.pushState(null, '', hash)
+      irParaCertificacoes.current()
+    }
+    const initial = window.location.hash === hash
+      ? window.setTimeout(onHash, 700)
+      : 0
+    window.addEventListener('hashchange', onHash)
+    document.addEventListener('click', onClick)
+    return () => {
+      window.clearTimeout(initial)
+      window.removeEventListener('hashchange', onHash)
+      document.removeEventListener('click', onClick)
+    }
+  }, [])
 
   return (
-    <section
-      id="formacao"
-      className="relative w-full overflow-hidden bg-black px-6 py-24 text-stone-200 antialiased selection:bg-stone-100 selection:text-black md:py-32 lg:px-12"
+    <div
+      ref={storyRef}
+      data-story-enter
+      className="relative z-30 mt-[calc(-42svh)] w-full overflow-x-clip"
     >
-      <div className="mx-auto max-w-[1400px]">
-        <Reveal>
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <p className="text-[11px] font-medium tracking-[0.24em] text-stone-500 uppercase">Formação</p>
-              <h2 className="mt-5 max-w-[900px] font-serif text-[2.75rem] leading-[1.05] tracking-tight text-stone-50 md:text-[4rem] lg:text-[5rem]">
-                O que me formou.
-              </h2>
-            </div>
-            <p className="font-serif text-sm text-stone-500">
-              {String(quantidade).padStart(2, '0')} {quantidade === 1 ? 'cartão' : 'cartões'}
-            </p>
-          </div>
-        </Reveal>
-
-        <Reveal delay={0.1} className="mt-7 max-w-xl">
-          <p className="text-base leading-relaxed text-stone-400 md:text-lg">{DESCRICAO_GRUPO[grupo]}</p>
-        </Reveal>
-
-        <Reveal delay={0.16}>
-          <div
-            role="tablist"
-            aria-label="Grupos de credenciais"
-            aria-orientation="horizontal"
-            className="mt-9 inline-flex flex-wrap items-center gap-1 rounded-2xl border border-white/10 bg-white/[0.03] p-1.5 backdrop-blur"
-          >
-            {GRUPOS.map((g) => {
-              const ativo = g.id === grupo
-              return (
-                <button
-                  key={g.id}
-                  type="button"
-                  role="tab"
-                  id={`tab-${g.id}`}
-                  aria-selected={ativo}
-                  aria-controls="painel-formacao"
-                  onClick={() => trocar(g.id)}
-                  className={`group inline-flex items-center gap-2 rounded-xl px-3.5 py-2 text-[13px] font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-stone-200/60 motion-reduce:transition-none ${
-                    ativo
-                      ? 'bg-stone-100 text-stone-900'
-                      : 'text-stone-400 hover:bg-white/5 hover:text-stone-100'
-                  }`}
-                >
-                  {g.label}
-                  <span
-                    className={`rounded-md px-1.5 py-0.5 font-mono text-[10px] leading-none tabular-nums ${
-                      ativo ? 'bg-black/10 text-stone-700' : 'bg-white/5 text-stone-500 group-hover:text-stone-300'
-                    }`}
-                  >
-                    {String(contagem[g.id]).padStart(2, '0')}
-                  </span>
-                </button>
-              )
-            })}
-          </div>
-        </Reveal>
+      <motion.section
+        id="formacao"
+        style={
+          reduceMotion
+            ? undefined
+            : { rotate: entryRotate, x: exitX, transformOrigin: 'bottom left' }
+        }
+        className="relative w-full origin-bottom-left overflow-hidden bg-black text-stone-200 antialiased selection:bg-stone-100 selection:text-black"
+      >
 
         <div
           id="painel-formacao"
           role="tabpanel"
           aria-labelledby={`tab-${grupo}`}
-          className="mt-6"
+          className="flex w-full flex-col pt-24 pb-32 md:pt-32 md:pb-48"
         >
-          <div
-            key={shown}
-            className={out ? 'formacao-esteira-out' : 'formacao-esteira-in'}
-          >
-            <CredentialRail
-              items={railItems}
-              caption="Passe o mouse sobre a fileira para trazer um cartão à frente."
-              hint="passe o mouse · arraste para balançar · clique para abrir"
-            />
+
+          <div className="flex flex-col gap-8 px-6 md:flex-row md:items-end md:justify-between md:gap-12 md:px-10 lg:px-14">
+            <Reveal className="max-w-xl">
+              <p className="text-[11px] font-medium tracking-[0.24em] text-stone-500 uppercase">{DATA.eyebrow}</p>
+              <h2 className="mt-3 font-serif text-[2.25rem] leading-[1.05] tracking-tight text-stone-50 md:text-[3rem] lg:text-[3.5rem]">
+                {DATA.title}
+              </h2>
+            </Reveal>
+
+            <Reveal delay={0.06} className="md:pb-1">
+              <div
+                role="tablist"
+                aria-label="Grupos de credenciais"
+                aria-orientation="horizontal"
+                className="flex flex-wrap items-start gap-3 sm:gap-5 md:justify-end"
+              >
+                {GRUPOS.map((g) => {
+                  const ativo = g.id === grupo
+                  return (
+                    <button
+                      key={g.id}
+                      type="button"
+                      role="tab"
+                      id={`tab-${g.id}`}
+                      aria-selected={ativo}
+                      aria-controls="painel-formacao"
+                      aria-label={`${g.label}, ${contagem[g.id]} ${contagem[g.id] === 1 ? 'item' : 'itens'}`}
+                      onClick={() => trocar(g.id)}
+                      className="group/tab flex flex-col items-center gap-2.5 rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-stone-200/60 focus-visible:ring-offset-4 focus-visible:ring-offset-black"
+                    >
+                      <span className="relative inline-flex transition-transform duration-300 group-hover/tab:-translate-y-0.5 motion-reduce:transition-none">
+                        <HoverSlatButton
+                          aria-hidden="true"
+                          initialText={g.label.toUpperCase()}
+                          hoverText={g.hover.toUpperCase()}
+                          hoverClassName="bg-white text-stone-900"
+                        />
+                        <span
+                          aria-hidden="true"
+                          className={`absolute -bottom-1.5 left-0 h-[2px] bg-stone-100 transition-all duration-300 ${
+                            ativo ? 'w-full opacity-100' : 'w-0 opacity-0'
+                          }`}
+                        />
+                      </span>
+                      <span
+                        className={`font-mono text-[10px] leading-none tracking-[0.18em] tabular-nums uppercase transition-colors ${
+                          ativo ? 'text-stone-200' : 'text-stone-500'
+                        }`}
+                      >
+                        {String(contagem[g.id]).padStart(2, '0')} {contagem[g.id] === 1 ? 'item' : 'itens'}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+            </Reveal>
+          </div>
+
+
+          <div id="certificacoes" className="mt-10 w-full scroll-mt-28 md:mt-12">
+            <div
+              key={shown}
+              className={out ? 'formacao-esteira-out' : 'formacao-esteira-in'}
+            >
+              <CredentialRail
+                items={railItems}
+                layoutCount={layoutSlots}
+                caption="Passe o mouse sobre a fileira para trazer um cartão à frente."
+                hint="passe o mouse · arraste para balançar · clique para abrir"
+              />
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </motion.section>
+    </div>
   )
 }
 

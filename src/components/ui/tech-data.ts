@@ -1,4 +1,5 @@
 import type { LucideIcon } from 'lucide-react'
+import tecnologiasData from '../../data/tecnologias.json'
 
 export type TechCategory =
   | 'Front-end & UI'
@@ -10,14 +11,12 @@ export type TechCategory =
 
 export interface TechItem {
   name: string
-  /** Slug do Simple Icons (logo via CDN). */
   slug?: string
-  /** Ícone lucide para tecnologias sem logo dedicado. */
   icon?: LucideIcon
   category: TechCategory
 }
 
-export const TECH_CATEGORIES: readonly TechCategory[] = [
+const DEFAULT_CATEGORIES: readonly TechCategory[] = [
   'Front-end & UI',
   'Back-end & APIs',
   'Banco de Dados & Cache',
@@ -25,3 +24,8 @@ export const TECH_CATEGORIES: readonly TechCategory[] = [
   'Ferramentas e Plataformas',
   'Conceitos & Especialidades',
 ]
+
+export const TECH_CATEGORIES: readonly TechCategory[] =
+  Array.isArray(tecnologiasData.categories) && tecnologiasData.categories.length > 0
+    ? (tecnologiasData.categories as unknown as readonly TechCategory[])
+    : DEFAULT_CATEGORIES

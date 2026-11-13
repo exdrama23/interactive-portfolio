@@ -1,0 +1,101 @@
+{
+  "label": "Projetos selecionados — Vol. 01",
+  "hint": "Arraste · clique no cartão central para abrir",
+  "projects": [
+    {
+      "id": "aurora",
+      "kicker": "Dashboard · React + TypeScript",
+      "title": "Aurora",
+      "caption": "Painel de operações com métricas em tempo real, permissões por papel e relatórios exportáveis.",
+      "image": "https://images.unsplash.com/photo-1454496522488-7a8e488e8606?auto=format&fit=crop&w=900&h=1125&q=80",
+      "alt": "Montanhas cobertas de neve ao anoitecer",
+      "company": {
+        "name": "ACESSO.NET",
+        "logo": "",
+        "url": ""
+      },
+      "links": [
+        { "label": "Repositório", "url": "https://github.com/exdrama23" }
+      ],
+      "summary": "Painel de operações em tempo real para acompanhar métricas, permissões e relatórios em um só lugar.",
+      "techs": ["React", "TypeScript", "Node.js", "PostgreSQL", "WebSocket"],
+      "description": "O Aurora nasceu da necessidade de reunir, em uma única tela, indicadores que antes viviam espalhados por planilhas e sistemas internos. O painel acompanha filas, chamados e desempenho operacional em tempo real, com atualizações via WebSocket e filtros por período.\n\nA arquitetura separa a API de leitura da API de escrita, permitindo consultas pesadas sem travar a operação. O controle de acesso é por papel, e todos os relatórios podem ser exportados em CSV ou PDF. O front-end foi construído em React e TypeScript, com componentes reutilizáveis e estados de carregamento consistentes."
+    },
+    {
+      "id": "nucleo",
+      "kicker": "API · Node.js + PostgreSQL",
+      "title": "Núcleo",
+      "caption": "Back-end modular com autenticação, filas e integrações — documentado de ponta a ponta.",
+      "image": "https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=900&h=1125&q=80",
+      "alt": "Lago cercado por montanhas, água parada refletindo o céu",
+      "company": {
+        "name": "Projeto autoral",
+        "logo": "",
+        "url": ""
+      },
+      "links": [
+        { "label": "Repositório", "url": "https://github.com/exdrama23" }
+      ],
+      "summary": "API modular com autenticação, filas assíncronas e integrações, documentada de ponta a ponta.",
+      "techs": ["Node.js", "Express", "PostgreSQL", "Redis", "Docker"],
+      "description": "O Núcleo é uma base de back-end pensada para ser reaproveitada em diferentes produtos. Ele reúne autenticação, autorização, envio de e-mails, filas assíncronas e um conjunto de integrações externas prontas para uso.\n\nA organização por módulos mantém cada domínio isolado, com contratos claros entre as camadas. Os processos demorados rodam em filas com Redis, e o ambiente completo sobe com Docker Compose. A documentação cobre desde a configuração inicial até o detalhamento de cada endpoint, facilitando a entrada de novos desenvolvedores."
+    },
+    {
+      "id": "vitrine",
+      "kicker": "E-commerce · Next.js",
+      "title": "Vitrine",
+      "caption": "Loja completa com catálogo, carrinho persistente e checkout integrado a meios de pagamento.",
+      "image": "https://images.unsplash.com/photo-1433086966358-54859d0ed716?auto=format&fit=crop&w=900&h=1125&q=80",
+      "alt": "Cachoeira entre paredões de rocha e vegetação",
+      "company": {
+        "name": "Cliente independente",
+        "logo": "",
+        "url": ""
+      },
+      "links": [
+        { "label": "Repositório", "url": "https://github.com/exdrama23" }
+      ],
+      "summary": "Loja completa com catálogo, carrinho persistente e checkout integrado a meios de pagamento.",
+      "techs": ["Next.js", "TypeScript", "Tailwind CSS", "Stripe", "PostgreSQL"],
+      "description": "A Vitrine é uma loja construída para ser rápida no primeiro acesso e simples de manter. O catálogo é renderizado no servidor, as imagens passam por otimização automática e o carrinho sobrevive à navegação entre páginas e dispositivos.\n\nO checkout foi integrado a meios de pagamento com confirmação por webhook, tratamento de falhas e reenvio seguro. A área administrativa permite cadastrar produtos, controlar estoque e acompanhar pedidos sem depender de uma plataforma externa."
+    },
+    {
+      "id": "orbe",
+      "kicker": "Experimento 3D · WebGL",
+      "title": "Orbe",
+      "caption": "Estudo de materiais, luz e movimento em tempo real — a mesma linguagem visual deste portfólio.",
+      "image": "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=900&h=1125&q=80",
+      "alt": "Pico rochoso sob um céu estrelado",
+      "company": {
+        "name": "Estudo autoral",
+        "logo": "",
+        "url": ""
+      },
+      "links": [
+        { "label": "Repositório", "url": "https://github.com/exdrama23" }
+      ],
+      "summary": "Estudo de materiais, luz e movimento em tempo real que deu origem à linguagem visual deste portfólio.",
+      "techs": ["three.js", "WebGL", "GLSL", "React", "GSAP"],
+      "description": "O Orbe começou como um laboratório para testar materiais, iluminação e movimento sem depender de modelos prontos. Cada cena é construída com geometria simples e shaders próprios, buscando um resultado orgânico com poucos elementos.\n\nO projeto virou a base visual de outras experiências do portfólio: a transição de entrada, o carrossel curvo e os efeitos de profundidade usam as mesmas ideias de câmera, luz e tempo. O desempenho foi ajustado para rodar em telas modestas, com limites de pixel ratio e pausa automática quando a seção sai da tela."
+    },
+    {
+      "id": "rota",
+      "kicker": "PWA · Offline first",
+      "title": "Rota",
+      "caption": "Aplicação instalável com cache inteligente, sincronização em segundo plano e mapa em campo.",
+      "image": "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=900&h=1125&q=80",
+      "alt": "Floresta enevoada vista do alto",
+      "company": {
+        "name": "Cliente independente",
+        "logo": "",
+        "url": ""
+      },
+      "links": [
+        { "label": "Repositório", "url": "https://github.com/exdrama23" }
+      ],
+      "summary": "Aplicação instalável com cache inteligente, sincronização em segundo plano e mapa em campo.",
+      "techs": ["React", "TypeScript", "PWA", "Service Worker", "IndexedDB"],
+      "description": "O Rota foi feito para funcionar onde a conexão é instável. Rotas, pontos de parada e registros ficam disponíveis offline, e tudo o que é criado em campo é sincronizado automaticamente quando a rede volta.\n\nA aplicação pode ser instalada na tela inicial e usa cache inteligente para não baixar dados repetidos. O mapa foi pensado para uso com uma mão, com controles grandes, leitura rápida e confirmação visual antes de qualquer alteração."
+    }
+  ]
+}

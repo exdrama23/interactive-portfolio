@@ -6,10 +6,12 @@ import { createPortal } from "react-dom"
 /**
  * Credential Rail — adapted from the skate-deck rail.
  *
- * The cards hang by printed lanyards from a metal rail, swing with the pointer,
- * slide when dragged and lift into a detail view on click. Instead of deck
- * photos, each card gets two React faces (front / back) drawn at its real pixel
- * width, so a credential can be laid out with the same numbers at any size.
+ * The cards hang by printed lanyards from a metal rail, swing with the pointer
+ * and lift into a detail view on click. Pull a card and the whole lanyard
+ * pivots on the bar; release and it swings back like a real badge. Instead of
+ * deck photos, each card gets two React faces (front / back) drawn at its real
+ * pixel width, so a credential can be laid out with the same numbers at any
+ * size.
  */
 
 export interface RailItem {
@@ -49,6 +51,12 @@ export interface CredentialRailProps extends React.ComponentProps<"section"> {
   active?: number | null
   onActiveChange?: (index: number | null) => void
   labels?: CredentialRailLabels
+  /**
+   * Número de cartões usado para calcular o tamanho do palco. Serve para manter
+   * a barra e os cartões no mesmo lugar quando os grupos têm contagens
+   * diferentes (ex.: 4 formações × 1 certificado).
+   */
+  layoutCount?: number
 }
 
 const DECK_ASPECT = 0.62
@@ -63,16 +71,17 @@ const CAROUSEL_MAX_H = 350
 const EDGE = 16
 const RAIL_TOP = 12
 const RAIL_Y = 0.03
-const HOOK_LEN = 0.2
+const HOOK_LEN = 0.34
 const HOLE_Y = 0.05
 const FOOT_PX = 34
 const FOOT = 0.1
 const STAGE_K = 1 + RAIL_Y + HOOK_LEN - HOLE_Y + FOOT
-const SWING_K = 26
-const SWING_DAMP = 2.3
-const SWING_LIMIT = 12
-const COUPLE = 0.035
-const HANG_SHARE = 0.3
+/** Verlet rope: fixed 120 Hz steps keep the lanyard stable while dragged. */
+const ROPE_STEP = 1 / 120
+const ROPE_GRAVITY = 2400
+const ROPE_ITER = 18
+const ROPE_SEGMENTS = 14
+const ROPE_DAMPING = 0.992
 const RAD = Math.PI / 180
 
 const DEFAULT_LABELS: CredentialRailLabels = {
@@ -132,12 +141,127 @@ function stageGeometry(h: number) {
   }
 }
 
-function hookGeometry(h: number) {
-  const t = Math.max(1.7, h * 0.0078)
-  return {
-    t,
-    pivotX: 0,
-    pivotY: -(HOOK_LEN - HOLE_Y) * h,
+type RopePt = { x: number; y: number; px: number; py: number; w: number }
+type RopeLink = [number, number, number]
+
+type RopeRig = {
+  pts: RopePt[]
+  links: RopeLink[]
+  left: number[]
+  right: number[]
+  low: number[]
+  iB: number
+  iT: number
+  iC: number
+  dragging: boolean
+  tx: number
+  ty: number
+  spread: number
+  arm: number
+}
+
+function makeRope(h: number): RopeRig {
+  const D = HOOK_LEN * h
+  const spread = Math.min(h * 0.16, 46)
+  const arm = h * 0.55
+  const pts: RopePt[] = []
+  const links: RopeLink[] = []
+  const add = (x: number, y: number, w: number) => {
+    pts.push({ x, y, px: x, py: y, w })
+    return pts.length - 1
+  }
+  const strand = (from: number, to: number, n: number, slack: number) => {
+    const a = pts[from]
+    const b = pts[to]
+    const rest = (Math.hypot(b.x - a.x, b.y - a.y) * slack) / n
+    const ids = [from]
+    for (let i = 1; i < n; i++)
+      ids.push(add(a.x + ((b.x - a.x) * i) / n, a.y + ((b.y - a.y) * i) / n, 1))
+    ids.push(to)
+    for (let i = 0; i < n; i++) links.push([ids[i], ids[i + 1], rest])
+    return ids
+  }
+
+  const aL = add(-spread, -D, 0)
+  const aR = add(spread, -D, 0)
+  const iB = add(0, -D * 0.26, 1.4)
+  const left = strand(aL, iB, ROPE_SEGMENTS, 1.03)
+  const right = strand(aR, iB, ROPE_SEGMENTS, 1.03)
+  const iT = add(0, 0, 0.8)
+  const low = strand(iB, iT, 3, 1)
+  const iC = add(0, arm, 0.25)
+  links.push([iT, iC, arm])
+  return { pts, links, left, right, low, iB, iT, iC, dragging: false, tx: 0, ty: 0, spread, arm }
+}
+
+function integrateRope(pts: RopePt[], gravity: number) {
+  for (const p of pts) {
+    if (!p.w) continue
+    const vx = (p.x - p.px) * ROPE_DAMPING
+    const vy = (p.y - p.py) * ROPE_DAMPING
+    p.px = p.x
+    p.py = p.y
+    p.x += vx
+    p.y += vy + gravity * ROPE_STEP * ROPE_STEP
+  }
+}
+
+function solveRope(pts: RopePt[], links: RopeLink[]) {
+  for (let k = 0; k < ROPE_ITER; k++) {
+    for (const [i, j, rest] of links) {
+      const a = pts[i]
+      const b = pts[j]
+      const ws = a.w + b.w
+      if (!ws) continue
+      const dx = b.x - a.x
+      const dy = b.y - a.y
+      const d = Math.hypot(dx, dy) || 1e-6
+      const f = (d - rest) / (d * ws)
+      a.x += dx * f * a.w
+      a.y += dy * f * a.w
+      b.x -= dx * f * b.w
+      b.y -= dy * f * b.w
+    }
+  }
+}
+
+function stepRope(rig: RopeRig, h: number, reduced: boolean) {
+  const t = rig.pts[rig.iT]
+  if (rig.dragging) {
+    t.px = t.x
+    t.py = t.y
+    t.x += (rig.tx - t.x) * 0.35
+    t.y += (rig.ty - t.y) * 0.35
+  }
+  integrateRope(rig.pts, ROPE_GRAVITY * (h / 300))
+  solveRope(rig.pts, rig.links)
+
+  if (reduced) {
+    for (const p of rig.pts) {
+      p.px = p.x
+      p.py = p.y
+    }
+  }
+}
+
+function ropeBusy(rig: RopeRig) {
+  for (const p of rig.pts) {
+    if (!p.w) continue
+    if (Math.hypot(p.x - p.px, p.y - p.py) > 0.06) return true
+  }
+  return false
+}
+
+function settleRope(rig: RopeRig, h: number) {
+  for (let i = 0; i < 420; i++) stepRope(rig, h, true)
+  for (const p of rig.pts) {
+    p.px = p.x
+    p.py = p.y
+  }
+  solveRope(rig.pts, rig.links)
+  for (const p of rig.pts) {
+    p.px = p.x
+    p.py = p.y
   }
 }
 
@@ -166,27 +290,43 @@ function Defs({ uid }: { uid: string }) {
  * and hold the card through a metal clip. It lives inside the hanging group,
  * so it swings with the card and stays attached to the rail.
  */
+function lanyardFrame(h: number) {
+  const railDrop = -((HOOK_LEN - HOLE_Y) * h)
+  const height = HOLE_Y * h - railDrop
+  const bleed = railThickness(h) * 0.55
+  const width = Math.max(60, h * 0.5)
+  return {
+    width,
+    cx: width / 2,
+    top: railDrop - bleed,
+    bleed,
+    holeY: height + bleed,
+    spread: Math.min(h * 0.16, 46),
+    strapW: Math.max(5, h * 0.034),
+    drop: HOOK_LEN * h,
+  }
+}
+
+/** Static chrome for the lanyard; `paint` updates its paths from the rope. */
 function Lanyard({
   h,
   color,
   ink,
   pattern = "mandala",
+  register,
 }: {
   h: number
   color: string
   ink: string
   pattern?: "mandala" | "grid" | "orbit" | "circuit"
+  register: (node: SVGSVGElement | null) => void
 }) {
-  const railDrop = -((HOOK_LEN - HOLE_Y) * h)
-  const hole = HOLE_Y * h
-  const height = hole - railDrop
-  const width = Math.max(60, h * 0.5)
-  const cx = width / 2
-  const topY = 10
-  const holeY = topY + height
-  const buckleY = topY + height * 0.74
-  const spread = Math.min(h * 0.16, 46)
-  const strapW = Math.max(5, h * 0.034)
+  const g = lanyardFrame(h)
+  const buckle = g.holeY - g.drop * 0.26
+  const spread = g.spread
+  const left = `M${g.cx - spread},${g.bleed} Q${g.cx - spread * 0.55},${g.bleed + (buckle - g.bleed) * 0.54} ${g.cx},${buckle}`
+  const right = `M${g.cx + spread},${g.bleed} Q${g.cx + spread * 0.55},${g.bleed + (buckle - g.bleed) * 0.54} ${g.cx},${buckle}`
+  const lower = `M${g.cx},${buckle} L${g.cx},${g.holeY - g.strapW * 0.9}`
   const dash =
     pattern === "grid"
       ? "5 5"
@@ -195,87 +335,85 @@ function Lanyard({
         : pattern === "circuit"
           ? "8 3 2 3"
           : "1 4"
-  const left = `M${cx - spread},${topY} Q${cx - spread * 0.55},${topY + height * 0.42} ${cx},${buckleY}`
-  const right = `M${cx + spread},${topY} Q${cx + spread * 0.55},${topY + height * 0.42} ${cx},${buckleY}`
-  const lower = `M${cx},${buckleY} L${cx},${holeY - strapW * 0.9}`
 
   return (
     <svg
+      ref={register}
       aria-hidden="true"
       data-lanyard
-      width={width}
-      height={holeY + strapW * 2}
-      viewBox={`0 0 ${width} ${holeY + strapW * 2}`}
+      width={g.width}
+      height={g.holeY + g.strapW * 2}
+      viewBox={`0 0 ${g.width} ${g.holeY + g.strapW * 2}`}
       className="pointer-events-none absolute overflow-visible"
-      style={{ left: "50%", top: railDrop, transform: "translateX(-50%)" }}
+      style={{ left: "50%", top: g.top, transform: "translateX(-50%)" }}
     >
       {/* sombra */}
       <g fill="none" stroke="black" strokeOpacity="0.35" strokeLinecap="round" transform="translate(1.2 1.8)">
-        <path d={left} strokeWidth={strapW} />
-        <path d={right} strokeWidth={strapW} />
-        <path d={lower} strokeWidth={strapW * 0.8} />
+        <path data-l="left" d={left} strokeWidth={g.strapW} />
+        <path data-l="right" d={right} strokeWidth={g.strapW} />
+        <path data-l="lower" d={lower} strokeWidth={g.strapW * 0.8} />
       </g>
 
       {/* fita */}
       <g fill="none" strokeLinecap="butt">
-        <path d={left} stroke={color} strokeWidth={strapW} />
-        <path d={right} stroke={color} strokeWidth={strapW} />
-        <path d={lower} stroke={color} strokeWidth={strapW * 0.8} />
+        <path data-l="left" d={left} stroke={color} strokeWidth={g.strapW} />
+        <path data-l="right" d={right} stroke={color} strokeWidth={g.strapW} />
+        <path data-l="lower" d={lower} stroke={color} strokeWidth={g.strapW * 0.8} />
       </g>
 
       {/* impressão no cordão */}
       <g fill="none" strokeLinecap="butt">
-        <path d={left} stroke={ink} strokeWidth={strapW * 0.22} strokeDasharray={dash} opacity={0.9} />
-        <path d={right} stroke={ink} strokeWidth={strapW * 0.22} strokeDasharray={dash} opacity={0.9} />
+        <path data-l="left" d={left} stroke={ink} strokeWidth={g.strapW * 0.22} strokeDasharray={dash} opacity={0.9} />
+        <path data-l="right" d={right} stroke={ink} strokeWidth={g.strapW * 0.22} strokeDasharray={dash} opacity={0.9} />
       </g>
 
       {/* brilho da trama */}
-      <g fill="none" stroke="white" strokeOpacity="0.22" strokeWidth={Math.max(0.7, strapW * 0.12)}>
-        <path d={left} />
-        <path d={right} />
+      <g fill="none" stroke="white" strokeOpacity="0.22" strokeWidth={Math.max(0.7, g.strapW * 0.12)}>
+        <path data-l="left" d={left} />
+        <path data-l="right" d={right} />
       </g>
 
       {/* fivela */}
-      <g transform={`translate(${cx} ${buckleY})`}>
+      <g data-l="buckle" transform={`translate(${g.cx} ${buckle})`}>
         <rect
-          x={-strapW * 1.15}
-          y={-strapW * 0.55}
-          width={strapW * 2.3}
-          height={strapW * 1.15}
-          rx={strapW * 0.22}
+          x={-g.strapW * 1.15}
+          y={-g.strapW * 0.55}
+          width={g.strapW * 2.3}
+          height={g.strapW * 1.15}
+          rx={g.strapW * 0.22}
           fill="#b8b1a3"
           stroke="#6d675c"
-          strokeWidth={Math.max(0.6, strapW * 0.1)}
+          strokeWidth={Math.max(0.6, g.strapW * 0.1)}
         />
         <rect
-          x={-strapW * 0.85}
-          y={-strapW * 0.28}
-          width={strapW * 1.7}
-          height={strapW * 0.28}
-          rx={strapW * 0.1}
+          x={-g.strapW * 0.85}
+          y={-g.strapW * 0.28}
+          width={g.strapW * 1.7}
+          height={g.strapW * 0.28}
+          rx={g.strapW * 0.1}
           fill="#4c473e"
           opacity={0.7}
         />
       </g>
 
       {/* clipe metálico que prende o cartão */}
-      <g transform={`translate(${cx} ${holeY - strapW * 0.9})`}>
+      <g data-l="clip" transform={`translate(${g.cx} ${g.holeY - g.strapW * 0.9})`}>
         <rect
-          x={-strapW * 0.42}
-          y={-strapW * 0.2}
-          width={strapW * 0.84}
-          height={strapW * 1.55}
-          rx={strapW * 0.16}
+          x={-g.strapW * 0.42}
+          y={-g.strapW * 0.2}
+          width={g.strapW * 0.84}
+          height={g.strapW * 1.55}
+          rx={g.strapW * 0.16}
           fill="#d7d1c4"
           stroke="#8b8578"
-          strokeWidth={Math.max(0.5, strapW * 0.08)}
+          strokeWidth={Math.max(0.5, g.strapW * 0.08)}
         />
         <rect
-          x={-strapW * 0.28}
-          y={strapW * 0.15}
-          width={strapW * 0.56}
-          height={strapW * 0.9}
-          rx={strapW * 0.1}
+          x={-g.strapW * 0.28}
+          y={g.strapW * 0.15}
+          width={g.strapW * 0.56}
+          height={g.strapW * 0.9}
+          rx={g.strapW * 0.1}
           fill="#2c2924"
           opacity={0.55}
         />
@@ -308,15 +446,9 @@ type Sim = {
   turn: number[]
   vturn: number[]
   tturn: number[]
-  swing: number[]
-  vswing: number[]
   tag: number[]
   vtag: number[]
-  frameX: number[]
-  frameV: number[]
-  acc: number[]
   drag: number
-  grab: number
   free: number
   last: number
   raf: number
@@ -330,15 +462,9 @@ function emptySim(): Sim {
     turn: [],
     vturn: [],
     tturn: [],
-    swing: [],
-    vswing: [],
     tag: [],
     vtag: [],
-    frameX: [],
-    frameV: [],
-    acc: [],
     drag: -1,
-    grab: 0,
     free: 0,
     last: 0,
     raf: 0,
@@ -362,13 +488,19 @@ export function CredentialRail({
   active: activeProp,
   onActiveChange,
   labels = DEFAULT_LABELS,
+  layoutCount,
   className,
   ...rest
 }: CredentialRailProps) {
   const uid = React.useId().replace(/[^a-zA-Z0-9_-]/g, "")
   const count = items.length
+  const layoutSlots = Math.max(1, layoutCount ?? count)
+  const ropeKey = items.map((item) => item.id).join("|")
   const stageRef = React.useRef<HTMLDivElement | null>(null)
   const slots = React.useRef<(HTMLButtonElement | null)[]>([])
+  const lants = React.useRef<(SVGSVGElement | null)[]>([])
+  const ropes = React.useRef<RopeRig[]>([])
+  const acc = React.useRef(0)
   const hangs = React.useRef<(HTMLSpanElement | null)[]>([])
   const swings = React.useRef<(HTMLSpanElement | null)[]>([])
   const turns = React.useRef<(HTMLSpanElement | null)[]>([])
@@ -402,6 +534,8 @@ export function CredentialRail({
     lastX: 0,
     lastT: 0,
     v: 0,
+    ox: 0,
+    oy: 0,
   })
   const live = React.useRef({
     active: null as number | null,
@@ -448,11 +582,13 @@ export function CredentialRail({
     const measure = () => {
       const width = stage.clientWidth
       if (!width) return
-      const chrome = section.getBoundingClientRect().height - stage.getBoundingClientRect().height
+      // offsetHeight ignora rotações da seção de entrada; getBoundingClientRect
+      // encolheria o palco enquanto a seção ainda está inclinada.
+      const chrome = section.offsetHeight - stage.offsetHeight
       const byHeight = (window.innerHeight - chrome - 12 - RAIL_TOP - FOOT_PX) / STAGE_K
       const fit =
         (width - 2 * EDGE) /
-        (Math.max(1, count) * (DECK_ASPECT + GAP) + FRONT_EXTRA * DECK_ASPECT)
+        (Math.max(1, layoutSlots) * (DECK_ASPECT + GAP) + FRONT_EXTRA * DECK_ASPECT)
       const carousel = fit < MIN_RAIL_H
       const raw = carousel
         ? Math.min(CAROUSEL_MAX_H, width * 0.9, byHeight)
@@ -473,7 +609,7 @@ export function CredentialRail({
       observer.disconnect()
       window.removeEventListener("resize", measure)
     }
-  }, [count])
+  }, [layoutSlots])
 
   const targets = React.useCallback(
     (h: number, width: number, carousel: boolean, front: number | null, centre: number) => {
@@ -518,12 +654,19 @@ export function CredentialRail({
     const angle = s.turn[i] ?? restAngle(i)
     const e = progress(angle, i)
     const lift = Math.min(1, e)
-    const theta = s.swing[i] ?? 0
     slot.style.transform = `translate3d(${((s.x[i] ?? 0) - deckW / 2).toFixed(2)}px,0,0)`
+    const rope = ropes.current[i]
     const hang = hangs.current[i]
-    if (hang) hang.style.transform = `rotate(${(theta * HANG_SHARE).toFixed(3)}deg)`
+    if (rope && hang) {
+      const T = rope.pts[rope.iT]
+      const C = rope.pts[rope.iC]
+      const swing = Math.atan2(C.x - T.x, C.y - T.y)
+      hang.style.transform = `translate3d(${T.x.toFixed(2)}px, ${T.y.toFixed(2)}px, 0) rotate(${(-swing).toFixed(4)}rad)`
+    } else if (hang) {
+      hang.style.transform = "none"
+    }
     const sw = swings.current[i]
-    if (sw) sw.style.transform = `rotate(${(theta * (1 - HANG_SHARE)).toFixed(3)}deg)`
+    if (sw) sw.style.transform = "none"
     const tu = turns.current[i]
     if (tu)
       tu.style.transform = `perspective(${PERSPECTIVE}px) rotateY(${angle.toFixed(
@@ -551,23 +694,58 @@ export function CredentialRail({
     }
     const tag = tags.current[i]
     if (tag) tag.style.transform = `rotate(${(-9 + (s.tag[i] ?? 0)).toFixed(2)}deg) scale(${tagScale(h).toFixed(3)})`
+
+    // Redraw the lanyard so it follows the simulated rope. The two strands are
+    // pinned to the bar; the buckle and clip move with the verlet points.
+    const svg = lants.current[i]
+    if (rope && svg) {
+      const g = lanyardFrame(h)
+      const B = rope.pts[rope.iB]
+      const T = rope.pts[rope.iT]
+      const axL = g.cx - rope.spread
+      const axR = g.cx + rope.spread
+      const ay = g.bleed
+      const bx = g.cx + B.x
+      const by = g.holeY + B.y
+      const tx = g.cx + T.x
+      const ty = g.holeY + T.y
+      const dLeft = `M${axL.toFixed(2)},${ay.toFixed(2)} Q${(axL + (bx - axL) * 0.55).toFixed(2)},${(
+        ay +
+        (by - ay) * 0.54
+      ).toFixed(2)} ${bx.toFixed(2)},${by.toFixed(2)}`
+      const dRight = `M${axR.toFixed(2)},${ay.toFixed(2)} Q${(axR + (bx - axR) * 0.55).toFixed(2)},${(
+        ay +
+        (by - ay) * 0.54
+      ).toFixed(2)} ${bx.toFixed(2)},${by.toFixed(2)}`
+      const dLower = `M${bx.toFixed(2)},${by.toFixed(2)} L${tx.toFixed(2)},${(ty - g.strapW * 0.9).toFixed(2)}`
+      svg.querySelectorAll('[data-l="left"]').forEach((el) => el.setAttribute("d", dLeft))
+      svg.querySelectorAll('[data-l="right"]').forEach((el) => el.setAttribute("d", dRight))
+      svg.querySelectorAll('[data-l="lower"]').forEach((el) => el.setAttribute("d", dLower))
+      const ang = Math.atan2(T.x - B.x, T.y - B.y) / RAD
+      svg
+        .querySelector('[data-l="buckle"]')
+        ?.setAttribute("transform", `translate(${bx.toFixed(2)} ${by.toFixed(2)}) rotate(${(-ang).toFixed(2)})`)
+      svg
+        .querySelector('[data-l="clip"]')
+        ?.setAttribute(
+          "transform",
+          `translate(${tx.toFixed(2)} ${(ty - g.strapW * 0.9).toFixed(2)}) rotate(${(-ang).toFixed(2)})`,
+        )
+    }
   }, [])
 
   const step = React.useCallback(
     (now: number) => {
       const s = sim.current
       const n = live.current.count
-      const dt = s.last ? Math.min(0.1, (now - s.last) / 1000) : 1 / 60
+      const dt = s.last ? Math.min(0.05, (now - s.last) / 1000) : 1 / 60
       s.last = now
       const { h, width, carousel } = live.current.size
-      const deckW = h * DECK_ASPECT
-      const tail = h * (1 - HOLE_Y) + HOOK_LEN * h * HANG_SHARE
       const spacing = (i: number) =>
         (footprint(h, progress(s.turn[i] ?? 0, i)) +
           footprint(h, progress(s.turn[i + 1] ?? 0, i + 1))) /
           2 +
         h * 0.015
-      for (let i = 0; i < n; i++) s.frameX[i] = s.x[i] ?? 0
       const sub = Math.max(2, Math.ceil(dt / 0.017))
       const sdt = dt / sub
       for (let k = 0; k < sub; k++) {
@@ -633,62 +811,50 @@ export function CredentialRail({
             2 * Math.sqrt(150) * 0.78 * (s.vturn[i] ?? 0)
           s.vturn[i] = (s.vturn[i] ?? 0) + ta * sdt
           s.turn[i] = (s.turn[i] ?? 0) + (s.vturn[i] ?? 0) * sdt
-          const sa =
-            -SWING_K * (s.swing[i] ?? 0) -
-            SWING_DAMP * (s.vswing[i] ?? 0) +
-            (s.acc[i] ?? 0) * COUPLE
-          s.vswing[i] = (s.vswing[i] ?? 0) + sa * sdt
-          let swing = (s.swing[i] ?? 0) + (s.vswing[i] ?? 0) * sdt
-          if (Math.abs(swing) > SWING_LIMIT) {
-            swing = Math.sign(swing) * SWING_LIMIT
-            if ((s.vswing[i] ?? 0) * swing > 0) s.vswing[i] = -(s.vswing[i] ?? 0) * 0.25
-          }
-          s.swing[i] = swing
-          const tagA =
-            -46 * ((s.tag[i] ?? 0) - swing * 0.6) - 3.4 * (s.vtag[i] ?? 0) - (s.vswing[i] ?? 0) * 0.9
-          s.vtag[i] = (s.vtag[i] ?? 0) + tagA * sdt
-          s.tag[i] = clamp((s.tag[i] ?? 0) + (s.vtag[i] ?? 0) * sdt, -30, 30)
-        }
-        for (let pass = 0; pass < 2; pass++) {
-          for (let i = 0; i < n - 1; i++) {
-            if (progress(s.turn[i] ?? 0, i) > 0.5 || progress(s.turn[i + 1] ?? 0, i + 1) > 0.5)
-              continue
-            const ta = (s.x[i] ?? 0) - tail * Math.sin((s.swing[i] ?? 0) * RAD)
-            const tb = (s.x[i + 1] ?? 0) - tail * Math.sin((s.swing[i + 1] ?? 0) * RAD)
-            const overlap = deckW * 0.98 + 1 - (tb - ta)
-            if (overlap <= 0) continue
-            const turn = overlap / 2 / tail / RAD
-            s.swing[i] = clamp((s.swing[i] ?? 0) + turn, -SWING_LIMIT, SWING_LIMIT)
-            s.swing[i + 1] = clamp((s.swing[i + 1] ?? 0) - turn, -SWING_LIMIT, SWING_LIMIT)
-            const wa = s.vswing[i] ?? 0
-            const wb = s.vswing[i + 1] ?? 0
-            if (wa < wb) {
-              const mean = (wa + wb) / 2
-              s.vswing[i] = mean + (wb - wa) * 0.18
-              s.vswing[i + 1] = mean - (wb - wa) * 0.18
-            }
-          }
         }
       }
+
+      // Verlet lanyards: fixed 120 Hz steps, whatever the frame rate.
+      acc.current += dt
+      const rigs = ropes.current
+      let rounds = 0
+      while (acc.current >= ROPE_STEP && rounds < 12) {
+        acc.current -= ROPE_STEP
+        rounds++
+        for (let i = 0; i < n; i++) {
+          const rig = rigs[i]
+          if (rig) stepRope(rig, h, live.current.reduced)
+        }
+      }
+      if (rounds === 12) acc.current = 0
+
       for (let i = 0; i < n; i++) {
-        const v = ((s.x[i] ?? 0) - (s.frameX[i] ?? 0)) / dt
-        const a = (v - (s.frameV[i] ?? 0)) / dt
-        s.frameV[i] = v
-        s.acc[i] = (s.acc[i] ?? 0) * 0.5 + clamp(a, -30000, 30000) * 0.5
+        const rig = rigs[i]
+        const target = rig
+          ? (Math.atan2(
+              rig.pts[rig.iC].x - rig.pts[rig.iT].x,
+              rig.pts[rig.iC].y - rig.pts[rig.iT].y,
+            ) /
+              RAD) *
+            0.55
+          : 0
+        const tagA = -46 * ((s.tag[i] ?? 0) - target) - 3.4 * (s.vtag[i] ?? 0)
+        s.vtag[i] = (s.vtag[i] ?? 0) + tagA * dt
+        s.tag[i] = clamp((s.tag[i] ?? 0) + (s.vtag[i] ?? 0) * dt, -30, 30)
       }
+
       let busy = s.drag >= 0 || now < s.free
       for (let i = 0; i < n; i++) {
         paint(i)
+        const rig = rigs[i]
         if (
           Math.abs(s.vx[i] ?? 0) > 0.4 ||
           (now > s.free && Math.abs((s.x[i] ?? 0) - (s.tx[i] ?? 0)) > 0.25) ||
           Math.abs((s.turn[i] ?? 0) - (s.tturn[i] ?? 0)) > 0.05 ||
           Math.abs(s.vturn[i] ?? 0) > 0.05 ||
-          Math.abs(s.swing[i] ?? 0) > 0.02 ||
-          Math.abs(s.vswing[i] ?? 0) > 0.05 ||
           Math.abs(s.tag[i] ?? 0) > 0.05 ||
           Math.abs(s.vtag[i] ?? 0) > 0.08 ||
-          Math.abs(s.acc[i] ?? 0) > 1
+          (rig && (rig.dragging || ropeBusy(rig)))
         )
           busy = true
       }
@@ -696,16 +862,19 @@ export function CredentialRail({
       else {
         s.raf = 0
         s.last = 0
+        acc.current = 0
         for (let i = 0; i < n; i++) {
           if (now > s.free) s.x[i] = s.tx[i] ?? 0
           s.turn[i] = s.tturn[i] ?? restAngle(i)
           s.vturn[i] = 0
-          s.swing[i] = 0
-          s.vswing[i] = 0
           s.tag[i] = 0
           s.vtag[i] = 0
-          s.acc[i] = 0
-          s.frameV[i] = 0
+          const rig = rigs[i]
+          if (rig)
+            for (const p of rig.pts) {
+              p.px = p.x
+              p.py = p.y
+            }
           paint(i)
         }
       }
@@ -721,12 +890,14 @@ export function CredentialRail({
         s.vx[i] = 0
         s.turn[i] = s.tturn[i] ?? restAngle(i)
         s.vturn[i] = 0
-        s.swing[i] = 0
-        s.vswing[i] = 0
         s.tag[i] = 0
         s.vtag[i] = 0
-        s.acc[i] = 0
-        s.frameV[i] = 0
+        const rig = ropes.current[i]
+        if (rig)
+          for (const p of rig.pts) {
+            p.px = p.x
+            p.py = p.y
+          }
         paint(i)
       }
       return
@@ -739,9 +910,13 @@ export function CredentialRail({
 
   const impulse = React.useCallback(
     (i: number, amount: number) => {
-      const s = sim.current
       if (live.current.reduced || i < 0 || i >= live.current.count) return
-      s.vswing[i] = (s.vswing[i] ?? 0) + amount
+      const rig = ropes.current[i]
+      if (!rig) return
+      const T = rig.pts[rig.iT]
+      const C = rig.pts[rig.iC]
+      T.px -= amount * 0.14
+      C.px -= amount * 0.07
       kick()
     },
     [kick],
@@ -775,6 +950,25 @@ export function CredentialRail({
     }
   }, [active, impulse])
 
+  // Build one verlet lanyard per credential. The anchors live on the bar, the
+  // buckle and clip hang below, and the card follows the clip.
+  React.useLayoutEffect(() => {
+    if (!size.width || !count) {
+      ropes.current = []
+      return
+    }
+    const next = Array.from({ length: count }, () => makeRope(size.h))
+    if (reduced) next.forEach((rig) => settleRope(rig, size.h))
+    ropes.current = next
+    acc.current = 0
+    for (let i = 0; i < count; i++) {
+      sim.current.tag[i] = 0
+      sim.current.vtag[i] = 0
+      paint(i)
+    }
+    kick()
+  }, [size.width, size.h, ropeKey, count, reduced, paint, kick])
+
   React.useLayoutEffect(() => {
     if (!size.width) return
     const s = sim.current
@@ -787,13 +981,8 @@ export function CredentialRail({
       if (fresh || reduced) {
         s.x[i] = s.tx[i] ?? 0
         s.vx[i] = 0
-        s.frameX[i] = s.x[i] ?? 0
-        s.frameV[i] = 0
-        s.acc[i] = 0
         s.turn[i] = s.tturn[i] ?? restAngle(i)
         s.vturn[i] = 0
-        s.swing[i] = s.swing[i] ?? 0
-        s.vswing[i] = s.vswing[i] ?? 0
         s.tag[i] = 0
         s.vtag[i] = 0
       }
@@ -893,28 +1082,56 @@ export function CredentialRail({
     const s = sim.current
     const stage = stageRef.current
     if (p.id === event.pointerId && stage) {
-      const dx = event.clientX - p.x
       const now = performance.now()
-      if (!p.moved && Math.abs(dx) > 6 && Math.abs(dx) > Math.abs(event.clientY - p.y)) {
+      const dx = event.clientX - p.x
+      const dy = event.clientY - p.y
+      const horizontal = Math.abs(dx) > Math.abs(dy)
+      if (
+        !p.moved &&
+        Math.hypot(dx, dy) > 6 &&
+        (!live.current.size.carousel || horizontal)
+      ) {
         p.moved = true
         stop()
         if (stage.isConnected) stage.setPointerCapture(event.pointerId)
         if (!live.current.size.carousel && p.index >= 0) {
-          s.drag = p.index
-          s.grab = event.clientX - stage.getBoundingClientRect().left - (s.x[p.index] ?? 0)
+          const box = stage.getBoundingClientRect()
+          const { h } = live.current.size
+          const geo = stageGeometry(h)
+          const rig = ropes.current[p.index]
+          if (rig) {
+            s.drag = p.index
+            const localX = event.clientX - box.left - (s.x[p.index] ?? 0)
+            const localY = event.clientY - box.top - geo.top
+            const T = rig.pts[rig.iT]
+            p.ox = T.x - localX
+            p.oy = T.y - localY
+            rig.dragging = true
+            rig.tx = localX + p.ox
+            rig.ty = localY + p.oy
+            T.w = 0
+            p.lastT = now
+          }
         }
       }
       if (p.moved) {
-        const v = (event.clientX - p.lastX) / Math.max(1, now - p.lastT)
-        p.v = p.v * 0.6 + v * 0.4
-        p.lastX = event.clientX
-        p.lastT = now
         if (s.drag >= 0) {
-          s.vx[s.drag] = p.v * 1000
-          s.x[s.drag] = event.clientX - stage.getBoundingClientRect().left - s.grab
-          s.free = now + 900
-          kick()
+          const rig = ropes.current[s.drag]
+          if (rig) {
+            const box = stage.getBoundingClientRect()
+            const geo = stageGeometry(live.current.size.h)
+            const localX = event.clientX - box.left - (s.x[s.drag] ?? 0)
+            const localY = event.clientY - box.top - geo.top
+            rig.tx = localX + p.ox
+            rig.ty = localY + p.oy
+            p.lastT = now
+            kick()
+          }
         } else if (live.current.size.carousel) {
+          const v = dx / Math.max(1, now - p.lastT)
+          p.v = p.v * 0.6 + v * 0.4
+          p.lastX = event.clientX
+          p.lastT = now
           p.swipe = dx
           const xs = targets(
             live.current.size.h,
@@ -963,6 +1180,8 @@ export function CredentialRail({
       lastX: event.clientX,
       lastT: now,
       v: 0,
+      ox: 0,
+      oy: 0,
     }
   }
 
@@ -974,10 +1193,13 @@ export function CredentialRail({
     if (stage?.hasPointerCapture(event.pointerId)) stage.releasePointerCapture(event.pointerId)
     pointer.current = { ...p, id: -1 }
     if (s.drag >= 0) {
-      const idle = performance.now() - p.lastT
-      s.vx[s.drag] = (s.vx[s.drag] ?? 0) * clamp(1 - idle / 120, 0, 1)
+      const rig = ropes.current[s.drag]
+      if (rig) {
+        rig.dragging = false
+        rig.pts[rig.iT].w = 0.8
+      }
       s.drag = -1
-      s.free = performance.now() + 700
+      s.free = performance.now()
       kick()
       return
     }
@@ -1015,7 +1237,6 @@ export function CredentialRail({
   }
 
   const current = active === null ? null : items[active]
-  const hook = hookGeometry(size.h)
 
   return (
     <section
@@ -1023,7 +1244,7 @@ export function CredentialRail({
       data-slot="credential-rail"
       data-mode={size.carousel ? "carousel" : "rail"}
       data-active={active ?? ""}
-      className={`relative isolate w-full overflow-hidden bg-transparent text-stone-200 ${className ?? ""}`}
+      className={`relative isolate w-full overflow-x-clip bg-transparent text-stone-200 ${className ?? ""}`}
     >
       <Defs uid={uid} />
       <div
@@ -1075,7 +1296,7 @@ export function CredentialRail({
         <div
           aria-hidden="true"
           data-rail
-          className="pointer-events-none absolute inset-x-0 z-[5]"
+          className="pointer-events-none absolute inset-x-0 z-[36]"
           style={{ top: geo.railY - geo.railT / 2, height: geo.railT }}
         >
           <div
@@ -1127,7 +1348,7 @@ export function CredentialRail({
                 top: geo.top,
                 width: w,
                 height: size.h,
-                zIndex: facing ? 30 : 10 + i,
+                zIndex: facing ? 35 : 25 + i,
                 transform: `translate3d(${((sim.current.x[i] ?? 0) - w / 2).toFixed(2)}px,0,0)`,
               }}
               onFocus={() => {
@@ -1143,6 +1364,15 @@ export function CredentialRail({
                 if (event.detail === 0 || pending === i) open(i)
               }}
             >
+              <Lanyard
+                h={size.h}
+                color={item.strap?.color ?? "#2a2823"}
+                ink={item.strap?.ink ?? "#f0b429"}
+                pattern={item.strap?.pattern}
+                register={(node) => {
+                  lants.current[i] = node
+                }}
+              />
               <span
                 ref={(node) => {
                   hangs.current[i] = node
@@ -1150,7 +1380,7 @@ export function CredentialRail({
                 data-hang
                 className="absolute inset-0"
                 style={{
-                  transformOrigin: `calc(50% + ${hook.pivotX.toFixed(2)}px) ${hook.pivotY.toFixed(2)}px`,
+                  transformOrigin: `50% ${HOLE_Y * 100}%`,
                 }}
               >
                 <span
@@ -1239,12 +1469,6 @@ export function CredentialRail({
                     <Hole h={size.h} />
                   </span>
                 </span>
-                <Lanyard
-                  h={size.h}
-                  color={item.strap?.color ?? "#2a2823"}
-                  ink={item.strap?.ink ?? "#f0b429"}
-                  pattern={item.strap?.pattern}
-                />
                 {item.tag && (
                   <span
                     ref={(node) => {

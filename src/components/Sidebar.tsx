@@ -100,6 +100,12 @@ const Sidebar = () => {
     // setIsMenuOpen(false);
   }, []);
 
+  const handleOpenMenu = useCallback(() => {
+    setExactPosition(window.innerHeight / 2 - FLOATING_MENU_HEIGHT / 2);
+    setState('expanding');
+    setTimeout(() => setState('fullscreen'), EXPAND_ANIMATION_DURATION);
+  }, [setExactPosition]);
+
   // const handleToggleMenu = useCallback(() => {
   //   setIsMenuOpen(!isMenuOpen);
   // }, [isMenuOpen]);
@@ -126,6 +132,35 @@ const Sidebar = () => {
     }; 
   }, [stopAnimation]);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!window.matchMedia('(hover: hover)').matches) return;
+    try {
+      if (sessionStorage.getItem('sidebar-peek-v1')) return;
+    } catch {
+      return;
+    }
+
+    let hideTimer: ReturnType<typeof setTimeout>;
+    const showTimer = setTimeout(() => {
+      if (stateRef.current !== 'idle') return;
+      try {
+        sessionStorage.setItem('sidebar-peek-v1', '1');
+      } catch {}
+      setExactPosition(window.innerHeight / 2 - FLOATING_MENU_HEIGHT / 2);
+      setState('edgeHover');
+      hideTimer = setTimeout(() => {
+        if (stateRef.current === 'edgeHover') setState('idle');
+      }, 1200);
+    }, 2600);
+
+    return () => {
+      clearTimeout(showTimer);
+      clearTimeout(hideTimer);
+    };
+  }, [setExactPosition]);
+
   // const shouldShowFloatingMenu = state === 'edgeHover' || state === 'magneticFollow';
   // const sidebarStripWidth = EDGE_ZONE_WIDTH + FLOATING_MENU_WIDTH;
 const isMenuVisible = state === 'edgeHover' || state === 'magneticFollow';
@@ -136,6 +171,19 @@ const isMenuVisible = state === 'edgeHover' || state === 'magneticFollow';
         onMouseEnter={handleMouseEnterEdgeZone} 
         onMouseLeave={handleMouseLeaveEdgeZone}
       />
+
+      <button
+        type="button"
+        aria-label="Abrir menu"
+        onClick={handleOpenMenu}
+        className="fixed top-5 right-5 z-50 flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-black/80 backdrop-blur-md transition-colors hover:bg-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white lg:hidden"
+      >
+        <span className="flex h-5 w-6 flex-col justify-between" aria-hidden="true">
+          <span className="h-0.5 w-full bg-white" />
+          <span className="h-0.5 w-full bg-white" />
+          <span className="h-0.5 w-full bg-white" />
+        </span>
+      </button>
       
       {/* {shouldShowFloatingMenu && ( */}
          <div

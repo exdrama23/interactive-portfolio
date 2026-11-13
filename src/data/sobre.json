@@ -1,0 +1,86 @@
+{
+  "headline": ["Sobre", "mim."],
+  "story": [
+    {
+      "side": "left",
+      "image": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=1600&auto=format&fit=crop",
+      "alt": "Código aberto em um editor, primeiros experimentos com programação",
+      "body": "Minha relação com a programação começou antes mesmo de eu imaginar que ela se tornaria minha profissão. O que inicialmente era apenas uma brincadeira, explorando códigos e descobrindo o que era possível construir com eles, acabou despertando uma paixão que me acompanharia nos anos seguintes.",
+      "info": {
+        "meta": "O começo",
+        "title": "O primeiro contato",
+        "body": "Antes de ser profissão, programar era curiosidade: abrir um editor, mexer em códigos soltos e descobrir o que dava para construir com eles. Foi ali que a brincadeira virou interesse.",
+        "tags": ["Início", "Curiosidade", "Experimentação"]
+      }
+    },
+    {
+      "side": "right",
+      "image": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1600&auto=format&fit=crop",
+      "alt": "Estudante desenvolvendo aplicações web em um notebook",
+      "body": "Essa curiosidade ganhou direção quando ingressei no **SENAI**, onde tive meu primeiro contato aprofundado com o desenvolvimento de aplicações web. Foram três anos de formação técnica, nos quais transformei experimentação em conhecimento e comecei a enxergar a tecnologia não apenas como uma ferramenta, mas como um meio de criar soluções e transformar ideias em realidade. Ainda no segundo ano do ensino médio, comecei minha trajetória como freelancer, conciliando os estudos com projetos e experiências profissionais.",
+      "info": {
+        "meta": "Formação técnica",
+        "title": "SENAI",
+        "body": "Três anos de formação técnica em desenvolvimento de aplicações web. Foi onde a experimentação ganhou método e a tecnologia passou a ser vista como meio de criar soluções reais.",
+        "tags": ["SENAI", "Desenvolvimento web", "Base técnica"]
+      }
+    },
+    {
+      "side": "left",
+      "image": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=1600&auto=format&fit=crop",
+      "alt": "Tela com código de um sistema corporativo",
+      "body": "Em fevereiro de 2026, concluí minha formação técnica e, em **2 de março de 2026**, iniciei uma nova etapa como Desenvolvedor de Sistemas na **ACESSO.NET**, atuando no desenvolvimento de sistemas corporativos, arquitetura de software e integração de plataformas.",
+      "info": {
+        "meta": "2026 · ACESSO.NET",
+        "title": "Sistemas corporativos",
+        "body": "Desenvolvimento de sistemas corporativos, arquitetura de software e integração de plataformas — o dia a dia de quem transforma regra de negócio em produto funcionando.",
+        "tags": ["ACESSO.NET", "Arquitetura", "Integrações"]
+      }
+    },
+    {
+      "side": "right",
+      "image": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=1600&auto=format&fit=crop",
+      "alt": "Equipe trabalhando em uma startup",
+      "body": "Paralelamente à minha trajetória profissional, comecei a transformar ideias próprias em iniciativas empresariais, participando da concepção, estruturação e desenvolvimento de startups como a **VIVAJU** e a **LPG (Link Petróleo e Gás)**. Também mantenho minha atuação em projetos independentes de desenvolvimento, levando essa experiência para além do ambiente corporativo.",
+      "info": {
+        "meta": "Produto próprio",
+        "title": "VIVAJU e LPG",
+        "body": "Da ideia à estruturação: participação na concepção e no desenvolvimento de startups, levando a experiência de produto para além do ambiente corporativo.",
+        "tags": ["Startups", "Produto", "Empreendedorismo"]
+      }
+    },
+    {
+      "side": "left",
+      "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1600&auto=format&fit=crop",
+      "alt": "Rede global de sistemas distribuídos",
+      "body": "Atualmente, curso **Ciência da Computação na Universidade Tiradentes (UNIT)** e direciono meus estudos e minha atuação para arquitetura de soluções, sistemas distribuídos, aplicações modulares e desenvolvimento de produtos digitais.",
+      "info": {
+        "meta": "UNIT · em andamento",
+        "title": "Ciência da Computação",
+        "body": "Arquitetura de soluções, sistemas distribuídos e aplicações modulares: a base teórica que sustenta o que já faço na prática.",
+        "tags": ["UNIT", "Sistemas distribuídos", "Arquitetura"]
+      }
+    },
+    {
+      "side": "right",
+      "image": "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=1600&auto=format&fit=crop",
+      "alt": "Mesa de trabalho com anotações e ideias",
+      "body": "Minha motivação continua sendo a mesma daquela época em que programar era apenas uma brincadeira: a vontade de descobrir, construir e transformar ideias em algo real.",
+      "info": {
+        "meta": "O que continua",
+        "title": "A mesma motivação",
+        "body": "Descobrir, construir e transformar ideias em algo real. É o que sobrou intacto desde a época em que programar era só uma brincadeira.",
+        "tags": ["Propósito", "Construção"]
+      }
+    }
+  ],
+  "card": {
+    "eyebrow": "Desenvolvedor de Sistemas",
+    "name": "Alec Vinícius",
+    "location": ["Brasil · remoto", "sistemas corporativos & produtos digitais"]
+  },
+  "social": [
+    { "label": "LinkedIn", "url": "https://www.linkedin.com/in/alec-vinicius/" },
+    { "label": "Instagram", "url": "https://www.instagram.com/alecvinicius/" }
+  ]
+}

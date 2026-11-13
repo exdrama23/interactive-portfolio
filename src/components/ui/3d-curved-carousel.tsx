@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import type { MotionValue } from "framer-motion"
 
 // A photo carousel seen through a curved lens. The cards sit on one WebGL canvas:
 // the middle one reads flat, and the further a card travels from the centre, the
@@ -32,6 +33,20 @@ export type CurvedLensCarouselProps = {
   height?: string
   className?: string
   onChange?: (index: number) => void
+  /**
+   * Conteúdo exibido ao redor do cartão ampliado, nos espaços vazios que o
+   * foco WebGL deixa. Recebe o slide e o índice atual.
+   */
+  renderFocus?: (slide: LensSlide, index: number) => React.ReactNode
+  /** Texto de ajuda no topo. */
+  hint?: string
+  /**
+   * Progresso de scroll 0..1 da seção. Serve só de gatilho: quando ele chega ao
+   * ponto em que a seção está no lugar (INTRO_GATE), a entrada do modelo começa
+   * sozinha, em tempo real — os cartões sobem de baixo e crescem em sequência.
+   * Sem esta prop, a mesma entrada roda sozinha na montagem.
+   */
+  entrance?: MotionValue<number>
 }
 
 // #region motion
@@ -70,15 +85,22 @@ export function cardSize(w: number, h: number): [number, number] {
 export function pad2(n: number): string {
   return n < 10 ? "0" + n : String(n)
 }
+
+const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v)
+const easeOut3 = (t: number) => 1 - (1 - t) ** 3
+/** Same curve the reference intro uses on the grow phase. */
+const easeInOutExpo = (t: number) =>
+  t <= 0 ? 0 : t >= 1 ? 1 : t < 0.5 ? 2 ** (20 * t - 10) / 2 : (2 - 2 ** (-20 * t + 10)) / 2
 // #endregion
 
 const VERT =
   "attribute vec2 aPos;" +
-  "uniform vec2 uRes;uniform vec2 uSize;uniform float uX;uniform float uBend;uniform float uVel;uniform float uIntro;uniform float uLift;" +
+  "uniform vec2 uRes;uniform vec2 uSize;uniform float uX;uniform float uY;uniform float uBend;uniform float uVel;uniform float uIntro;uniform float uLift;" +
   "varying vec2 vUv;varying float vX;" +
   "void main(){" +
   "vec2 p=vec2(uX+(aPos.x-.5)*uSize.x,(aPos.y-.5)*uSize.y);" +
   "p.y-=(1.-uIntro)*uSize.y*.9;" +
+  "p.y+=uY;" +
   "vec2 n=p/(uRes*.5);" +
   "float x=clamp(n.x,-1.4,1.4);" +
   "n.y*=1.+uBend*x*x;" +
@@ -89,7 +111,7 @@ const VERT =
 
 const FRAG =
   "precision highp float;" +
-  "uniform sampler2D uTex;uniform vec2 uSize;uniform float uAspect;uniform float uVel;uniform float uIntro;uniform float uShift;uniform float uReady;" +
+  "uniform sampler2D uTex;uniform vec2 uSize;uniform float uAspect;uniform float uVel;uniform float uIntro;uniform float uAlpha;uniform float uShift;uniform float uReady;" +
   "varying vec2 vUv;varying float vX;" +
   "float box(vec2 q,vec2 b,float r){vec2 d=abs(q)-b+r;return length(max(d,0.))+min(max(d.x,d.y),0.)-r;}" +
   "void main(){" +
@@ -104,7 +126,7 @@ const FRAG =
   "float rim=smoothstep(-5.,0.,d);" +
   "c+=rim*.10;" +
   "c+=.07*smoothstep(.55,1.,vUv.y)*(1.-abs(vX));" +
-  "float al=smoothstep(.75,-.75,d)*uIntro;" +
+  "float al=smoothstep(.75,-.75,d)*uIntro*uAlpha;" +
   "gl_FragColor=vec4(c*al,al);}"
 
 const FONT =
@@ -143,6 +165,21 @@ const CSS =
   ".clc-btn:active{transform:scale(.94)}" +
   ".clc-btn:focus-visible{outline:2px solid var(--clc-ink);outline-offset:3px}" +
   ".clc-btn svg{width:18px;height:18px}" +
+  ".clc-top,.clc-copy,.clc-ctl{transition:opacity .45s ease}" +
+  ".clc-top{opacity:calc(.62 * var(--clc-ui,1))}" +
+  ".clc-copy,.clc-ctl{opacity:var(--clc-ui,1)}" +
+  ".clc-close{position:absolute;top:clamp(18px,3.4vw,34px);right:clamp(20px,4vw,48px);z-index:2;display:inline-flex;align-items:center;gap:8px;" +
+  "padding:10px 16px;border-radius:999px;font:500 11px/1 ui-sans-serif,system-ui,sans-serif;letter-spacing:.18em;text-transform:uppercase;" +
+  "color:var(--clc-ink);cursor:pointer;opacity:0;pointer-events:none;transform:translateY(-6px);transition:opacity .35s ease,transform .35s ease,background .3s ease;" +
+  "background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.18);" +
+  "box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 10px 30px -10px rgba(0,0,0,.7);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}" +
+  ".clc-close:hover{background:linear-gradient(180deg,rgba(255,255,255,.24),rgba(255,255,255,.06));border-color:rgba(255,255,255,.32)}" +
+  ".clc-close:focus-visible{outline:2px solid var(--clc-ink);outline-offset:3px}" +
+  ".clc-root[data-focus] .clc-close{opacity:1;pointer-events:auto;transform:none}" +
+  ".clc-focus-info{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;transition:opacity .45s ease .12s}" +
+  ".clc-root[data-focus] .clc-focus-info{opacity:1}" +
+  ".clc-root[data-focus] .clc-top,.clc-root[data-focus] .clc-copy,.clc-root[data-focus] .clc-ctl{opacity:0;pointer-events:none}" +
+  ".clc-root[data-entry] .clc-ctl,.clc-root[data-entry] .clc-top,.clc-root[data-entry] .clc-copy{pointer-events:none}" +
   ".clc-fallback{position:absolute;left:50%;top:50%;width:min(62vw,360px);aspect-ratio:4/5;transform:translate(-50%,-50%);object-fit:cover;border-radius:14px;max-width:none}" +
   ".clc-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}" +
   "@media (max-width:640px){.clc-copy{max-width:calc(100% - 40px);bottom:96px}.clc-ctl{flex-direction:row;align-items:center;left:20px;justify-content:space-between}.clc-bar{width:96px}.clc-top span{display:none}.clc-top b{font-size:10px;letter-spacing:.12em}}" +
@@ -224,16 +261,21 @@ export default function CurvedLensCarousel({
   height = "100svh",
   className,
   onChange,
+  renderFocus,
+  hint = "Arraste · clique para ampliar",
+  entrance,
 }: CurvedLensCarouselProps) {
   const n = slides.length
   const rootRef = React.useRef(null as HTMLDivElement | null)
   const canvasRef = React.useRef(null as HTMLCanvasElement | null)
   const [index, setIndex] = React.useState(0)
   const [shown, setShown] = React.useState(false)
+  const [focused, setFocused] = React.useState(false)
   const [noGL, setNoGL] = React.useState(false)
-  const api = React.useRef({ go: (_d: number) => {} })
+  const api = React.useRef({ go: (_d: number) => {}, close: () => {} })
   const onChangeRef = React.useRef(onChange)
   onChangeRef.current = onChange
+  const hasFocusInfo = !!renderFocus
 
   React.useEffect(() => {
     const canvas = canvasRef.current
@@ -265,7 +307,7 @@ export default function CurvedLensCarousel({
     gl.enableVertexAttribArray(loc)
     gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0)
     const u: GLState["u"] = {}
-    for (const k of ["uRes", "uSize", "uX", "uBend", "uVel", "uIntro", "uTex", "uAspect", "uShift", "uReady", "uLift"]) u[k] = gl.getUniformLocation(prog, k)
+    for (const k of ["uRes", "uSize", "uX", "uY", "uBend", "uVel", "uIntro", "uAlpha", "uTex", "uAspect", "uShift", "uReady", "uLift"]) u[k] = gl.getUniformLocation(prog, k)
     gl.enable(gl.BLEND)
     gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true)
@@ -296,10 +338,40 @@ export default function CurvedLensCarousel({
     // Stage size, measured on resize only; the frame loop reads these numbers.
     let W = 1, H = 1, dpr = 1, cw = 1, ch = 1, gap = 1
     let pos = 0, vel = 0, target = 0
-    let intro = reduced.matches ? 1 : 0
-    let introStart = -1
+
+    // Entrada fiel ao modelo (glass-carousel): os cartões começam pequenos,
+    // empacotados no centro e abaixo da tela; sobem em sequência e depois
+    // crescem/abrem até o layout normal. Roda em tempo real e dispara sozinha
+    // quando a seção fica no lugar — `entrance` só marca esse momento.
+    const INTRO_GATE = 0.54
+    const INTRO_RISE = 1
+    const INTRO_GROW = 2.15
+    const INTRO_STAGGER = 0.085
+    const INTRO_SPREAD = 0.07 * Math.max(0, n - 1)
+    const MAX_R = Math.max(1, ...Array.from({ length: n }, (_, i) => Math.abs(offsetOf(i, 0, n))))
+    const RISE_END = 0.35 + INTRO_SPREAD + INTRO_RISE
+    const GROW_START = RISE_END + 0.25
+    const INTRO_END = GROW_START + MAX_R * INTRO_STAGGER + INTRO_GROW
+    const hash01 = (i: number) => {
+      const x = Math.sin(i * 127.1 + 311.7) * 43758.5453
+      return x - Math.floor(x)
+    }
+    const riseOf = (i: number, t: number) =>
+      easeOut3(clamp01((t - (0.35 + hash01(i) * INTRO_SPREAD)) / INTRO_RISE))
+    const growOf = (d: number, t: number) =>
+      easeInOutExpo(clamp01((t - (GROW_START + (MAX_R - Math.abs(d)) * INTRO_STAGGER)) / INTRO_GROW))
+
+    let entryProgress = entrance ? clamp01(entrance.get()) : 1
+    // 0 = esperando a seção chegar, 1 = animando, 2 = pronta.
+    let introState = reduced.matches ? 2 : entrance ? 0 : 1
+    let introT0 = 0
+    let introElapsed = 0
     let dragging = false, dragX = 0, dragPos = 0, lastX = 0, lastT = 0, flick = 0
+    let pressed = false, dragMoved = 0, lastCX = 0, lastCY = 0, hoverCard = false
+    // Foco: clique no cartão central amplia a imagem e derruba os demais.
+    let focusOn = false, focusT = 0, focusIndex = -1
     let raf = 0, last = 0, visible = true, current = 0
+    const drawn: { i: number; x: number; y: number; w: number; h: number; centred: boolean }[] = []
 
     const resize = (w: number, h: number) => {
       W = Math.max(1, w)
@@ -316,37 +388,147 @@ export default function CurvedLensCarousel({
     const draw = () => {
       gl.clearColor(0, 0, 0, 0)
       gl.clear(gl.COLOR_BUFFER_BIT)
+
+      // Entrada: `ready` é o palco normal; durante a animação cada cartão tem
+      // sua própria altura (cresce) e posição vertical (sobe), e o grupo fica
+      // empacotado pelo tamanho atual de cada um — igual ao modelo.
+      const ready = reduced.matches || introState === 2
+      const animating = !ready && introState === 1
+      const t = introElapsed
+      const aspect = cw / ch
+      const centre = wrap(Math.round(pos), n)
+      const heightOf = (i: number) => {
+        if (ready) return ch
+        if (!animating) return ch * 0.24
+        return ch * (0.24 + 0.76 * growOf(offsetOf(i, pos, n), t))
+      }
+      const riseOfCard = (i: number) => (ready ? 1 : animating ? riseOf(i, t) : 0)
+      const step = cw + gap
+      // Com informações ao redor, o cartão fica menor para abrir espaço.
+      const focusH = Math.min(
+        H * (hasFocusInfo ? (W < 1024 ? 0.38 : 0.52) : 0.8),
+        900,
+      )
+      const focusW = Math.min(W * 0.86, focusH * aspect)
+      const lift = ((W < 640 ? 0.3 : 0.15) * H) / 2
+      // Em telas estreitas a ficha fica embaixo; sobe um pouco o cartão.
+      const focusInfoLift = hasFocusInfo && W < 1024 ? H * 0.21 : 0
+
       gl.uniform2f(u.uRes, W, H)
-      gl.uniform2f(u.uSize, cw, ch)
-      gl.uniform1f(u.uBend, bend)
+      // No foco a lente se achata, para a imagem ampliada ficar reta.
+      gl.uniform1f(u.uBend, bend * (1 - 0.92 * focusT))
       gl.uniform1f(u.uVel, reduced.matches ? 0 : Math.max(-1, Math.min(1, vel * 0.12)))
       gl.uniform1f(u.uLift, W < 640 ? 0.3 : 0.15)
-      const step = cw + gap
+
+      type CardDraw = {
+        i: number
+        d: number
+        x: number
+        y: number
+        w: number
+        h: number
+        intro: number
+        alpha: number
+        focus: boolean
+      }
+      const cards: CardDraw[] = []
+
       for (let i = 0; i < n; i++) {
         const d = offsetOf(i, pos, n)
-        const x = d * step
-        if (Math.abs(x) > W * 0.5 + step * 1.5) continue
-        const order = Math.abs(d)
-        const t = Math.max(0, Math.min(1, (intro - order * 0.12) / 0.6))
-        const e = 1 - Math.pow(1 - t, 3)
-        gl.bindTexture(gl.TEXTURE_2D, tex[i].t)
-        gl.uniform1f(u.uX, x)
-        gl.uniform1f(u.uIntro, e)
-        gl.uniform1f(u.uAspect, tex[i].aspect)
-        gl.uniform1f(u.uReady, tex[i].ready ? 1 : 0)
-        gl.uniform1f(u.uShift, Math.max(-0.05, Math.min(0.05, -d * 0.035)))
+        const isFocus = focusT > 0 && i === focusIndex
+        const h0 = heightOf(i)
+        let sw = h0 * aspect
+        let sh = h0
+        let x = d * step
+        // Na entrada o grupo é empacotado somando as larguras atuais entre o
+        // centro e o cartão (o modelo faz o mesmo durante o crescimento).
+        let y = ready ? 0 : -H * 0.9 * (1 - riseOfCard(i))
+        let alpha = 1
+
+        if (!ready) {
+          const sgn = Math.sign(d)
+          // Gap proporcional ao tamanho atual: no início o grupo fica compacto,
+          // como no modelo; no fim vira o espaçamento normal (cw + gap).
+          const spanOf = (a: number, b: number) => {
+            const ha = heightOf(a)
+            const hb = heightOf(b)
+            return ((ha + hb) / 2) * aspect + gap * ((ha / ch + hb / ch) / 2)
+          }
+          x = 0
+          for (let j = 1; j <= Math.abs(d); j++) {
+            x += sgn * spanOf(wrap(centre + sgn * (j - 1), n), wrap(centre + sgn * j, n))
+          }
+          x += (centre - pos) * step
+        }
+
+        if (focusT > 0) {
+          if (isFocus) {
+            x = d * step * (1 - focusT)
+            sw = cw + (focusW - cw) * focusT
+            sh = ch + (focusH - ch) * focusT
+            y = (-lift + focusInfoLift) * focusT
+          } else {
+            y = -H * 1.3 * focusT
+            alpha = 1 - 0.85 * focusT
+          }
+        }
+
+        if (!isFocus && Math.abs(x) - sw / 2 > W * 0.5 + step * 1.5) continue
+
+        cards.push({ i, d, x, y, w: sw, h: sh, intro: 1, alpha, focus: isFocus })
+      }
+
+      // O cartão em foco por último, para ficar por cima.
+      cards.sort((a, b) => Number(a.focus) - Number(b.focus))
+
+      drawn.length = 0
+      for (const c of cards) {
+        gl.bindTexture(gl.TEXTURE_2D, tex[c.i].t)
+        gl.uniform2f(u.uSize, c.w, c.h)
+        gl.uniform1f(u.uX, c.x)
+        gl.uniform1f(u.uY, c.y)
+        gl.uniform1f(u.uIntro, c.intro)
+        gl.uniform1f(u.uAlpha, c.alpha)
+        gl.uniform1f(u.uAspect, tex[c.i].aspect)
+        gl.uniform1f(u.uReady, tex[c.i].ready ? 1 : 0)
+        gl.uniform1f(u.uShift, Math.max(-0.05, Math.min(0.05, -c.d * 0.035)))
         gl.drawArrays(gl.TRIANGLES, 0, mesh.length / 2)
+        drawn.push({ i: c.i, x: c.x, y: c.y, w: c.w, h: c.h, centred: Math.abs(c.d) < 0.5 })
       }
     }
+
+    const hitCard = (mx: number, my: number) => {
+      const x = mx - W / 2
+      const y = H / 2 - my
+      return drawn.find((c) => Math.abs(x - c.x) <= c.w / 2 && Math.abs(y - (c.y + ((W < 640 ? 0.3 : 0.15) * H) / 2)) <= c.h / 2) ?? null
+    }
+
+    const canInteract = () => reduced.matches || introState === 2
 
     const frame = (now: number) => {
       raf = 0
       const dt = last ? Math.min(0.05, (now - last) / 1000) : 1 / 60
       last = now
-      if (intro < 1) {
-        if (introStart < 0) introStart = now
-        intro = Math.min(1.5, (now - introStart) / 1100)
-        if (intro >= 1.5) intro = 1
+      // A entrada é em tempo real e dispara uma única vez: quando a seção
+      // chega no lugar (`entrance` cruza INTRO_GATE) ou, sem a prop, na montagem.
+      if (entrance) entryProgress = clamp01(entrance.get())
+      if (introState === 0 && entryProgress >= INTRO_GATE) {
+        introState = 1
+        introT0 = now
+      }
+      if (introState === 1 && introT0 === 0) introT0 = now
+      if (introState === 1) {
+        introElapsed = Math.max(0, (now - introT0) / 1000)
+        if (introElapsed >= INTRO_END) {
+          introElapsed = INTRO_END
+          introState = 2
+        }
+      }
+      // Foco suavizado, para abrir/fechar sem saltos.
+      const fTarget = focusOn ? 1 : 0
+      if (focusT !== fTarget) {
+        focusT += (fTarget - focusT) * Math.min(1, dt * 8)
+        if (Math.abs(fTarget - focusT) < 0.001) focusT = fTarget
       }
       if (!dragging) {
         if (reduced.matches) {
@@ -361,7 +543,21 @@ export default function CurvedLensCarousel({
         onChangeRef.current?.(idx)
       }
       draw()
-      const settled = !dragging && Math.abs(target - pos) < 0.0005 && Math.abs(vel) < 0.001 && (intro >= 1 || reduced.matches)
+
+      // Interface (rótulos, textos e controles) entra no fim do crescimento.
+      const ui =
+        reduced.matches || introState === 2
+          ? 1
+          : introState === 0
+            ? 0
+            : clamp01((introElapsed - (GROW_START + 0.9)) / 1.2)
+      const uiStr = String(Math.round(ui * 100) / 100)
+      if (root.style.getPropertyValue("--clc-ui") !== uiStr) root.style.setProperty("--clc-ui", uiStr)
+      const enteringNow = !reduced.matches && introState !== 2
+      if (root.hasAttribute("data-entry") !== enteringNow) root.toggleAttribute("data-entry", enteringNow)
+      if (root.hasAttribute("data-focus") !== focusOn) root.toggleAttribute("data-focus", focusOn)
+
+      const settled = !dragging && Math.abs(target - pos) < 0.0005 && Math.abs(vel) < 0.001 && (reduced.matches || introState === 2) && focusT === fTarget
       if (settled) {
         pos = target
         draw()
@@ -373,45 +569,114 @@ export default function CurvedLensCarousel({
       if (!raf && visible && !disposed) raf = requestAnimationFrame(frame)
     }
 
-    api.current.go = (dir: number) => {
-      target = Math.round(target) + dir
+    function openFocus() {
+      if (focusOn || !canInteract()) return
+      focusIndex = wrap(Math.round(pos), n)
+      focusOn = true
+      setFocused(true)
+      kick()
+    }
+    function closeFocus() {
+      if (!focusOn) return
+      focusOn = false
+      setFocused(false)
       kick()
     }
 
+    api.current.go = (dir: number) => {
+      if (focusOn || !canInteract()) return
+      target = Math.round(target) + dir
+      kick()
+    }
+    api.current.close = closeFocus
+
     const onDown = (e: PointerEvent) => {
       if (e.button !== 0) return
+      pressed = true
+      dragMoved = 0
+      lastCX = e.clientX
+      lastCY = e.clientY
+      canvas.setPointerCapture(e.pointerId)
+      if (focusOn || !canInteract()) {
+        kick()
+        return
+      }
       dragging = true
       dragX = lastX = e.clientX
       lastT = e.timeStamp
       dragPos = pos
       flick = 0
-      canvas.setPointerCapture(e.pointerId)
       kick()
     }
     const onMove = (e: PointerEvent) => {
-      if (!dragging) return
-      const step = cw + gap
-      const p = dragPos - (e.clientX - dragX) / step
-      const dts = Math.max(1, e.timeStamp - lastT) / 1000
-      flick = flick * 0.6 + (-(e.clientX - lastX) / step / dts) * 0.4
-      vel = flick
-      lastX = e.clientX
-      lastT = e.timeStamp
-      pos = p
-      kick()
+      lastCX = e.clientX
+      lastCY = e.clientY
+      if (dragging) {
+        const step = cw + gap
+        const p = dragPos - (e.clientX - dragX) / step
+        const dts = Math.max(1, e.timeStamp - lastT) / 1000
+        flick = flick * 0.6 + (-(e.clientX - lastX) / step / dts) * 0.4
+        dragMoved += Math.abs(e.clientX - lastX)
+        vel = flick
+        lastX = e.clientX
+        lastT = e.timeStamp
+        pos = p
+        kick()
+        return
+      }
+      if (pressed || focusOn || !canInteract()) return
+      // Cursor de link quando o ponteiro está sobre um cartão.
+      const r = canvas.getBoundingClientRect()
+      const h = hitCard(e.clientX - r.left, e.clientY - r.top)
+      const over = !!(h && h.centred)
+      if (over !== hoverCard) {
+        hoverCard = over
+        canvas.style.cursor = over ? "pointer" : ""
+      }
     }
     const onUp = () => {
-      if (!dragging) return
-      dragging = false
-      target = restFor(pos, flick)
-      vel = flick
-      kick()
+      if (!pressed) return
+      pressed = false
+      if (focusOn) {
+        closeFocus()
+        return
+      }
+      if (dragging) {
+        dragging = false
+        target = restFor(pos, flick)
+        vel = flick
+        // Clique curto: centraliza outro cartão ou abre o central.
+        if (dragMoved < 8 && canInteract()) {
+          const r = canvas.getBoundingClientRect()
+          const h = hitCard(lastCX - r.left, lastCY - r.top)
+          if (h) {
+            if (h.centred) openFocus()
+            else {
+              target = Math.round(target) + offsetOf(h.i, target, n)
+              vel = 0
+            }
+          }
+        }
+        kick()
+      }
     }
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight") api.current.go(1)
+      if (e.key === "Escape") closeFocus()
+      else if (e.key === "ArrowRight") api.current.go(1)
       else if (e.key === "ArrowLeft") api.current.go(-1)
       else return
       e.preventDefault()
+    }
+    // Escape também funciona com o foco no documento, não só no carrossel.
+    const onWindowKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && focusOn) {
+        closeFocus()
+        e.preventDefault()
+      }
+    }
+    const onLeave = () => {
+      hoverCard = false
+      canvas.style.cursor = ""
     }
     const onMotion = () => kick()
 
@@ -419,7 +684,9 @@ export default function CurvedLensCarousel({
     canvas.addEventListener("pointermove", onMove)
     canvas.addEventListener("pointerup", onUp)
     canvas.addEventListener("pointercancel", onUp)
+    canvas.addEventListener("pointerleave", onLeave)
     root.addEventListener("keydown", onKey)
+    window.addEventListener("keydown", onWindowKey)
     reduced.addEventListener("change", onMotion)
 
     const ro = new ResizeObserver((entries) => {
@@ -435,23 +702,27 @@ export default function CurvedLensCarousel({
       }
     })
     io.observe(root)
+    const unsubEntrance = entrance?.on("change", () => kick())
 
     return () => {
       disposed = true
       cancelAnimationFrame(raf)
+      unsubEntrance?.()
       ro.disconnect()
       io.disconnect()
       canvas.removeEventListener("pointerdown", onDown)
       canvas.removeEventListener("pointermove", onMove)
       canvas.removeEventListener("pointerup", onUp)
       canvas.removeEventListener("pointercancel", onUp)
+      canvas.removeEventListener("pointerleave", onLeave)
       root.removeEventListener("keydown", onKey)
+      window.removeEventListener("keydown", onWindowKey)
       reduced.removeEventListener("change", onMotion)
       for (const t of tex) gl.deleteTexture(t.t)
       gl.deleteBuffer(buf)
       gl.deleteProgram(prog)
     }
-  }, [n, slides, bend])
+  }, [n, slides, bend, entrance, hasFocusInfo])
 
   const slide = slides[index] ?? slides[0]
   if (!slide) return null
@@ -472,9 +743,14 @@ export default function CurvedLensCarousel({
       <canvas ref={canvasRef} className="clc-canvas" aria-hidden="true" />
       {noGL ? <img className="clc-fallback" src={slide.image} alt={slide.alt ?? slide.title} /> : null}
       <div className="clc-grain" aria-hidden="true" />
+      {renderFocus ? (
+        <div className="clc-focus-info">
+          {focused ? renderFocus(slide, index) : null}
+        </div>
+      ) : null}
       <div className="clc-top">
         <b>{label}</b>
-        <span>Arraste para explorar</span>
+        <span>{hint}</span>
       </div>
       <Copy key={index} slide={slide} shown={shown} />
       <div className="clc-ctl">
@@ -493,6 +769,15 @@ export default function CurvedLensCarousel({
           </button>
         </div>
       </div>
+      <button
+        type="button"
+        className="clc-close"
+        onClick={() => api.current.close()}
+        tabIndex={focused ? 0 : -1}
+        aria-hidden={!focused}
+      >
+        Fechar
+      </button>
     </div>
   )
 }
