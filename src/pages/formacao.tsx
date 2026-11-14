@@ -293,6 +293,8 @@ function BottomBand({ item, s, sub }: { item: Credencial; s: number; sub?: strin
           <img
             src={tema.logoBar}
             alt={item.instituicao}
+            loading="lazy"
+            decoding="async"
             style={{
               display: 'block',
               height: 17 * s,
@@ -389,6 +391,8 @@ function FormacaoFront({ item, s }: { item: Credencial; s: number }) {
           <img
             src={tema.logo}
             alt={item.instituicao}
+            loading="lazy"
+            decoding="async"
             style={{
               display: 'block',
               height: (tema.logoHeight ?? 40) * s,
@@ -525,6 +529,8 @@ function CertificadoFront({ item, s }: { item: Credencial; s: number }) {
           <img
             src={tema.logo}
             alt={item.instituicao}
+            loading="lazy"
+            decoding="async"
             style={{
               display: 'block',
               height: 34 * s,
@@ -758,10 +764,11 @@ export function Formacao() {
   const [out, setOut] = useState(false)
   const timer = useRef<number | null>(null)
   const storyRef = useRef<HTMLDivElement>(null)
+  const pinRef = useRef<HTMLDivElement>(null)
   const reduceMotion = useReducedMotion()
   const { scrollY } = useScroll()
   const [entry, setEntry] = useState({ start: 0, end: 1 })
-  const [exit, setExit] = useState({ start: 0, span: 1 })
+  const [pin, setPin] = useState<{ top: number; height: number } | null>(null)
 
   useEffect(() => {
     const measure = () => {
@@ -770,13 +777,6 @@ export function Formacao() {
       const vh = window.innerHeight
       const top = el.getBoundingClientRect().top + window.scrollY
       setEntry({ start: top - vh, end: top - vh * 0.25 })
-      const bottom = el.getBoundingClientRect().bottom + window.scrollY
-      const next = document.querySelector<HTMLElement>('#projetos')
-      const start = next
-        ? next.getBoundingClientRect().top + window.scrollY
-        : bottom - vh
-      const span = next ? Math.max(1, next.offsetHeight - vh) : vh
-      setExit({ start, span })
     }
     measure()
     window.addEventListener('resize', measure)
@@ -787,12 +787,43 @@ export function Formacao() {
     }
   }, [grupo])
 
+  // Pin nativo: a Formacao fica presa (position: sticky) exatamente durante a
+  // abertura da janela do Projetos, nos primeiros 50% do progresso dele
+  // (WINDOW_OPEN_END em projetos.tsx). Sticky e resolvido pelo compositor,
+  // entao nao existe o atraso de 1 frame do transform em JS (que fazia a
+  // secao tremer para cima e para baixo). O wrapper ganha a altura extra do
+  // pin e o Projetos compensa com margem negativa, entao a pagina nao cresce.
+  useEffect(() => {
+    if (reduceMotion) {
+      setPin(null)
+      return
+    }
+    const measure = () => {
+      const story = storyRef.current
+      const shell = pinRef.current
+      if (!story || !shell) return
+      const vh = window.innerHeight
+      const storyTop = story.getBoundingClientRect().top + window.scrollY
+      const next = document.querySelector<HTMLElement>('#projetos')
+      const nextTop = next
+        ? next.getBoundingClientRect().top + window.scrollY
+        : storyTop + vh
+      const run = next ? Math.max(0, (next.offsetHeight - vh) * 0.5) : vh
+      setPin({ top: storyTop - nextTop, height: shell.offsetHeight + run })
+    }
+    measure()
+    const observer = new ResizeObserver(measure)
+    if (pinRef.current) observer.observe(pinRef.current)
+    window.addEventListener('resize', measure)
+    const timer = window.setTimeout(measure, 900)
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('resize', measure)
+      window.clearTimeout(timer)
+    }
+  }, [grupo, reduceMotion])
+
   const entryRotate = useTransform(scrollY, [entry.start, entry.end], [30, 0])
-  const exitX = useTransform(
-    scrollY,
-    [exit.start, exit.start + exit.span],
-    ['0vw', '-100vw'],
-  )
 
   useEffect(() => () => {
     if (timer.current) window.clearTimeout(timer.current)
@@ -891,13 +922,19 @@ export function Formacao() {
       ref={storyRef}
       data-story-enter
       className="relative z-30 mt-[calc(-42svh)] w-full overflow-x-clip"
+      style={pin ? { height: pin.height } : undefined}
     >
+      <div
+        ref={pinRef}
+        className={reduceMotion ? undefined : 'sticky'}
+        style={pin ? { top: pin.top } : undefined}
+      >
       <motion.section
         id="formacao"
         style={
           reduceMotion
             ? undefined
-            : { rotate: entryRotate, x: exitX, transformOrigin: 'bottom left' }
+            : { rotate: entryRotate, transformOrigin: 'bottom left' }
         }
         className="relative w-full origin-bottom-left overflow-hidden bg-black text-stone-200 antialiased selection:bg-stone-100 selection:text-black"
       >
@@ -982,6 +1019,7 @@ export function Formacao() {
           </div>
         </div>
       </motion.section>
+      </div>
     </div>
   )
 }

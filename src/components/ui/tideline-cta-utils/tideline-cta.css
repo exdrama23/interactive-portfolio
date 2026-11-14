@@ -1,0 +1,386 @@
+/* =========================================================================
+   Tideline CTA — "maré" de fechamento
+   -------------------------------------------------------------------------
+   Como a onda não trava:
+   - a subida da água é só `transform: translate3d` (compositor, sem layout);
+   - a face invertida é o MESMO layout da face seca, deslocada em oposição
+     exata à água, então as duas ficam alinhadas pixel a pixel em todo frame;
+   - a borda ondulada é uma máscara ESTÁTICA (SVG em data URI), nunca
+     recalculada por frame — nada de clip-path animado;
+   - a onda decorativa de fundo anda por transform (a animação de
+     background-position obriga repaint a cada frame e é o que engasga);
+   - tudo pausa quando a seção sai da tela.
+   ========================================================================= */
+
+.tlc {
+  --tlc-wave-h: 26px;
+  --tlc-water: #f4f1ea;
+  --tlc-water-ink: #0c0c0c;
+  --tlc-dry: #000000;
+  --tlc-dry-ink: #f4f1ea;
+  --tlc-rule: rgba(12, 12, 12, 0.16);
+  /* distância que a água percorre: começa uma altura inteira abaixo */
+  --tlc-rise: var(--tlc-h);
+
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  contain: layout paint;
+  background: var(--tlc-dry);
+  color: var(--tlc-dry-ink);
+}
+
+.tlc--night {
+  --tlc-buoy-hover: #ffffff;
+}
+
+.tlc--paper {
+  --tlc-water: #0c0c0c;
+  --tlc-water-ink: #f4f1ea;
+  --tlc-dry: #f4f1ea;
+  --tlc-dry-ink: #0c0c0c;
+  --tlc-rule: rgba(244, 241, 234, 0.2);
+  --tlc-buoy-hover: #1f1f1f;
+}
+
+/* A seção só "enche" depois que entra na tela. */
+.tlc[data-seen] {
+  --tlc-rise: 0px;
+}
+
+/* ------------------------------------------------------------------ faces */
+
+.tlc__layer,
+.tlc__inner {
+  width: 100%;
+  padding: clamp(72px, 11vh, 118px) clamp(24px, 6vw, 88px)
+    clamp(56px, 9vh, 104px);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(16px, 2.4vh, 26px);
+}
+
+.tlc__layer--dry {
+  position: relative;
+  min-height: min(64svh, 620px);
+}
+
+.tlc__inner {
+  position: absolute;
+  inset: 0;
+  color: var(--tlc-water-ink);
+  /* anula o deslocamento da água: a face fica sempre no mesmo lugar do
+     documento, só que recortada pela superfície */
+  transform: translate3d(
+    0,
+    calc(-1 * ((1 - var(--tlc-target)) * var(--tlc-h) + var(--tlc-rise))),
+    0
+  );
+}
+
+.tlc__eyebrow {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  opacity: 0.62;
+}
+
+.tlc__headline {
+  margin: 0;
+  max-width: 16ch;
+  font-family: var(--font-serif, 'Playfair Display', Georgia, serif);
+  font-size: clamp(34px, 5.2vw, 76px);
+  font-weight: 500;
+  line-height: 1.04;
+  letter-spacing: -0.022em;
+  text-wrap: balance;
+}
+
+.tlc__body {
+  margin-top: clamp(24px, 3.6vh, 40px);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(14px, 2vh, 20px);
+  max-width: 46ch;
+}
+
+.tlc__sub {
+  margin: 0;
+  font-size: clamp(14px, 1.05vw, 17px);
+  line-height: 1.62;
+  opacity: 0.76;
+}
+
+.tlc__level {
+  margin: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.tlc__level::before {
+  content: '';
+  margin-top: 6px;
+  width: 28px;
+  height: 1px;
+  flex: none;
+  background: currentColor;
+  opacity: 0.55;
+}
+
+.tlc__details {
+  margin: auto 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.56;
+}
+
+.tlc__details li {
+  display: inline-flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.tlc__details li + li::before {
+  content: '';
+  width: 3px;
+  height: 3px;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0.6;
+}
+
+/* ------------------------------------------------------------------ água */
+
+.tlc__water {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transform: translate3d(
+    0,
+    calc((1 - var(--tlc-target)) * var(--tlc-h) + var(--tlc-rise)),
+    0
+  );
+
+  /* Borda ondulada estática: uma faixa de 26px com a curva + um degradê
+     sólido logo abaixo. As duas máscaras se somam (mask-composite: add),
+     então a altura da seção nunca deforma a amplitude da onda. */
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 28' preserveAspectRatio='none'%3E%3Cpath d='M0 14C100 0 200 0 300 14S500 28 600 14 800 0 900 14 1100 28 1200 14V28H0Z' fill='%23000'/%3E%3C/svg%3E"),
+    linear-gradient(#000, #000);
+  -webkit-mask-size: 100% var(--tlc-wave-h), 100% calc(100% - var(--tlc-wave-h));
+  -webkit-mask-position: 0 0, 0 var(--tlc-wave-h);
+  -webkit-mask-repeat: no-repeat, no-repeat;
+  -webkit-mask-composite: source-over;
+
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 28' preserveAspectRatio='none'%3E%3Cpath d='M0 14C100 0 200 0 300 14S500 28 600 14 800 0 900 14 1100 28 1200 14V28H0Z' fill='%23000'/%3E%3C/svg%3E"),
+    linear-gradient(#000, #000);
+  mask-size: 100% var(--tlc-wave-h), 100% calc(100% - var(--tlc-wave-h));
+  mask-position: 0 0, 0 var(--tlc-wave-h);
+  mask-repeat: no-repeat, no-repeat;
+  mask-composite: add;
+}
+
+.tlc__surface {
+  position: absolute;
+  inset: 0;
+  background: var(--tlc-water);
+}
+
+/* Onda decorativa atrás da superfície. Anda por transform (nunca por
+   background-position) e some suavemente para dentro da água. */
+.tlc__backwave {
+  position: absolute;
+  top: 12px;
+  left: 0;
+  width: 200%;
+  height: 84px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 80' preserveAspectRatio='none'%3E%3Cpath d='M0 42Q150 8 300 42T600 42T900 42T1200 42V80H0Z' fill='%230c0c0c'/%3E%3C/svg%3E");
+  background-repeat: repeat-x;
+  background-size: 50% 100%;
+  opacity: 0.09;
+  transform: translate3d(0, 0, 0);
+  animation: tlc-drift 38s linear infinite;
+  animation-play-state: paused;
+  will-change: transform;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 78%);
+  mask-image: linear-gradient(to bottom, #000 0%, transparent 78%);
+}
+
+.tlc[data-active] .tlc__backwave {
+  animation-play-state: running;
+}
+
+@keyframes tlc-drift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+/* Subida: só transform, e os dois lados com a MESMA curva/duração — assim a
+   soma (água + face) é sempre zero e o texto nunca escorrega. */
+.tlc[data-seen]:not([data-done]) .tlc__water,
+.tlc[data-seen]:not([data-done]) .tlc__inner {
+  transition: transform 1500ms cubic-bezier(0.16, 1, 0.3, 1) 80ms;
+  will-change: transform;
+}
+
+/* ------------------------------------------------------------------ boia */
+
+.tlc__buoy {
+  position: absolute;
+  z-index: 2;
+  right: clamp(24px, 6vw, 88px);
+  top: calc((1 - var(--tlc-target)) * var(--tlc-h) + 15px);
+  transform: translate3d(0, -50%, 0);
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 24px;
+  border-radius: 999px;
+  background: var(--tlc-water);
+  color: var(--tlc-water-ink);
+  box-shadow:
+    0 0 0 1px rgba(12, 12, 12, 0.22),
+    0 18px 38px -18px rgba(0, 0, 0, 0.55);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 500ms ease 950ms;
+  animation: tlc-bob 7.5s ease-in-out 2s infinite;
+  animation-play-state: paused;
+}
+
+.tlc__buoy:hover {
+  background: var(--tlc-buoy-hover, #ffffff);
+}
+
+.tlc__buoy:focus-visible {
+  outline: 2px solid var(--tlc-water);
+  outline-offset: 3px;
+}
+
+.tlc__buoy svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tlc__buoy:hover svg {
+  transform: translateX(3px);
+}
+
+.tlc[data-seen] .tlc__buoy {
+  opacity: 1;
+}
+
+.tlc[data-active] .tlc__buoy {
+  animation-play-state: running;
+}
+
+@keyframes tlc-bob {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -6px;
+  }
+}
+
+/* -------------------------------------------------------------- responsivo */
+
+@media (max-width: 640px) {
+  .tlc__layer--dry {
+    min-height: min(72svh, 640px);
+  }
+
+  .tlc__headline {
+    max-width: 100%;
+  }
+
+  /* No celular o conteúdo sobe e a boia desce para a água, num espaço
+     reservado só para ela (nada de sobrepor o texto). */
+  .tlc__layer,
+  .tlc__inner {
+    padding-bottom: 140px;
+  }
+
+  .tlc__details {
+    margin-top: clamp(20px, 4vh, 32px);
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .tlc__details li + li::before {
+    display: none;
+  }
+
+  .tlc__buoy {
+    right: auto;
+    left: 50%;
+    top: auto;
+    bottom: clamp(32px, 7vh, 56px);
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+/* ------------------------------------------------------- movimento reduzido */
+
+.tlc[data-motion='reduced'],
+.tlc[data-motion='reduced'] * {
+  transition: none !important;
+  animation: none !important;
+}
+
+.tlc[data-motion='reduced'] {
+  --tlc-rise: 0px;
+}
+
+.tlc[data-motion='reduced'] .tlc__buoy {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tlc {
+    --tlc-rise: 0px;
+  }
+
+  .tlc *,
+  .tlc *::before,
+  .tlc *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .tlc__buoy {
+    opacity: 1;
+  }
+
+  .tlc .tlc__backwave {
+    will-change: auto;
+  }
+}
