@@ -195,6 +195,12 @@ function Scramble({ text, on }: { text: string; on: boolean }) {
       setTick(-1)
       return
     }
+    // Montado por baixo do fade da intro: o hero já está no estado final,
+    // então não faz sentido "embaralhar" as letras de novo.
+    if (document.documentElement.classList.contains('intro-handoff')) {
+      setTick(chars.length + 9)
+      return
+    }
     let k = 0
     setTick(0)
     const id = window.setInterval(() => {

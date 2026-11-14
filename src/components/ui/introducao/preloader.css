@@ -1,0 +1,492 @@
+/* ==========================================================================
+   Pixel World intro — estilos.
+   Tudo escopado em .pw-* para não vazar no resto do site.
+   Duração do fade do portão: 650ms (igual a FADE_MS em pixel-world-preloader.tsx).
+   ========================================================================== */
+
+.pw-root {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  isolation: isolate;
+  background: #ffffff;
+  color: #111111;
+  font-family: var(--pw-sans);
+}
+
+/* Modo capa (usado na home): o root fica transparente para a página real
+   aparecer por baixo durante o fade final. */
+.pw-root.pw-cover {
+  background: transparent;
+}
+
+.pw-gate {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  overflow: hidden;
+  background: #070814;
+  color: #fff;
+  user-select: none;
+  -webkit-user-select: none;
+  container-type: size;
+  transition: opacity 650ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.pw-gate[data-phase="fade"] {
+  opacity: 0;
+  pointer-events: none;
+}
+.pw-scene {
+  position: absolute;
+  inset: 0;
+  width: 100cqw;
+  height: 100cqh;
+  transform-origin: 0 0;
+  will-change: transform;
+  transform: translate3d(
+    calc(var(--pw-tx, -3%) * 1cqw + var(--pw-px, 0) * var(--pw-pamp, 1) * 1.2cqw),
+    calc(var(--pw-ty, 5%) * 1cqh + var(--pw-py, 0) * var(--pw-pamp, 1) * 1.2cqh),
+    0
+  )
+    scale(var(--pw-sc, 1.08));
+}
+.pw-pixel-svg {
+  shape-rendering: crispEdges;
+  image-rendering: pixelated;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* ---- Sky Layer (0% to 100% height of scene) ---- */
+.pw-sky {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100cqw;
+  height: 104cqh;
+  background: linear-gradient(180deg, #050712 0%, #0c1229 45%, #191d3a 80%, #272242 100%);
+  overflow: hidden;
+}
+.pw-star {
+  animation: pw-twinkle 2.6s steps(2, end) infinite;
+}
+@keyframes pw-twinkle {
+  50% {
+    opacity: 0.22;
+  }
+}
+.pw-moon-wrap {
+  position: absolute;
+  right: 14cqw;
+  top: 9cqh;
+  width: 17cqw;
+  height: 17cqw;
+  max-width: 23cqh;
+  max-height: 23cqh;
+  filter: drop-shadow(0 0 2.8cqw rgba(255, 236, 153, 0.38));
+}
+.pw-cloud-drift {
+  animation: pw-drift 30s steps(60, end) infinite alternate;
+}
+@keyframes pw-drift {
+  from {
+    transform: translateX(-2%);
+  }
+  to {
+    transform: translateX(3%);
+  }
+}
+
+/* ---- Room & Building Layer (100% to 200% height of scene) ---- */
+.pw-room-wrap {
+  position: absolute;
+  left: 0;
+  top: 100cqh;
+  width: 100cqw;
+  height: 100cqh;
+  background: #141229;
+  overflow: hidden;
+}
+.pw-exterior-mask {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  pointer-events: none;
+  opacity: var(--pw-win-fade, 1);
+  transition: opacity 100ms linear;
+}
+
+/* ---- The Center Monitor Portal (Exact 20cqw x 20cqh at left:52cqw, top:28cqh of room) ---- */
+.pw-monitor-screen {
+  position: absolute;
+  left: 52cqw;
+  top: 28cqh;
+  width: 20cqw;
+  height: 20cqh;
+  z-index: 3;
+  background: #ffffff;
+  overflow: hidden;
+  container-type: size;
+  box-shadow: 0 0 2.6cqw rgba(255, 200, 150, 0.32);
+}
+
+/* ---- Foreground Programmer & Racing Chair Layer (Z-index above monitor, slides down on zoom) ---- */
+.pw-fg-chair-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  transform: translateY(calc(var(--pw-chair-drop, 0) * 1%));
+  will-change: transform;
+}
+.pw-breathe {
+  animation: pw-bob 2.8s steps(2, end) infinite;
+}
+@keyframes pw-bob {
+  50% {
+    transform: translateY(0.55px);
+  }
+}
+.pw-cat-breathe {
+  animation: pw-cat 3.4s steps(2, end) infinite;
+}
+@keyframes pw-cat {
+  50% {
+    transform: scaleY(0.96);
+    transform-origin: center bottom;
+  }
+}
+.pw-float-pix {
+  animation: pw-fpix 3.2s steps(4, end) infinite alternate;
+}
+@keyframes pw-fpix {
+  from {
+    transform: translateY(0px);
+  }
+  to {
+    transform: translateY(-2.5px);
+  }
+}
+
+/* ---- Scanlines & CRT Pixel Overlay ---- */
+.pw-crt {
+  position: absolute;
+  inset: 0;
+  z-index: 25;
+  pointer-events: none;
+  opacity: calc(var(--pw-crt-op, 1) * 0.16);
+  background-image: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.45) 50%),
+    linear-gradient(90deg, rgba(255, 0, 0, 0.035), rgba(0, 255, 0, 0.015), rgba(0, 0, 255, 0.035));
+  background-size: 100% 4px, 6px 100%;
+}
+
+/* ---- HUD ---- */
+.pw-hud {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+  font-family: var(--pw-mono);
+  color: #f8fafc;
+  mix-blend-mode: difference;
+  transition: opacity 400ms ease;
+}
+.pw-hud[data-hide="true"] {
+  opacity: 0;
+}
+.pw-hud-top,
+.pw-hud-bot {
+  position: absolute;
+  left: clamp(16px, 3cqw, 36px);
+  right: clamp(16px, 3cqw, 36px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.pw-hud-top {
+  top: clamp(14px, 2.6cqh, 28px);
+  font-size: clamp(9px, 1.05cqw, 12px);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.pw-hud-bot {
+  bottom: clamp(14px, 2.6cqh, 28px);
+  align-items: flex-end;
+}
+.pw-hud-stage {
+  font-size: clamp(9px, 1.05cqw, 12px);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.pw-hud-skip {
+  pointer-events: auto;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  padding: 5px 12px;
+  font-family: var(--pw-pixel);
+  font-size: clamp(8px, 0.9cqw, 11px);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: background 150ms ease, transform 150ms ease;
+}
+.pw-hud-skip:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+}
+.pw-hud-pct {
+  font-family: var(--pw-pixel);
+  font-size: clamp(24px, 4.8cqw, 58px);
+  line-height: 0.85;
+  letter-spacing: -0.03em;
+}
+.pw-hud-pct small {
+  font-size: 0.35em;
+  margin-left: 0.15em;
+  vertical-align: top;
+}
+.pw-hud-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: #f59e0b;
+  transform-origin: 0 50%;
+  box-shadow: 0 0 12px #f59e0b;
+}
+
+/* ============================================================================
+   PORTFOLIO HERO (the screen living inside the center monitor)
+   ============================================================================ */
+.pw-hero {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  container-type: size;
+  background: #ffffff;
+  color: #111111;
+  overflow: hidden;
+  user-select: none;
+}
+.pw-hero-inner {
+  position: absolute;
+  inset: 0;
+  width: 100cqw;
+  height: 100cqh;
+}
+.pw-hero-dots {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.pw-hero-top-role {
+  position: absolute;
+  left: 4.1cqw;
+  top: 9.8cqh;
+  font-family: var(--pw-sans);
+  font-weight: 600;
+  font-size: 1.15cqw;
+  letter-spacing: -0.01em;
+  color: #1a1a1a;
+}
+.pw-hero-year-badge {
+  position: absolute;
+  right: 4.4cqw;
+  top: 6.8cqh;
+  width: 6.6cqw;
+  height: 6.8cqh;
+}
+.pw-hero-alec-wrap {
+  position: absolute;
+  left: 3.9cqw;
+  top: 16.5cqh;
+  display: flex;
+  align-items: baseline;
+  gap: 1.5cqw;
+}
+.pw-hero-alec {
+  font-family: var(--pw-pixel);
+  font-weight: 700;
+  font-size: 5.5cqw;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: #111111;
+}
+.pw-hero-alec-o {
+  display: inline-block;
+  width: 2.1cqw;
+  height: 2.1cqw;
+  border: 0.44cqw solid #111111;
+  border-radius: 999px;
+  transform: translateY(0.45cqw);
+}
+.pw-hero-tag-bubble {
+  position: absolute;
+  right: 4.4cqw;
+  top: 20.2cqh;
+  width: 9.8cqw;
+  height: 12.5cqh;
+}
+.pw-hero-center-title {
+  position: absolute;
+  left: 50%;
+  top: 44.5cqh;
+  transform: translate(-50%, -50%);
+  width: 92cqw;
+  text-align: center;
+  font-family: var(--pw-script);
+  font-weight: 400;
+  font-size: 10.6cqw;
+  line-height: 1.05;
+  color: #0b0b0b;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.pw-hero-swe {
+  position: absolute;
+  left: 4.1cqw;
+  bottom: 17cqh;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.pw-hero-swe-letters {
+  font-family: var(--pw-sans);
+  font-weight: 800;
+  font-size: 3.1cqw;
+  line-height: 0.9;
+  letter-spacing: 0.03em;
+  color: transparent;
+  -webkit-text-stroke: 0.11cqw #161616;
+}
+.pw-hero-swe-sub {
+  margin-top: 0.35cqh;
+  font-family: var(--pw-sans);
+  font-weight: 700;
+  font-size: 0.78cqw;
+  letter-spacing: 0.01em;
+  color: #161616;
+}
+.pw-hero-quote {
+  position: absolute;
+  right: 4.1cqw;
+  bottom: 18cqh;
+  width: 24cqw;
+  text-align: right;
+  font-family: var(--pw-mono);
+  font-size: 0.72cqw;
+  line-height: 1.55;
+  color: #161616;
+}
+.pw-hero-quote .pw-muted {
+  color: #8c8c8c;
+}
+.pw-hero-quote .pw-cite {
+  display: block;
+  margin-top: 0.5cqh;
+  font-size: 0.62cqw;
+  color: #9a9a9a;
+  letter-spacing: 0.04em;
+}
+.pw-cursor-blink {
+  display: inline-block;
+  width: 0.12cqw;
+  height: 0.95cqw;
+  background: #111;
+  margin-left: 0.2cqw;
+  vertical-align: middle;
+  animation: pw-blink 1s steps(2, end) infinite;
+}
+@keyframes pw-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+.pw-hero-foot-left {
+  position: absolute;
+  left: 4.1cqw;
+  bottom: 2.2cqh;
+  font-family: var(--pw-mono);
+  font-size: 0.55cqw;
+  letter-spacing: 0.08em;
+  color: #8c8c8c;
+  text-transform: uppercase;
+}
+.pw-hero-foot-center {
+  position: absolute;
+  left: 50%;
+  bottom: 6.4cqh;
+  transform: translateX(-50%);
+  font-family: var(--pw-mono);
+  font-size: 0.62cqw;
+  letter-spacing: 0.45em;
+  color: #333333;
+}
+.pw-hero-foot-right {
+  position: absolute;
+  right: 4.1cqw;
+  bottom: 2.2cqh;
+  font-family: var(--pw-mono);
+  font-size: 0.55cqw;
+  letter-spacing: 0.08em;
+  color: #8c8c8c;
+  text-transform: uppercase;
+}
+
+/* Quem pediu menos movimento não recebe as animações decorativas. */
+@media (prefers-reduced-motion: reduce) {
+  .pw-star,
+  .pw-cloud-drift,
+  .pw-breathe,
+  .pw-cat-breathe,
+  .pw-float-pix,
+  .pw-cursor-blink {
+    animation: none;
+  }
+  .pw-gate,
+  .pw-scene,
+  .pw-fg-chair-layer {
+    will-change: auto;
+    transition: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Handoff da intro para a home.
+   A home só é montada quando o fade final começa, e o hero tem uma entrada
+   escalonada de ~3s (texto, traços, scramble). Como a intro já mostra o
+   estado final do hero, aqui ele nasce "assentado" — assim o cruzamento não
+   revela texto pela metade. Ao terminar a intro a classe sai e o hero volta
+   ao comportamento normal (entradas animadas em remontagens de rota).
+   -------------------------------------------------------------------------- */
+html.intro-handoff .hcl-root *,
+html.intro-handoff .hero-glyph * {
+  transition: none !important;
+  animation-duration: 0s !important;
+  animation-delay: 0s !important;
+}
+html.intro-handoff .hcl-ch,
+html.intro-handoff .hcl-px,
+html.intro-handoff .hcl-pill,
+html.intro-handoff .hcl-cite,
+html.intro-handoff .hcl-caret,
+html.intro-handoff .hcl-sig span,
+html.intro-handoff .hcl-swe-label {
+  opacity: 1 !important;
+  transform: none !important;
+}
+html.intro-handoff .hcl-ver path,
+html.intro-handoff .hcl-sup circle,
+html.intro-handoff .hcl-mono {
+  stroke-dashoffset: 0 !important;
+  opacity: 1 !important;
+}
+html.intro-handoff .hcl-tag-swoosh {
+  clip-path: inset(-20% -20% -20% -20%) !important;
+}
