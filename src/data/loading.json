@@ -1,0 +1,105 @@
+{
+  "note": "Dados da tela de carregamento de TROCA DE ROTA (não é a introdução). Edite aqui os vocalistas, paletas, textos e etapas.",
+  "durationMs": 1700,
+  "loadingWord": "CARREGANDO",
+  "order": [
+    "sharks",
+    "vermilion",
+    "what_ive_done",
+    "eu_protesto"
+  ],
+  "tracks": {
+    "sharks": {
+      "id": "sharks",
+      "band": "Imagine Dragons",
+      "singer": "Dan Reynolds",
+      "song": "Sharks",
+      "bpm": 124,
+      "singerImage": "/rock/dan-reynolds.webp",
+      "palette": {
+        "paper": "#00d2ff",
+        "ink": "#040811",
+        "glow": "#ff1e42",
+        "edge": "#005682",
+        "spark": "#b8f4ff"
+      },
+      "ringText": "IMAGINE DRAGONS · SHARKS · DAN REYNOLDS · BLOOD IN THE WATER · ",
+      "stages": [
+        "Blood In The Water",
+        "Apex Predator",
+        "Don't Let Them In"
+      ],
+      "singerImageCredit": "Joe Bielawa · CC BY 2.0",
+      "singerImageCreditUrl": "https://commons.wikimedia.org/wiki/File:Dan_Reynolds1.jpg"
+    },
+    "vermilion": {
+      "id": "vermilion",
+      "band": "Slipknot",
+      "singer": "Corey Taylor",
+      "song": "Vermilion",
+      "bpm": 138,
+      "singerImage": "/rock/corey-taylor.webp",
+      "palette": {
+        "paper": "#d91828",
+        "ink": "#090304",
+        "glow": "#f7e6e8",
+        "edge": "#59040b",
+        "spark": "#ff5c6a"
+      },
+      "ringText": "SLIPKNOT · VERMILION · COREY TAYLOR #8 · SHE ISN'T REAL · ",
+      "stages": [
+        "Vol. 3 Stitched Mask",
+        "Crimson Tension",
+        "She Isn't Real"
+      ],
+      "singerImageCredit": "bill (jersey city) · CC BY 2.0",
+      "singerImageCreditUrl": "https://commons.wikimedia.org/wiki/File:Corey_Taylor_at_Mayhem_Fest_4.jpg"
+    },
+    "what_ive_done": {
+      "id": "what_ive_done",
+      "band": "Linkin Park",
+      "singer": "Chester Bennington",
+      "song": "What I've Done",
+      "bpm": 120,
+      "singerImage": "/rock/chester-bennington.webp",
+      "palette": {
+        "paper": "#f59e0b",
+        "ink": "#090b10",
+        "glow": "#38bdf8",
+        "edge": "#dc2626",
+        "spark": "#fef3c7"
+      },
+      "ringText": "LINKIN PARK · WHAT I'VE DONE · CHESTER BENNINGTON · MINUTES TO MIDNIGHT · ",
+      "stages": [
+        "Flame Tattoos",
+        "Minutes To Midnight",
+        "Erasing The Past"
+      ],
+      "singerImageCredit": "kallerna · CC BY-SA 3.0",
+      "singerImageCreditUrl": "https://commons.wikimedia.org/wiki/File:Chester_Bennington,_Linkin_Park_@_Sonisphere.jpg"
+    },
+    "eu_protesto": {
+      "id": "eu_protesto",
+      "band": "Charlie Brown Jr.",
+      "singer": "Chorão",
+      "song": "Eu Protesto",
+      "bpm": 152,
+      "singerImage": "/rock/chorao.webp",
+      "palette": {
+        "paper": "#facc15",
+        "ink": "#0c0c0e",
+        "glow": "#10b981",
+        "edge": "#e11d48",
+        "spark": "#ffffff"
+      },
+      "ringText": "CHARLIE BROWN JR · CHORÃO ETERNO · 013 SANTOS · EU PROTESTO · ",
+      "stages": [
+        "013 Skate Vibration",
+        "Microfone Na Mão",
+        "Eu Protesto!"
+      ],
+      "singerImageCredit": "Rodrigo Bertolino · CC BY-SA 2.0",
+      "singerImageCreditUrl": "https://commons.wikimedia.org/wiki/File:Charlie_Brown_Jr._ao_vivo_em_Guarulhos,_SP_(19_Julho_2008)_-_05.jpg"
+    }
+  }
+}
