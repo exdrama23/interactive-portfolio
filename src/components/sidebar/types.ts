@@ -1,3 +1,5 @@
+import type { MotionValue } from 'framer-motion';
+
 export type MenuState = 'idle' | 'edgeHover' | 'magneticFollow' | 'expanding' | 'fullscreen';
 
 export interface MenuItemData {
@@ -17,7 +19,8 @@ export interface MenuItemProps extends MenuItemData {
 }
 
 export interface FloatingMenuProps {
-  magneticY: number;
+  /** MotionValue: o movimento é animado fora do React (sem re-render por frame). */
+  magneticY: MotionValue<number>;
   onClick: () => void;
 }
 

@@ -28,7 +28,7 @@ const FullscreenMenu: React.FC<FullscreenMenuProps> = ({ onClose }) => {
     )), []);
 
   return (
-    <div className="fixed inset-0 bg-black dark:bg-white z-50 flex">
+    <div className="fixed inset-0 bg-black dark:bg-white z-50 flex pointer-events-auto">
       <div className="w-[140px] h-full bg-black dark:bg-white flex items-center justify-center">
         <div className="h-3/4 rounded-l-[140px] w-full bg-black dark:bg-white border-r border-white/10 dark:border-black/10" />
       </div>

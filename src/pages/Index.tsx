@@ -1,6 +1,5 @@
 // import { FlowingSidebar } from '../components/Header';
 import { useEffect, useState } from 'react';
-import Header from '../components/Header';
 import HeroPortal from '../components/HeroPortal';
 import Sidebar from '../components/Sidebar';
 import Contato from '../components/Contato';
@@ -62,9 +61,13 @@ export function Index() {
       {/* <section className="py-32 bg-gradient-to-b from-transparent via-purple-900/10 to-transparent relative overflow-hidden">
         
       </section> */}
-      <Sidebar />
       </main>
       )}
+
+      {/* Fora do <main className="relative z-10">: dentro dele a sidebar ficava
+          presa no stacking context z-10 e o Header (fixed z-50) engolia a faixa
+          de hover da borda direita. */}
+      <Sidebar />
 
       {introActive && (
         <IntroOverlay

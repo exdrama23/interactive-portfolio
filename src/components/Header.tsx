@@ -7,8 +7,7 @@ import {
   Award, 
   Briefcase, 
   Mail,
-  Menu,
-  Grid 
+  Menu
 } from "lucide-react";
 
 const useWindowSize = () => {
@@ -50,7 +49,7 @@ const NavButton = ({
     >
         <div className={`transition-transform duration-300 ${active ? '-translate-y-1' : 'group-hover:-translate-y-1'} flex justify-center w-full`}>
             {React.isValidElement(icon) 
-              ? React.cloneElement(icon as React.ReactElement<any>, { size: 18 }) 
+              ? React.cloneElement(icon as React.ReactElement<{ size?: number }>, { size: 18 }) 
               : icon}
         </div>
         <span className="text-[9px] font-medium tracking-wide uppercase opacity-80 text-center leading-none w-full">
@@ -94,7 +93,7 @@ export default function OrganicHeader() {
   `;
 
   return (
-    <div className="fadeable fixed top-0 left-0 w-full z-50 flex justify-center text-white dark:text-zinc-900 drop-shadow-2xl group">
+    <div className="fadeable fixed top-0 left-0 w-full z-50 flex justify-center text-white dark:text-zinc-900 drop-shadow-2xl group pointer-events-none">
       
       {/* Wrapper do SVG ajustado dinamicamente */}
       <div 
@@ -180,7 +179,7 @@ export default function OrganicHeader() {
         style={{ height: CENTER_HEIGHT }}
       >
         <div 
-            className="flex items-center justify-center gap-1"
+            className="pointer-events-auto flex items-center justify-center gap-1"
             style={{ 
                 height: CENTER_HEIGHT, 
                 width: CENTER_WIDTH,
@@ -198,7 +197,7 @@ export default function OrganicHeader() {
 
         {/* Botão hamburguer alinhado com a nova altura lateral */}
         <div 
-          className="fixed top-0 right-8 flex items-center gap-4"
+          className="pointer-events-auto fixed top-0 right-8 flex items-center gap-4"
           style={{ height: SIDE_HEIGHT }}
         >
            <button className="md:hidden p-2 text-zinc-300 dark:text-zinc-600 hover:text-white dark:hover:text-zinc-900">

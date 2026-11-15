@@ -3,42 +3,49 @@ import { motion, AnimatePresence } from 'framer-motion';
 import type { ExtendedFloatingMenuProps } from './types';
 import { FLOATING_MENU_HEIGHT, FLOATING_MENU_WIDTH } from './constants';
 
-const FloatingMenu: React.FC<ExtendedFloatingMenuProps> = ({ 
+const FloatingMenu: React.FC<ExtendedFloatingMenuProps> = ({
   magneticY,
   onClick,
   isVisible,
   onMouseEnter,
-  onMouseLeave
+  onMouseLeave,
 }) => {
-  const curvedPath = "M 100 -110 L 100 210 Q 10 50 100 -110 Z";
-  const flatPath = "M 100 -110 L 100 210 Q 100 50 100 -110 Z";
+  const curvedPath = 'M 100 -110 L 100 210 Q 10 50 100 -110 Z';
+  const flatPath = 'M 100 -110 L 100 210 Q 100 50 100 -110 Z';
+  const blobRef = React.useRef<HTMLDivElement>(null);
 
+  // O eixo Y vai por `translate` (propriedade separada) para não brigar com o
+  // `transform` que o framer usa na entrada (x: 100% → 0). Antes o `y` passado
+  // em `style` era ignorado quando havia `animate` no mesmo elemento.
+  React.useEffect(() => {
+    const apply = (value: number) => {
+      if (blobRef.current) blobRef.current.style.translate = `0 ${value}px`;
+    };
+    apply(magneticY.get());
+    return magneticY.on('change', apply);
+  }, [magneticY]);
 
   return (
     <AnimatePresence>
       {isVisible && (
         <motion.div
           key="floating-menu"
-          
+          ref={blobRef}
           onClick={onClick}
-          onMouseEnter={onMouseEnter} 
+          onMouseEnter={onMouseEnter}
           onMouseLeave={onMouseLeave}
-          
-          className="absolute right-0 group" 
-          
+          className="absolute right-0 group"
           initial={{ x: '100%', opacity: 0 }}
-          animate={{ 
-            x: 0, 
-            opacity: 1, 
-            y: magneticY,
-            transition: { type: 'spring', stiffness: 700, damping: 30, mass: 0.4 }
+          animate={{
+            x: 0,
+            opacity: 1,
+            transition: { type: 'spring', stiffness: 700, damping: 30, mass: 0.4 },
           }}
-          exit={{ 
-            x: '100%', 
+          exit={{
+            x: '100%',
             opacity: 0,
-            transition: { duration: 0.15, ease: "easeIn" } 
+            transition: { duration: 0.15, ease: 'easeIn' },
           }}
-
           style={{
             top: 0,
             height: FLOATING_MENU_HEIGHT,
@@ -46,31 +53,36 @@ const FloatingMenu: React.FC<ExtendedFloatingMenuProps> = ({
             willChange: 'transform',
             filter: 'drop-shadow(-5px 0px 15px rgba(0,0,0,0.15))',
             right: undefined,
-            pointerEvents: 'auto', 
-            cursor: 'pointer'
-          }}>
+            pointerEvents: 'auto',
+            cursor: 'pointer',
+          }}
+        >
           <div className="relative w-full h-full">
             <svg
               viewBox="0 0 100 100"
               className="absolute inset-0 w-full h-full overflow-visible origin-right"
-              preserveAspectRatio="none">
+              preserveAspectRatio="none"
+            >
               <motion.path
                 initial={{ d: flatPath }}
-                animate={{ 
+                animate={{
                   d: curvedPath,
-                  transition: { duration: 0.2, ease: "easeOut" }
+                  transition: { duration: 0.2, ease: 'easeOut' },
                 }}
-                exit={{ 
+                exit={{
                   d: flatPath,
-                  transition: { duration: 0.15, ease: "easeIn" } 
+                  transition: { duration: 0.15, ease: 'easeIn' },
                 }}
-                fill={"#191919"} className="dark:fill-[#e6e6e6]"
-                vectorEffect="non-scaling-stroke"/>
+                fill={'#191919'}
+                className="dark:fill-[#e6e6e6]"
+                vectorEffect="non-scaling-stroke"
+              />
             </svg>
 
-            <motion.div 
+            <motion.div
               exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1 } }}
-              className="absolute inset-0 flex items-center justify-end pr-6 pl-4">
+              className="absolute inset-0 flex items-center justify-end pr-6 pl-4"
+            >
               <button className="relative w-10 h-10 rounded-full flex items-center justify-end bg-transparent pointer-events-none">
                 <div className="relative w-6 h-5 flex flex-col justify-between">
                   <span className="w-full h-0.5 bg-white dark:bg-zinc-800 transition-all duration-300 group-hover:w-1/2 self-end" />
