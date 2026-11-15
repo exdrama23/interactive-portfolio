@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { createPortal } from 'react-dom'
 import {
   AnimatePresence,
   motion,
@@ -268,93 +269,102 @@ export function TechOrbit({ progress, items, rest }: TechOrbitProps) {
         </motion.button>
       </div>
 
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            className="fixed inset-0 z-[120] flex items-center justify-center p-4 sm:p-6"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3, ease: EASE }}
-          >
-            <button
-              type="button"
-              aria-label="Fechar lista de tecnologias"
-              tabIndex={-1}
-              onClick={close}
-              className="absolute inset-0 h-full w-full cursor-default bg-black/80 backdrop-blur-sm"
-            />
-
-            <motion.div
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="tech-orbit-title"
-              initial={reduceMotion ? false : { opacity: 0, y: 24, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={reduceMotion ? undefined : { opacity: 0, y: 16, scale: 0.98 }}
-              transition={{ duration: 0.45, ease: EASE }}
-              className="relative max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-sm border border-white/15 bg-[#080808] p-6 shadow-2xl shadow-black sm:p-9"
-            >
-              <div className="flex items-start justify-between gap-6">
-                <div>
-                  <p className="text-[11px] font-medium tracking-[0.22em] text-stone-500 uppercase">
-                    Fora do círculo
-                  </p>
-                  <h3
-                    id="tech-orbit-title"
-                    className="mt-3 font-serif text-3xl leading-tight text-stone-50 sm:text-4xl"
-                  >
-                    Também fazem parte do dia a dia
-                  </h3>
-                </div>
-
+      {/* Portal para o <body>: dentro do trilho horizontal da seção existe um
+          ancestral com `transform` (o `x` do carrossel) e `overflow-hidden`.
+          Um `position: fixed` ali se ancora nesse ancestral, não na viewport —
+          o modal abria deslocado e cortado, principalmente em telas pequenas.
+          Com o portal ele sempre centraliza, em qualquer largura. */}
+      {typeof document !== 'undefined' &&
+        createPortal(
+          <AnimatePresence>
+            {open && (
+              <motion.div
+                className="fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-6"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3, ease: EASE }}
+              >
                 <button
-                  ref={closeRef}
                   type="button"
+                  aria-label="Fechar lista de tecnologias"
+                  tabIndex={-1}
                   onClick={close}
-                  aria-label="Fechar"
-                  className="rounded-sm border border-white/15 p-2 text-stone-300 transition-colors hover:border-white/40 hover:text-white focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none"
+                  className="absolute inset-0 h-full w-full cursor-default bg-black/80 backdrop-blur-sm"
+                />
+
+                <motion.div
+                  role="dialog"
+                  aria-modal="true"
+                  aria-labelledby="tech-orbit-title"
+                  initial={reduceMotion ? false : { opacity: 0, y: 24, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={reduceMotion ? undefined : { opacity: 0, y: 16, scale: 0.98 }}
+                  transition={{ duration: 0.45, ease: EASE }}
+                  className="relative max-h-[calc(100dvh-1.5rem)] w-full max-w-2xl overflow-y-auto overscroll-contain rounded-sm border border-white/15 bg-[#080808] p-5 shadow-2xl shadow-black sm:max-h-[85dvh] sm:p-9"
                 >
-                  <X aria-hidden="true" size={18} />
-                </button>
-              </div>
+                  <div className="flex items-start justify-between gap-4 sm:gap-6">
+                    <div>
+                      <p className="text-[11px] font-medium tracking-[0.22em] text-stone-500 uppercase">
+                        Fora do círculo
+                      </p>
+                      <h3
+                        id="tech-orbit-title"
+                        className="mt-3 font-serif text-2xl leading-tight text-stone-50 sm:text-3xl md:text-4xl"
+                      >
+                        Também fazem parte do dia a dia
+                      </h3>
+                    </div>
 
-              <p className="mt-4 max-w-lg text-sm leading-relaxed text-stone-400">
-                O círculo mostra as {items.length} principais. Aqui está o resto da
-                stack — com e sem logo oficial — organizada por área.
-              </p>
-
-              <div className="mt-8 grid gap-8 sm:grid-cols-2">
-                {groups.map((group) => (
-                  <div key={group.category}>
-                    <p className="text-[10px] font-semibold tracking-[0.18em] text-stone-500 uppercase">
-                      {group.category}
-                    </p>
-                    <ul className="mt-3 space-y-2">
-                      {group.techs.map((tech) => (
-                        <li
-                          key={tech.name}
-                          className="flex items-center gap-2 text-[15px] text-stone-200"
-                        >
-                          <span
-                            aria-hidden="true"
-                            className="h-1 w-1 shrink-0 rounded-full bg-stone-500"
-                          />
-                          {tech.name}
-                        </li>
-                      ))}
-                    </ul>
+                    <button
+                      ref={closeRef}
+                      type="button"
+                      onClick={close}
+                      aria-label="Fechar"
+                      className="shrink-0 rounded-sm border border-white/15 p-2 text-stone-300 transition-colors hover:border-white/40 hover:text-white focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none"
+                    >
+                      <X aria-hidden="true" size={18} />
+                    </button>
                   </div>
-                ))}
-              </div>
 
-              <p className="mt-8 border-t border-white/10 pt-5 text-xs text-stone-500">
-                {rest.length} tecnologias listadas aqui · {items.length} no círculo
-              </p>
-            </motion.div>
-          </motion.div>
+                  <p className="mt-4 max-w-lg text-sm leading-relaxed text-stone-400">
+                    O círculo mostra as {items.length} principais. Aqui está o resto da
+                    stack — com e sem logo oficial — organizada por área.
+                  </p>
+
+                  <div className="mt-7 grid gap-6 sm:mt-8 sm:grid-cols-2 sm:gap-8">
+                    {groups.map((group) => (
+                      <div key={group.category}>
+                        <p className="text-[10px] font-semibold tracking-[0.18em] text-stone-500 uppercase">
+                          {group.category}
+                        </p>
+                        <ul className="mt-3 space-y-2">
+                          {group.techs.map((tech) => (
+                            <li
+                              key={tech.name}
+                              className="flex items-center gap-2 text-sm text-stone-200 sm:text-[15px]"
+                            >
+                              <span
+                                aria-hidden="true"
+                                className="h-1 w-1 shrink-0 rounded-full bg-stone-500"
+                              />
+                              {tech.name}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+
+                  <p className="mt-7 border-t border-white/10 pt-5 text-xs text-stone-500 sm:mt-8">
+                    {rest.length} tecnologias listadas aqui · {items.length} no círculo
+                  </p>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          document.body,
         )}
-      </AnimatePresence>
     </div>
   )
 }
