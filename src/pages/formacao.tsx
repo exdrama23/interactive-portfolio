@@ -18,7 +18,7 @@ interface Tema {
   strap: string
   strapInk: string
   pattern: StrapPattern
-  seal: 'unit' | 'senai' | 'inovase' | 'work'
+  seal: 'unit' | 'senai' | 'inovase' | 'work' | 'logo'
   logo?: string
   logoBar?: string
   logoHeight?: number
@@ -213,12 +213,72 @@ function SealWork({ letter, size }: { letter: string; size: number }) {
   )
 }
 
+/**
+ * Selo em forma de logo: usa a própria logo do tema como "máscara", então ela
+ * sai chapada na cor atual (`currentColor`) — igual aos selos vetoriais, sem
+ * precisar de versão monocromática de cada arquivo.
+ * Controlado só pelo JSON: `"seal": "logo"` no tema.
+ */
+function SealLogo({ src, size }: { src: string; size: number }) {
+  const mask = {
+    WebkitMaskImage: `url(${src})`,
+    maskImage: `url(${src})`,
+    WebkitMaskRepeat: 'no-repeat',
+    maskRepeat: 'no-repeat',
+    WebkitMaskPosition: 'center',
+    maskPosition: 'center',
+    WebkitMaskSize: 'contain',
+    maskSize: 'contain',
+  } as const
+
+  return (
+    <span
+      aria-hidden="true"
+      style={{
+        display: 'block',
+        width: size,
+        height: size,
+        backgroundColor: 'currentColor',
+        ...mask,
+      }}
+    />
+  )
+}
+
 function Seal({ item, size }: { item: Credencial; size: number }) {
   const seal = item.tema.seal
+  if (seal === 'logo' && item.tema.logo) return <SealLogo src={item.tema.logo} size={size} />
   if (seal === 'unit') return <SealUnit size={size} />
   if (seal === 'senai') return <SealSenai size={size} />
   if (seal === 'inovase') return <SealInovase size={size} />
   return <SealWork letter={item.tema.monogram ?? '•'} size={size} />
+}
+
+/**
+ * Caixa do selo-água grande. Os selos vetoriais são circulares e sangram para
+ * fora do cartão de propósito (o corte faz parte do visual). O selo-logo é um
+ * wordmark — se sangrasse, as letras sairiam cortadas — então ele cabe inteiro
+ * dentro do cartão.
+ */
+function watermarkStyle(tema: Tema, s: number, side: 'right' | 'left') {
+  const isLogo = tema.seal === 'logo'
+  if (side === 'right') {
+    return {
+      right: (isLogo ? 18 : -72) * s,
+      top: (isLogo ? 116 : 96) * s,
+      color: tema.accent,
+    }
+  }
+  return {
+    left: (isLogo ? 18 : -58) * s,
+    bottom: (isLogo ? 46 : 30) * s,
+    color: tema.accent,
+  }
+}
+
+/** 164 = largura do cartão (200) menos as margens internas. */
+function watermarkSize(tema: Tema, base: number, s: number) {
+  return (tema.seal === 'logo' ? 164 : base) * s
 }
 
 function MonoBadge({ tema, s }: { tema: Tema; s: number }) {
@@ -379,9 +439,9 @@ function FormacaoFront({ item, s }: { item: Credencial; s: number }) {
     <div className="relative h-full w-full overflow-hidden" style={{ background: tema.card, color: tema.ink }}>
       <div
         className="pointer-events-none absolute"
-        style={{ right: -72 * s, top: 96 * s, opacity: 0.14, color: tema.accent }}
+        style={{ ...watermarkStyle(tema, s, 'right'), opacity: 0.14 }}
       >
-        <Seal item={item} size={250 * s} />
+        <Seal item={item} size={watermarkSize(tema, 250, s)} />
       </div>
 
       <div className="absolute" style={{ left: 22 * s, right: 22 * s, top: 32 * s }}>
@@ -447,9 +507,9 @@ function FormacaoBack({ item, s }: { item: Credencial; s: number }) {
     <div className="relative h-full w-full overflow-hidden" style={{ background: tema.card, color: tema.ink }}>
       <div
         className="pointer-events-none absolute"
-        style={{ left: -58 * s, bottom: 30 * s, opacity: 0.12, color: tema.accent }}
+        style={{ ...watermarkStyle(tema, s, 'left'), opacity: 0.12 }}
       >
-        <Seal item={item} size={220 * s} />
+        <Seal item={item} size={watermarkSize(tema, 220, s)} />
       </div>
 
       <div className="absolute" style={{ left: 22 * s, right: 22 * s, top: 32 * s }}>
@@ -517,9 +577,9 @@ function CertificadoFront({ item, s }: { item: Credencial; s: number }) {
     <div className="relative h-full w-full overflow-hidden" style={{ background: tema.card, color: tema.ink }}>
       <div
         className="pointer-events-none absolute"
-        style={{ right: -60 * s, top: 84 * s, opacity: 0.12, color: tema.accent }}
+        style={{ ...watermarkStyle(tema, s, 'right'), opacity: 0.12 }}
       >
-        <Seal item={item} size={230 * s} />
+        <Seal item={item} size={watermarkSize(tema, 230, s)} />
       </div>
 
       <div className="absolute" style={{ left: 22 * s, right: 22 * s, top: 30 * s }}>
@@ -647,9 +707,9 @@ function TrabalhoFront({ item, s }: { item: Credencial; s: number }) {
     <div className="relative h-full w-full overflow-hidden" style={{ background: tema.card, color: tema.ink }}>
       <div
         className="pointer-events-none absolute"
-        style={{ right: -60 * s, top: 92 * s, opacity: 0.1, color: tema.accent }}
+        style={{ ...watermarkStyle(tema, s, 'right'), opacity: 0.1 }}
       >
-        <Seal item={item} size={230 * s} />
+        <Seal item={item} size={watermarkSize(tema, 230, s)} />
       </div>
 
       <div className="absolute" style={{ left: 22 * s, right: 22 * s, top: 30 * s }}>

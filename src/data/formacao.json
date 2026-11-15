@@ -14,7 +14,7 @@
       "strap": "#0b3a6b",
       "strapInk": "#f0b429",
       "pattern": "orbit",
-      "seal": "unit",
+      "seal": "logo",
       "logo": "unit",
       "logoBar": "unit"
     },
@@ -25,7 +25,7 @@
       "strap": "#0b4a9b",
       "strapInk": "#f6a01e",
       "pattern": "grid",
-      "seal": "senai",
+      "seal": "logo",
       "logo": "senai",
       "logoBar": "senaiLight",
       "logoHeight": 36
@@ -37,7 +37,7 @@
       "strap": "#08334f",
       "strapInk": "#7fd39a",
       "pattern": "circuit",
-      "seal": "inovase",
+      "seal": "logo",
       "logo": "inovase",
       "logoBar": "inovase"
     },
