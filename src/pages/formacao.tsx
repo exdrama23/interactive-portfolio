@@ -855,6 +855,10 @@ export function Formacao() {
   // pin e o Projetos compensa com margem negativa, entao a pagina nao cresce.
   useEffect(() => {
     if (reduceMotion) {
+      // Reset sincrono do pin ao trocar a preferencia de movimento: e um caso
+      // de borda unico (e nao um setState por render de efeito), entao o
+      // render extra aqui e irrelevante e evita o pin preso com a altura antiga.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setPin(null)
       return
     }
