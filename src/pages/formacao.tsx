@@ -933,25 +933,34 @@ export function Formacao() {
     [contagem],
   )
 
+  // Ref "latest": o clique e o hashchange são listenings globais registrados
+  // uma única vez, então precisam da versão mais recente da função (que usa
+  // `trocar`, dependente do estado). A atribuição vive num efeito — escrever
+  // `.current` durante o render é o que o react-hooks aponta como erro.
   const irParaCertificacoes = useRef<() => void>(() => {})
-  irParaCertificacoes.current = () => {
-    trocar('certificados')
-    window.requestAnimationFrame(() => {
-      const el = document.getElementById('certificacoes')
-      if (!el) return
-      let top = 0
-      let node: HTMLElement | null = el
-      while (node) {
-        top += node.offsetTop
-        node = node.offsetParent as HTMLElement | null
-      }
-      const centred = top - Math.max(80, (window.innerHeight - el.offsetHeight) / 2)
-      window.scrollTo({
-        top: Math.max(0, centred),
-        behavior: reduceMotion ? 'auto' : 'smooth',
+  useEffect(() => {
+    irParaCertificacoes.current = () => {
+      trocar('certificados')
+      window.requestAnimationFrame(() => {
+        // Mesmo destino de "Formações": o topo da seção. Antes o trilho era
+        // centralizado (`top - max(80, (vh - altura) / 2)`), então a seção
+        // parava na metade do caminho entre Formações e Projetos. Agora cai
+        // exatamente onde a seção repousa, só que com o cartão de certificado.
+        const el = document.getElementById('formacao')
+        if (!el) return
+        let top = 0
+        let node: HTMLElement | null = el
+        while (node) {
+          top += node.offsetTop
+          node = node.offsetParent as HTMLElement | null
+        }
+        window.scrollTo({
+          top: Math.max(0, top),
+          behavior: reduceMotion ? 'auto' : 'smooth',
+        })
       })
-    })
-  }
+    }
+  })
 
   useEffect(() => {
     const hash = '#certificacoes'
@@ -998,6 +1007,12 @@ export function Formacao() {
         }
         className="relative w-full origin-bottom-left overflow-hidden bg-black text-stone-200 antialiased selection:bg-stone-100 selection:text-black"
       >
+
+        {/* Âncora de "Certificações" no TOPO da seção: o portão de loading rola
+            até o elemento do hash, então a seção precisa parar no mesmo lugar
+            de "Formações" (e não 328px abaixo, no meio da passagem para
+            Projetos). */}
+        <span id="certificacoes" aria-hidden="true" className="block h-0" />
 
         <div
           id="painel-formacao"
@@ -1064,7 +1079,7 @@ export function Formacao() {
           </div>
 
 
-          <div id="certificacoes" className="mt-10 w-full scroll-mt-28 md:mt-12">
+          <div className="mt-10 w-full md:mt-12">
             <div
               key={shown}
               className={out ? 'formacao-esteira-out' : 'formacao-esteira-in'}
