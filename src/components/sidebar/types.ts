@@ -5,6 +5,8 @@ export type MenuState = 'idle' | 'edgeHover' | 'magneticFollow' | 'expanding' | 
 export interface MenuItemData {
   link: string;
   text: string;
+  /** Marca o item como rota principal, com um destaque discreto no menu. */
+  highlight?: boolean;
 }
 
 export interface FlowingMenuProps {

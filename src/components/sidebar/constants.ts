@@ -21,13 +21,14 @@ export const MAGNETIC_SMOOTHING_FACTOR = 0.35;
 export const BLOB_GRACE_MS = 160;
 
 export const demoItems: MenuItemData[] = [
-  { link: '#inicio', text: 'Início' },
-  { link: '#sobre', text: 'Sobre' },
-  { link: '#skills', text: 'Hard-Skills' },
-  { link: '#formacao', text: 'Formações' },
-  { link: '#certificacoes', text: 'Certificações' },
-  { link: '#projetos', text: 'Projetos' },
-  { link: '#contato', text: 'Contato' },
+  { link: '/#inicio', text: 'Início' },
+  { link: '/#sobre', text: 'Sobre' },
+  { link: '/#skills', text: 'Hard-Skills' },
+  { link: '/#formacao', text: 'Formações' },
+  { link: '/#certificacoes', text: 'Certificações' },
+  { link: '/#projetos', text: 'Projetos' },
+  { link: '/projetos', text: 'Todos os projetos', highlight: true },
+  { link: '/#contato', text: 'Contato' },
 ];
 
 export const SOCIAL_LINKS: SocialLink[] = [

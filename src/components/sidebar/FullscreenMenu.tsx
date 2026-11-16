@@ -1,24 +1,53 @@
 import React, { useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import type { FullscreenMenuProps } from './types';
 import { demoItems, SOCIAL_LINKS } from './constants';
 
 const FullscreenMenu: React.FC<FullscreenMenuProps> = ({ onClose }) => {
   const renderNavItems = useMemo(() =>
-    demoItems.map((item, index) => (
-      <a
-        key={index}
-        href={item.link}
-        onClick={onClose}
-        className="block group menu-item-in"
-        style={{ animationDelay: `${index * 80 + 150}ms` }}>
+    demoItems.map((item, index) => {
+      const isRoute = !item.link.includes('#');
+
+      const content = (
         <div className="flex items-center">
-          <div className="w-8 h-0.5 bg-white dark:bg-zinc-700 mr-6 opacity-0 group-hover:opacity-100 transition-opacity" />
-          <div className="text-3xl md:text-5xl font-serif font-light tracking-tight text-white/90 dark:text-zinc-800 group-hover:text-white dark:group-hover:text-black transition-colors">
+          <div
+            className={`w-8 h-0.5 mr-6 transition-opacity ${
+              item.highlight
+                ? 'bg-white/40 dark:bg-zinc-900/35 opacity-100'
+                : 'bg-white dark:bg-zinc-700 opacity-0 group-hover:opacity-100'
+            }`}
+          />
+          <div
+            className={`text-3xl md:text-5xl font-serif font-light tracking-tight transition-colors ${
+              item.highlight
+                ? 'text-white dark:text-zinc-900'
+                : 'text-white/90 dark:text-zinc-800 group-hover:text-white dark:group-hover:text-black'
+            }`}>
             {item.text}
           </div>
+          {item.highlight && (
+            <span
+              aria-hidden="true"
+              className="ml-3 md:ml-5 -translate-y-2 md:-translate-y-3 font-mono text-sm text-white/45 dark:text-zinc-900/45 transition-transform duration-300 group-hover:translate-x-1">
+              →
+            </span>
+          )}
         </div>
-      </a>
-    )), [onClose]);
+      );
+
+      const className = 'block group menu-item-in';
+      const style = { animationDelay: `${index * 80 + 150}ms` };
+
+      return isRoute ? (
+        <Link key={item.link} to={item.link} onClick={onClose} className={className} style={style}>
+          {content}
+        </Link>
+      ) : (
+        <a key={item.link} href={item.link} onClick={onClose} className={className} style={style}>
+          {content}
+        </a>
+      );
+    }), [onClose]);
 
   const renderSocialLinks = useMemo(() =>
     SOCIAL_LINKS.map(social => (
