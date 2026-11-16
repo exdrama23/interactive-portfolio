@@ -2,59 +2,25 @@
 
 import * as React from "react"
 
-/**
- * Lanyard Badge — an event badge hanging from a patterned lanyard.
- *
- * Two strands come down from above the frame and meet at a side-release
- * buckle; a short strap and a ring hold the card. The strap is a verlet rope
- * drawn as a textured ribbon on a 2D canvas (the ornament, script line and
- * label are generated, not images). The card is real HTML turned in 3D with
- * CSS, so both faces can hold anything — pass `front` / `back`, or use the
- * built-in design and just change the words.
- *
- * Drag the card and the strap pulls taut; flick it sideways and it spins on
- * the ring; tap it (or press Enter) to flip it over.
- *
- * Self-contained: React is the only import. No 3D library, no model file.
- */
-
-/** Printed motif repeated along the strap. */
 export type StrapPattern = "mandala" | "grid" | "orbit" | "circuit"
 
 export interface LanyardBadgeProps {
-  /** Card front. Replaces the built-in front entirely. */
   front?: React.ReactNode | ((scale: number) => React.ReactNode)
-  /** Card back. Replaces the built-in back entirely. */
   back?: React.ReactNode | ((scale: number) => React.ReactNode)
-  /** Built-in front: the event title. */
   title?: string
-  /** Built-in front: the line under the title. */
   subtitle?: string
-  /** Built-in back: the wearer's name. */
   name?: string
-  /** Built-in back: the wearer's role. */
   role?: string
-  /** Script line printed along the strap. */
   strapText?: string
-  /** Condensed label printed along the strap, between the script lines. */
   strapLabel?: string
-  /** Strap colour, #rrggbb. */
   strapColor?: string
-  /** Printed motif along the strap. Defaults to the mandala. */
   strapPattern?: StrapPattern
-  /** Ornament and print colour, on the strap and the built-in card. */
   inkColor?: string
-  /** Built-in card stock colour. */
   cardColor?: string
-  /** Show the "Show back / Show front" button in the top corner. */
   flipButton?: boolean
-  /** Card width in px. Height follows at 3:2, strap width at a tenth. */
   cardWidth?: number
-  /** Root height. A definite length — never a percentage. */
   height?: string
-  /** Accessible label for the badge button. */
   label?: string
-  /** Extra root class names. */
   className?: string
 }
 
@@ -63,7 +29,6 @@ export type Pt = { x: number; y: number; px: number; py: number; w: number }
 export type Link = [number, number, number]
 export type Spin = { a: number; v: number }
 
-/** Verlet step. `w` is inverse mass; 0 pins a point in place. */
 function integrate(pts: Pt[], dt: number, gravity: number, damping: number) {
   for (const p of pts) {
     if (!p.w) continue
@@ -76,7 +41,6 @@ function integrate(pts: Pt[], dt: number, gravity: number, damping: number) {
   }
 }
 
-/** Relax distance constraints, heavier points moving less. */
 function solve(pts: Pt[], links: Link[], iterations: number) {
   for (let k = 0; k < iterations; k++) {
     for (const [i, j, rest] of links) {
@@ -96,16 +60,11 @@ function solve(pts: Pt[], links: Link[], iterations: number) {
   }
 }
 
-/**
- * The card's turn on the ring. The strap's own twist is the spring pulling it
- * back to `target`; `drive` is whatever is twisting it right now.
- */
 function spinStep(s: Spin, target: number, dt: number, drive: number) {
   s.v += (-(s.a - target) * 18 - s.v * 3.2 + drive) * dt
   s.a += s.v * dt
 }
 
-/** How far the card swings from hanging straight down, in radians. Right is positive. */
 function swingAngle(top: Pt, bottom: Pt) {
   return Math.atan2(bottom.x - top.x, bottom.y - top.y)
 }
@@ -114,7 +73,6 @@ function swingAngle(top: Pt, bottom: Pt) {
 const DISPLAY = '"Oswald", "Bebas Neue", "Arial Narrow", Impact, sans-serif'
 const SCRIPT = '"Segoe Script", "Brush Script MT", "Snell Roundhand", cursive'
 
-/** A mandala: rings, petals, a bead circle and a flower in the middle. */
 function drawMandala(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number) {
   ctx.save()
   ctx.translate(cx, cy)
@@ -152,7 +110,6 @@ function drawMandala(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: n
   ctx.restore()
 }
 
-/** Technical grid with corner rivets — reads as engineering drawing. */
 function drawGrid(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number) {
   ctx.save()
   ctx.translate(cx, cy)
@@ -185,7 +142,6 @@ function drawGrid(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: numb
   ctx.restore()
 }
 
-/** Nested orbits around a nucleus — the academic / science mark. */
 function drawOrbit(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number) {
   ctx.save()
   ctx.translate(cx, cy)
@@ -210,7 +166,6 @@ function drawOrbit(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: num
   ctx.restore()
 }
 
-/** Nodes and right-angle traces — a chip / circuit board. */
 function drawCircuit(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number) {
   ctx.save()
   ctx.translate(cx, cy)
@@ -272,10 +227,6 @@ function drawMotif(
   else drawMandala(ctx, cx, cy, r)
 }
 
-/**
- * The printed strap, `length` css px long, laid out along the canvas height so
- * each rope segment can crop its own slice. Returns a canvas in device px.
- */
 function makeStrap(
   length: number,
   width: number,
@@ -293,7 +244,6 @@ function makeStrap(
   c.width = Math.max(1, Math.round(width * dpr))
   c.height = Math.max(1, Math.round(length * dpr))
   const ctx = c.getContext("2d")!
-  // strap space: x runs down the strap, y runs across it
   ctx.setTransform(0, dpr, -dpr, 0, c.width, 0)
   ctx.fillStyle = opts.color
   ctx.fillRect(0, 0, length, width)
@@ -315,7 +265,6 @@ function makeStrap(
     let x = width * 0.4
     let flip = 1
     while (x < length) {
-      // a motif too big for the strap, so only an arc of it shows
       ctx.globalAlpha = 0.55
       drawMotif(opts.pattern ?? "mandala", ctx, x + width * 1.3, width * (0.5 + flip * 0.28), width * 1.35)
       x += width * 2.8
@@ -333,7 +282,6 @@ function makeStrap(
     ctx.restore()
   }
 
-  // woven edges catch a little light
   ctx.globalAlpha = 0.35
   ctx.lineWidth = 1
   ctx.beginPath()
@@ -412,8 +360,6 @@ export default function LanyardBadge({
   const innerRef = React.useRef<HTMLDivElement | null>(null)
   const reduced = usePrefersReducedMotion()
   const flipRef = React.useRef<() => void>(() => {})
-  // which face is turned toward the viewer; the effect owns the physics, this
-  // mirrors it for the button label and survives the effect rebuilding
   const [showBack, setShowBack] = React.useState(false)
   const backRef = React.useRef(showBack)
 
@@ -484,7 +430,6 @@ export default function LanyardBadge({
       const cx = W / 2
       const spread = Math.min(W * 0.16, cw * 0.55)
       const top = -sw * 2
-      // hang the buckle so the whole card fits, but never above a sixth of the frame
       const bY = Math.max(H * 0.16, Math.min(H * 0.42, H - (lowLen + ringR * 2 + clipH + ch) - 28))
 
       const aL = add(cx - spread, top, 0)
@@ -511,7 +456,6 @@ export default function LanyardBadge({
           solve(pts, links, ITER)
         }
       } else {
-        // enter mid-swing, as if someone just let go of it
         pts[iC].x += cw * 0.55
         pts[iC].px = pts[iC].x - 2
         spin.v = 5
@@ -522,7 +466,6 @@ export default function LanyardBadge({
     const GRAVITY = 2400
     const ITER = 18
 
-    // ---- drawing ---------------------------------------------------------
     const ribbon = (ids: number[], tex: HTMLCanvasElement, rest: number, light: number) => {
       const Wt = tex.width
       for (let i = 0; i < ids.length - 1; i++) {
@@ -533,17 +476,14 @@ export default function LanyardBadge({
         const len = Math.hypot(dx, dy) || 1e-6
         const tx = dx / len
         const ty = dy / len
-        // glyph tops face +n; this pairing keeps the print readable, not mirrored
         const nx = ty
         const ny = -tx
         const v0 = i * rest * dpr
         const dv = rest * dpr
         const k = len / dv
         ctx.setTransform(nx, ny, tx * k, ty * k, a.x * dpr - (nx * Wt) / 2 - tx * k * v0, a.y * dpr - (ny * Wt) / 2 - ty * k * v0)
-        // +1.5 overlaps the next slice, so bends never show a hairline seam
         const src = Math.min(dv + 1.5, tex.height - v0)
         if (src > 0) ctx.drawImage(tex, 0, v0, Wt, src, 0, v0, Wt, src)
-        // a strand turned away from the light reads darker, which sells the 3D
         const shade = 0.22 * (1 - Math.max(0, nx * light))
         ctx.fillStyle = "rgba(0,0,0," + shade.toFixed(3) + ")"
         ctx.fillRect(0, v0, Wt, dv + 1)
@@ -568,7 +508,6 @@ export default function LanyardBadge({
       ribbon(right, strapTex, strandRest, 1)
       ribbon(low, plainTex, (lowLen * 1) / 3, 0)
 
-      // side-release buckle, turned to follow the short strap
       const B = pts[iB]
       const T = pts[iT]
       const ang = Math.atan2(T.x - B.x, T.y - B.y)
@@ -596,7 +535,6 @@ export default function LanyardBadge({
       ctx.lineTo(13 * u, -12.5 * u)
       ctx.stroke()
 
-      // split ring
       ctx.setTransform(dpr, 0, 0, dpr, T.x * dpr, (T.y + ringR * 0.8) * dpr)
       ctx.lineWidth = Math.max(2.5, ringR * 0.38)
       ctx.strokeStyle = metal(-ringR, -ringR, ringR, ringR)
@@ -617,7 +555,6 @@ export default function LanyardBadge({
       inner.style.setProperty("--lyd-shine", (50 + Math.sin(spin.a) * 70 + swing * 90).toFixed(1) + "%")
     }
 
-    // ---- interaction -----------------------------------------------------
     type Drag = { id: number; ox: number; oy: number; tx: number; ty: number; sx: number; sy: number; moved: boolean }
     let drag: Drag | null = null
     const local = (e: PointerEvent) => {
@@ -657,7 +594,6 @@ export default function LanyardBadge({
     card.addEventListener("pointerup", onUp)
     card.addEventListener("pointercancel", onUp)
 
-    // ---- loop --------------------------------------------------------------
     let raf = 0
     let acc = 0
     let last = performance.now()
@@ -679,7 +615,6 @@ export default function LanyardBadge({
         }
         const C = pts[iC]
         if (!reduced && !drag) {
-          // a draught in the room, so the badge is never perfectly still
           C.x += (22 * Math.sin(t * 0.7) + 12 * Math.sin(t * 1.9)) * STEP * STEP
         }
         integrate(pts, STEP, GRAVITY, 0.992)
@@ -810,7 +745,6 @@ export default function LanyardBadge({
         className="absolute left-0 top-0 outline-none focus-visible:ring-2 focus-visible:ring-stone-200/70"
         style={{ width: cw, height: ch + ringR + clipH, transformOrigin: "50% 0", cursor: "grab", touchAction: "pan-y", willChange: "transform" }}
       >
-        {/* badge clip: hooks the ring, bites the card */}
         <div
           aria-hidden="true"
           style={{

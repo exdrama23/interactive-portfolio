@@ -16,6 +16,7 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import VinylHalftonePreloader from './vinyl-halftone-preloader'
 import { LOADING_DEFAULTS, ROCK_TRACK_ORDER, type RockTrackId } from './rock-tracks'
+import { sectionScrollTop } from '../../lib/section-scroll'
 import {
   RouteTransitionContext,
   hashFromTarget,
@@ -114,9 +115,8 @@ export function RouteTransitionProvider({
         // O scroll fica travado durante o portão; libera e pula para a âncora
         // enquanto a tela ainda está 100% coberta.
         document.documentElement.classList.remove('no-scroll')
-        const el = document.getElementById(hash.slice(1))
-        if (el) {
-          const top = el.getBoundingClientRect().top + window.scrollY
+        const top = sectionScrollTop(hash.slice(1))
+        if (top !== null) {
           window.scrollTo({ top, behavior: 'instant' as ScrollBehavior })
         }
       } else {

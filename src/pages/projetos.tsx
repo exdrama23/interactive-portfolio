@@ -6,6 +6,7 @@ import {
   useScroll,
   useTransform,
 } from 'framer-motion'
+import { Link } from 'react-router-dom'
 import CurvedLensCarousel from '../components/ui/3d-curved-carousel'
 import {
   ProjectFocusInfo,
@@ -21,6 +22,11 @@ interface ProjetosData {
 
 const DATA = projetosData as unknown as ProjetosData
 const PROJETOS: ProjectDetail[] = DATA.projects
+// Só os marcados com "featured": true vão para o carrossel da home. O acervo
+// (/projetos) continua mostrando todos. Se nada estiver marcado, mostra todos
+// para o carrossel nunca ficar vazio.
+const DESTAQUES = PROJETOS.filter((project) => project.featured)
+const SLIDES = DESTAQUES.length > 0 ? DESTAQUES : PROJETOS
 
 // Fases do progresso da secao (0 = topo da secao no topo da tela, 1 = fim):
 // 1) a janela sobe ate o centro; 2) abre ate cobrir a tela; 3) palco parado
@@ -133,9 +139,21 @@ export function Projetos() {
           }
         >
           <CurvedLensCarousel
-            slides={PROJETOS}
+            slides={SLIDES}
             label={DATA.label}
             hint={DATA.hint}
+            topRight={
+              <div className="flex items-center gap-4">
+                <span className="hidden sm:inline">{DATA.hint}</span>
+                <Link
+                  to="/projetos"
+                  className="pointer-events-auto inline-flex items-center gap-1.5 border-b border-current/40 pb-0.5 tracking-[0.18em] transition-colors hover:border-current"
+                >
+                  Ver todos
+                  <span aria-hidden="true">↗</span>
+                </Link>
+              </div>
+            }
             bend={0.6}
             background="#000000"
             ink="#f3ede4"
@@ -143,9 +161,9 @@ export function Projetos() {
             entrance={carouselEntrance}
             renderFocus={(_slide, index) => (
               <ProjectFocusInfo
-                project={PROJETOS[index] ?? PROJETOS[0]}
+                project={SLIDES[index] ?? SLIDES[0]}
                 index={index}
-                total={PROJETOS.length}
+                total={SLIDES.length}
               />
             )}
           />

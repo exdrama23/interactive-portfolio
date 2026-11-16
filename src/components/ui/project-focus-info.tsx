@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom'
+
 export interface ProjectLink {
   label: string
   url: string
@@ -12,6 +14,10 @@ export interface ProjectCompany {
 export interface ProjectDetail {
   id: string
   title: string
+  /** true = aparece no carrossel da home; false = só no acervo /projetos */
+  featured?: boolean
+  /** áreas do projeto, usadas no filtro da página /projetos */
+  categories?: string[]
   kicker?: string
   caption?: string
   image: string
@@ -35,16 +41,28 @@ export function ProjectFocusInfo({
   return (
     <>
 
-      <div className="pointer-events-auto absolute top-1/2 right-[calc(50%_+_21svh_+_1.5rem)] hidden max-h-[86svh] w-[min(calc(50%_-_21svh_-_3rem),430px)] -translate-y-1/2 overflow-y-auto pr-2 lg:block">
+      <div
+        className="pointer-events-auto absolute top-1/2 hidden max-h-[86svh] -translate-y-1/2 overflow-y-auto pr-2 xl:block"
+        style={{
+          right: 'calc(50% + var(--clc-half, 21svh) + 1.5rem)',
+          width: 'min(calc(50% - var(--clc-half, 21svh) - 3rem), 430px)',
+        }}
+      >
         <ProjectMeta project={project} />
       </div>
 
-      <div className="pointer-events-auto absolute top-1/2 left-[calc(50%_+_21svh_+_1.5rem)] hidden max-h-[86svh] w-[min(calc(50%_-_21svh_-_3rem),540px)] -translate-y-1/2 overflow-y-auto pl-2 lg:block">
+      <div
+        className="pointer-events-auto absolute top-1/2 hidden max-h-[86svh] -translate-y-1/2 overflow-y-auto pl-2 xl:block"
+        style={{
+          left: 'calc(50% + var(--clc-half, 21svh) + 1.5rem)',
+          width: 'min(calc(50% - var(--clc-half, 21svh) - 3rem), 540px)',
+        }}
+      >
         <ProjectDescription project={project} index={index} total={total} />
       </div>
 
 
-      <div className="pointer-events-auto absolute inset-x-3 bottom-3 max-h-[48svh] overflow-y-auto overscroll-contain rounded-2xl border border-white/12 bg-black/75 p-5 text-stone-200 shadow-2xl backdrop-blur-xl lg:hidden">
+      <div className="pointer-events-auto absolute inset-x-3 bottom-3 max-h-[48svh] overflow-y-auto overscroll-contain rounded-2xl border border-white/12 bg-black/75 p-5 text-stone-200 shadow-2xl backdrop-blur-xl xl:hidden">
         <ProjectMeta project={project} compact />
         <div className="mt-5 border-t border-white/10 pt-4">
           <ProjectDescription project={project} index={index} total={total} compact />
@@ -187,11 +205,25 @@ function ProjectDescription({
       </div>
 
       <div className="mt-7 flex items-end justify-between gap-4 border-t border-white/10 pt-4">
-        <span className="pb-0.5 text-[10px] tracking-[0.22em] text-stone-600 uppercase">
-          {total > 0
-            ? `Projeto ${String(index + 1).padStart(2, '0')} / ${String(total).padStart(2, '0')}`
-            : 'Projeto'}
-        </span>
+        <div className="flex flex-col items-start gap-3 pb-0.5">
+          <span className="text-[10px] tracking-[0.22em] text-stone-600 uppercase">
+            {total > 0
+              ? `Projeto ${String(index + 1).padStart(2, '0')} / ${String(total).padStart(2, '0')}`
+              : 'Projeto'}
+          </span>
+          <Link
+            to="/projetos"
+            className="group inline-flex items-center gap-1.5 border-b border-white/25 pb-0.5 text-[10px] font-medium tracking-[0.18em] text-stone-300 uppercase transition-colors hover:border-white/60 hover:text-stone-50"
+          >
+            Ver todos
+            <span
+              aria-hidden="true"
+              className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+            >
+              ↗
+            </span>
+          </Link>
+        </div>
         <span
           aria-hidden="true"
           className="pointer-events-none -mb-3 font-serif text-[4rem] leading-none text-white/[0.07] select-none"

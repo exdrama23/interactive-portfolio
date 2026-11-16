@@ -3,17 +3,15 @@
   "hint": "Arraste · clique no cartão central para abrir",
   "projects": [
     {
-      "id": "aurora",
+      "id": "hapsengenharia",
+      "featured": true,
+      "categories": ["Front-end & UI", "Back-end & APIs"],
       "kicker": "Dashboard · React + TypeScript",
       "title": "Aurora",
       "caption": "Painel de operações com métricas em tempo real, permissões por papel e relatórios exportáveis.",
-      "image": "https://images.unsplash.com/photo-1454496522488-7a8e488e8606?auto=format&fit=crop&w=900&h=1125&q=80",
+      "image": "https://res.cloudinary.com/dtskn1ns3/image/upload/v1794850990/Captura_de_tela_2026-11-16_135034_t16xiu.png",
       "alt": "Montanhas cobertas de neve ao anoitecer",
-      "company": {
-        "name": "ACESSO.NET",
-        "logo": "",
-        "url": ""
-      },
+      "company": { "name": "Hapsengenharia", "logo": "", "url": "www.hapsengenharia.com.br/" },
       "links": [
         { "label": "Repositório", "url": "https://github.com/exdrama23" }
       ],
@@ -23,16 +21,14 @@
     },
     {
       "id": "nucleo",
+      "featured": true,
+      "categories": ["Back-end & APIs", "Banco de Dados & Cache"],
       "kicker": "API · Node.js + PostgreSQL",
       "title": "Núcleo",
       "caption": "Back-end modular com autenticação, filas e integrações — documentado de ponta a ponta.",
-      "image": "https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=900&h=1125&q=80",
+      "image": "https://res.cloudinary.com/dtskn1ns3/image/upload/v1794851025/Captura_de_tela_2026-11-16_140252_q20n3f.png",
       "alt": "Lago cercado por montanhas, água parada refletindo o céu",
-      "company": {
-        "name": "Projeto autoral",
-        "logo": "",
-        "url": ""
-      },
+      "company": { "name": "Projeto autoral", "logo": "", "url": "" },
       "links": [
         { "label": "Repositório", "url": "https://github.com/exdrama23" }
       ],
@@ -42,16 +38,14 @@
     },
     {
       "id": "vitrine",
+      "featured": true,
+      "categories": ["Front-end & UI", "Back-end & APIs"],
       "kicker": "E-commerce · Next.js",
       "title": "Vitrine",
       "caption": "Loja completa com catálogo, carrinho persistente e checkout integrado a meios de pagamento.",
-      "image": "https://images.unsplash.com/photo-1433086966358-54859d0ed716?auto=format&fit=crop&w=900&h=1125&q=80",
+      "image": "https://res.cloudinary.com/dtskn1ns3/image/upload/v1794851006/Captura_de_tela_2026-11-16_141358_wbypee.png",
       "alt": "Cachoeira entre paredões de rocha e vegetação",
-      "company": {
-        "name": "Cliente independente",
-        "logo": "",
-        "url": ""
-      },
+      "company": { "name": "Cliente independente", "logo": "", "url": "" },
       "links": [
         { "label": "Repositório", "url": "https://github.com/exdrama23" }
       ],
@@ -61,16 +55,14 @@
     },
     {
       "id": "orbe",
+      "featured": true,
+      "categories": ["Front-end & UI", "Conceitos & Especialidades"],
       "kicker": "Experimento 3D · WebGL",
       "title": "Orbe",
       "caption": "Estudo de materiais, luz e movimento em tempo real — a mesma linguagem visual deste portfólio.",
-      "image": "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=900&h=1125&q=80",
+      "image": "https://res.cloudinary.com/dtskn1ns3/image/upload/v1794852388/3db9e81b-cbfc-4b55-9b89-d2b91ce0fe66.png",
       "alt": "Pico rochoso sob um céu estrelado",
-      "company": {
-        "name": "Estudo autoral",
-        "logo": "",
-        "url": ""
-      },
+      "company": { "name": "Estudo autoral", "logo": "", "url": "" },
       "links": [
         { "label": "Repositório", "url": "https://github.com/exdrama23" }
       ],
@@ -80,22 +72,401 @@
     },
     {
       "id": "rota",
+      "featured": false,
+      "categories": ["Front-end & UI", "Conceitos & Especialidades"],
       "kicker": "PWA · Offline first",
       "title": "Rota",
       "caption": "Aplicação instalável com cache inteligente, sincronização em segundo plano e mapa em campo.",
       "image": "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=900&h=1125&q=80",
       "alt": "Floresta enevoada vista do alto",
-      "company": {
-        "name": "Cliente independente",
-        "logo": "",
-        "url": ""
-      },
+      "company": { "name": "Cliente independente", "logo": "", "url": "" },
       "links": [
         { "label": "Repositório", "url": "https://github.com/exdrama23" }
       ],
       "summary": "Aplicação instalável com cache inteligente, sincronização em segundo plano e mapa em campo.",
       "techs": ["React", "TypeScript", "PWA", "Service Worker", "IndexedDB"],
       "description": "O Rota foi feito para funcionar onde a conexão é instável. Rotas, pontos de parada e registros ficam disponíveis offline, e tudo o que é criado em campo é sincronizado automaticamente quando a rede volta.\n\nA aplicação pode ser instalada na tela inicial e usa cache inteligente para não baixar dados repetidos. O mapa foi pensado para uso com uma mão, com controles grandes, leitura rápida e confirmação visual antes de qualquer alteração."
+    },
+    {
+      "id": "tr069",
+      "featured": false,
+      "categories": ["Back-end & APIs", "Banco de Dados & Cache"],
+      "kicker": "Telecom · Node.js + TypeScript",
+      "title": "TR-069",
+      "caption": "API REST que orquestra o GenieACS para provisionar, monitorar e diagnosticar CPEs de provedores em massa.",
+      "image": "",
+      "alt": "Tela de gestão de dispositivos TR-069",
+      "company": { "name": "Projeto autoral", "logo": "", "url": "" },
+      "links": [
+        { "label": "Site", "url": "https://tr-069.vercel.app" }
+      ],
+      "summary": "Camada REST sobre o GenieACS para provisionar e monitorar roteadores TR-069/TR-181 em escala.",
+      "techs": ["Node.js", "TypeScript", "Express", "MongoDB", "PostgreSQL", "Redis", "BullMQ", "Socket.io", "Zod", "Docker"],
+      "description": "O TR-069 parte de um problema real de ISP: o GenieACS resolve o protocolo, mas expõe uma interface crua, difícil de operar em massa. O projeto embrulha esse motor em uma API modular, com DTOs validados por Zod, contrato OpenAPI gerado a partir dos schemas e autenticação JWT com argon2.\n\nA arquitetura usa injeção de dependência com tsyringe e um barramento de eventos com assinantes de auditoria e de socket, então cada alteração em um CPE vira log e notificação em tempo real. Tarefas demoradas (reboot, upgrade de firmware, coleta de parâmetros) rodam em filas BullMQ sobre Redis. O estado quente fica no MongoDB, a telemetria em PostgreSQL/TimescaleDB, e o deploy é via Docker com CI no GitHub Actions."
+    },
+    {
+      "id": "infradesk",
+      "featured": false,
+      "categories": ["Back-end & APIs", "Front-end & UI"],
+      "kicker": "Service desk · NestJS + Angular",
+      "title": "InfraDesk",
+      "caption": "Plataforma de chamados de TI com permissões por papel, fila de jobs e atualizações em tempo real.",
+      "image": "",
+      "alt": "Painel de chamados do InfraDesk",
+      "company": { "name": "Projeto autoral", "logo": "", "url": "" },
+      "links": [
+        { "label": "Site", "url": "https://infradesk-phi.vercel.app" },
+        { "label": "Repositório", "url": "https://github.com/exdrama23/infradesk" }
+      ],
+      "summary": "Gestão de chamados e demandas de TI com autenticação por papel e conversa em tempo real.",
+      "techs": ["NestJS", "Prisma", "PostgreSQL", "Socket.io", "Angular", "TypeScript", "Docker"],
+      "description": "O InfraDesk organiza chamados e demandas de TI em um fluxo único: abertura, atribuição, conversa e acompanhamento. O back-end em NestJS separa os domínios de autenticação, tickets, mensagens e jobs, com guards de papel e throttling nas rotas sensíveis.\n\nAs mensagens de um chamado chegam por WebSocket, então a conversa não depende de recarregar a página. Senhas passam por argon2, a API usa helmet e cookie-parser, e o acesso ao banco é feito com Prisma sobre PostgreSQL. O front-end em Angular consome a mesma API com interceptors de autenticação, e o ambiente completo sobe com Docker Compose."
+    },
+    {
+      "id": "rio_do_sal",
+      "featured": false,
+      "categories": ["Front-end & UI", "Conceitos & Especialidades"],
+      "kicker": "Site cultural · Next.js + WebGL",
+      "title": "Rio do Sal",
+      "caption": "Site de capoeira com cenas 3D, animações dirigidas por Theatre.js e acervo de histórias, músicas e galeria.",
+      "image": "",
+      "alt": "Página inicial do site Rio do Sal",
+      "company": { "name": "Projeto autoral", "logo": "", "url": "" },
+      "links": [
+        { "label": "Site", "url": "https://riodosal.vercel.app" },
+        { "label": "Repositório", "url": "https://github.com/exdrama23/rio_do_sal" }
+      ],
+      "summary": "Experiência digital para um grupo de capoeira, com cenas 3D e conteúdo organizado por história, música e memória.",
+      "techs": ["Next.js", "React", "Three.js", "React Three Fiber", "Theatre.js", "GSAP", "Framer Motion", "Tailwind CSS"],
+      "description": "O Rio do Sal transforma o acervo de um grupo de capoeira em um site navegável. As seções cobrem história, raízes, mestres, músicas, galeria, mural e calendário, com páginas individuais para cada relato e uma timeline que amarra a narrativa.\n\nA camada visual usa React Three Fiber e drei para montar a cena do herói, com shaders próprios para o fundo e um nó que referencia a ginga. As animações são coreografadas no Theatre.js e complementadas por GSAP e Framer Motion, enquanto o conteúdo fica separado em arquivos de dados tipados."
+    },
+    {
+      "id": "sete-quedas",
+      "featured": false,
+      "categories": ["Front-end & UI", "Conceitos & Especialidades"],
+      "kicker": "Portfólio cultural · Next.js + WebGL",
+      "title": "Sete Quedas",
+      "caption": "Portfólio de mestre de capoeira com biografia, faixas, timeline e a mesma base 3D do Rio do Sal.",
+      "image": "",
+      "alt": "Página inicial do portfólio Sete Quedas",
+      "company": { "name": "Projeto autoral", "logo": "", "url": "" },
+      "links": [
+        { "label": "Site", "url": "https://sete-quedas-portfolio.vercel.app" },
+        { "label": "Repositório", "url": "https://github.com/exdrama23/Sete_Quedas_Portfolio" }
+      ],
+      "summary": "Portfólio de um mestre de capoeira, unindo biografia, discografia e memória do grupo em uma experiência 3D.",
+      "techs": ["Next.js", "React", "Three.js", "React Three Fiber", "Theatre.js", "GSAP", "Framer Motion", "Tailwind CSS"],
+      "description": "O Sete Quedas nasceu da mesma base técnica do Rio do Sal, mas com outro recorte de conteúdo: em vez de um grupo, o site apresenta a trajetória de um mestre, com páginas de biografia por slug, faixas, músicas e registros do mural.\n\nA estrutura repete a cena 3D em WebGL com shaders próprios, as animações dirigidas no Theatre.js e o conteúdo isolado em arquivos de dados. Serviu como exercício de reaproveitar uma arquitetura de front-end trocando apenas o acervo e a identidade visual."
+    },
+    {
+      "id": "automacao-geap",
+      "featured": false,
+      "categories": ["Back-end & APIs", "Conceitos & Especialidades"],
+      "kicker": "RPA · NestJS + Playwright",
+      "title": "Automação GEAP",
+      "caption": "Robô que mantém uma sessão de Chrome viva em VPS, extrai dados do portal e gera relatórios em PDF e Word.",
+      "image": "",
+      "alt": "Painel de automação GEAP",
+      "company": { "name": "Projeto autoral", "logo": "", "url": "" },
+      "links": [
+        { "label": "Site", "url": "https://automa-o-g.vercel.app" }
+      ],
+      "summary": "Automação de rotinas de um portal corporativo, com agendamento, importação de planilhas e exportação de relatórios.",
+      "techs": ["NestJS", "Playwright", "Prisma", "PostgreSQL", "React", "Vite", "Tailwind CSS", "Recharts"],
+      "description": "O projeto automatiza o que antes era feito à mão em um portal corporativo. Um Chrome persistente roda em uma VPS com Xvfb e NoVNC, controlado pelo Playwright em modo CDP, o que permite manter a sessão autenticada entre execuções.\n\nO back-end em NestJS agenda as rotinas com @nestjs/schedule, lê planilhas com xlsx e grava o resultado no PostgreSQL (Neon) via Prisma. O front-end em React consulta esses dados, exibe gráficos com Recharts e monta relatórios em .docx e PDF no próprio navegador. Em produção tudo fica atrás de um Nginx, com PM2 cuidando dos processos."
+    },
+    {
+      "id": "aiox-opencode-adapter",
+      "featured": false,
+      "categories": ["Conceitos & Especialidades", "Back-end & APIs"],
+      "kicker": "Ferramenta · Node.js + OpenCode",
+      "title": "AIOX OpenCode Adapter",
+      "caption": "Pacote que instala os 13 agentes do framework AIOX globalmente no OpenCode, com validação e testes.",
+      "image": "",
+      "alt": "Página do pacote aiox-opencode-adapter no npm",
+      "company": { "name": "Projeto autoral", "logo": "", "url": "" },
+      "links": [
+        { "label": "npm", "url": "https://www.npmjs.com/package/aiox-opencode-adapter" },
+        { "label": "Repositório", "url": "https://github.com/exdrama23/aiox-opencode-adapter" }
+      ],
+      "summary": "CLI que leva o framework de agentes AIOX para o OpenCode em qualquer projeto, sem configuração manual.",
+      "techs": ["Node.js", "OpenCode", "MCP", "Jest", "GitHub Actions", "npm"],
+      "description": "O adapter resolve uma fricção concreta: usar os agentes do AIOX no OpenCode exigia copiar arquivos e ajustar configuração em cada projeto. O pacote instala tudo globalmente por um comando, incluindo os 13 agentes especializados, templates e plugins.\n\nO código inclui uma camada de compatibilidade com as versões do OpenCode, um script que valida os manifests dos agentes e testes em Jest rodando no GitHub Actions. A documentação é publicada em português e inglês, e o pacote é versionado no npm com um plugin que avisa quando há atualização."
+    },
+    {
+      "id": "aether-os",
+      "featured": false,
+      "categories": ["Front-end & UI", "Conceitos & Especialidades"],
+      "kicker": "Web desktop · React + Vite",
+      "title": "Aether OS",
+      "caption": "Um Linux de navegador com janelas, terminal, editor de código, player de música e arquivos em IndexedDB.",
+      "image": "",
+      "alt": "Área de trabalho do Aether OS",
+      "company": { "name": "Projeto autoral", "logo": "", "url": "" },
+      "links": [
+        { "label": "Site", "url": "https://aether-os-psi-beryl.vercel.app" }
+      ],
+      "summary": "Sistema operacional fictício no navegador, usado como portfólio interativo com apps reais.",
+      "techs": ["React", "TypeScript", "Vite", "Monaco Editor", "xterm.js", "Zustand", "Tailwind CSS", "IndexedDB", "PWA"],
+      "description": "O Aether OS simula um desktop Linux no navegador, inspirado em Hyprland, KDE e GNOME. Cada aplicativo é um componente de verdade: editor com Monaco, terminal com xterm.js, navegador, arquivos, notas, calculadora, player de música e loja.\n\nO gerenciador de janelas controla foco, arraste, redimensionamento e layouts de encaixe, enquanto o sistema de arquivos persiste em IndexedDB. O estado global fica no Zustand, há diálogo de permissões para recursos sensíveis e o conjunto é instalável como PWA. Os testes de componentes rodam em Vitest."
+    },
+    {
+      "id": "acessoia",
+      "featured": false,
+      "categories": ["IA & Dados", "Back-end & APIs"],
+      "kicker": "IA assistiva · React + Node.js",
+      "title": "AcessoIA",
+      "caption": "Assistente que responde dúvidas de acesso com busca semântica, classificação de intenção e resposta em voz.",
+      "image": "",
+      "alt": "Interface de chat do AcessoIA",
+      "company": { "name": "Projeto autoral", "logo": "", "url": "" },
+      "links": [
+        { "label": "Site", "url": "https://ia-acesso.vercel.app" }
+      ],
+      "summary": "Chat de suporte com RAG sobre uma base própria, embeddings locais e fallback entre provedores de IA.",
+      "techs": ["React", "TypeScript", "Express", "Prisma", "PostgreSQL", "Redis", "Gemini", "OpenAI", "Transformers.js", "MediaPipe"],
+      "description": "O AcessoIA foi feito para responder perguntas repetitivas de acesso sem depender sempre de um modelo grande. O back-end classifica a intenção da mensagem, busca trechos relevantes em uma base de conhecimento e só então monta a resposta, com cache em Redis para perguntas frequentes.\n\nOs embeddings podem ser gerados localmente com Transformers.js e ONNX, e há integrações com Gemini, OpenAI e OpenRouter quando a resposta exige mais contexto. O painel administrativo permite acompanhar métricas, revisar conteúdo e manter a base de FAQ, enquanto o front-end reúne chat, calendário e uma cena 3D feita com React Three Fiber."
+    },
+    {
+      "id": "flowgen",
+      "featured": false,
+      "categories": ["IA & Dados", "Front-end & UI"],
+      "kicker": "SaaS de conteúdo · Next.js + OpenAI",
+      "title": "Flowgen",
+      "caption": "Gerador de conteúdo com login, histórico, limites de uso por plano e exportação em PDF.",
+      "image": "",
+      "alt": "Painel do gerador de conteúdo Flowgen",
+      "company": { "name": "Projeto autoral", "logo": "", "url": "" },
+      "links": [
+        { "label": "Site", "url": "https://testando-o-aiox-nine.vercel.app" }
+      ],
+      "summary": "Aplicação de geração de conteúdo com autenticação, histórico pesquisável e controle de cota.",
+      "techs": ["Next.js", "React", "Supabase", "PostgreSQL", "OpenAI", "React Hook Form", "Valibot", "Tailwind CSS"],
+      "description": "O Flowgen é uma aplicação completa de geração de conteúdo: cadastro, confirmação de e-mail, recuperação de senha e uma área logada com geração, histórico filtrável, detalhe do conteúdo e perfil. A autenticação usa Supabase com SSR, e os formulários são validados com Valibot e React Hook Form.\n\nA geração passa por uma rota de API que conversa com a OpenAI, e um segundo endpoint controla a cota de uso por usuário. O histórico guarda o que foi gerado, permite busca e filtros, e cada item pode ser exportado em PDF no servidor com @react-pdf/renderer."
+    },
+    {
+      "id": "vivaju",
+      "featured": false,
+      "categories": ["Front-end & UI", "Back-end & APIs"],
+      "kicker": "Guia da cidade · React + Node.js",
+      "title": "VivaJu",
+      "caption": "Guia digital de comércios, eventos, culinária e pontos turísticos, com mapa, chat e painel da prefeitura.",
+      "image": "",
+      "alt": "Página inicial do guia VivaJu",
+      "company": { "name": "Projeto autoral", "logo": "", "url": "" },
+      "links": [
+        { "label": "Site", "url": "https://vivaju.vercel.app" },
+        { "label": "Repositório", "url": "https://github.com/exdrama23/vivaju" }
+      ],
+      "summary": "Guia da cidade que reúne comércios, eventos e pontos turísticos em um só lugar, com mapa interativo e moderação.",
+      "techs": ["React", "TypeScript", "Vite", "Express", "Prisma", "PostgreSQL", "Socket.io", "Leaflet", "Recharts", "Lottie"],
+      "description": "O VivaJu funciona como um guia da cidade: comércios, restaurantes, estacionamentos, eventos e pontos turísticos ficam catalogados por categoria, com busca, filtros e sugestões de lugares próximos.\n\nO mapa usa Leaflet com marcadores e popups próprios, e a navegação por categoria reaproveita os mesmos cartões em carrosséis. O back-end em Express com Prisma e PostgreSQL guarda o catálogo e as sugestões enviadas pelos moradores, com autenticação JWT, argon2 e limite de requisições. Há ainda chat com Socket.io, notificações, tarefas agendadas com node-cron e um painel separado para a prefeitura revisar o conteúdo."
+    },
+    {
+      "id": "carla-levita",
+      "featured": false,
+      "categories": ["Front-end & UI"],
+      "kicker": "Site institucional · Tailwind CSS",
+      "title": "Carla Levita",
+      "caption": "Landing de um centro de treinamento de squash e beach tennis, com história, treinos, planos e contato.",
+      "image": "",
+      "alt": "Página inicial do site Carla Levita",
+      "company": { "name": "Projeto autoral", "logo": "", "url": "" },
+      "links": [
+        { "label": "Site", "url": "https://site-carla-levita.vercel.app" }
+      ],
+      "summary": "Site institucional para uma academia de squash e beach tennis, com apresentação da fundadora e planos.",
+      "techs": ["HTML", "CSS", "JavaScript", "Tailwind CSS"],
+      "description": "O site apresenta o centro de treinamento de squash e beach tennis em uma página longa, com seções de história, apresentação da fundadora, modalidades, planos e academia.\n\nA identidade visual foi construída sobre uma paleta própria configurada no Tailwind, com tipografia de destaque e imagens em tela cheia. O contato e o agendamento de aula experimental ficam sempre acessíveis, e o layout é responsivo do celular ao desktop."
+    },
+    {
+      "id": "dudix",
+      "featured": false,
+      "categories": ["Front-end & UI", "Conceitos & Especialidades"],
+      "kicker": "Página interativa · anime.js",
+      "title": "Para Dudix",
+      "caption": "Cena interativa com máscara de água, barra de progresso e explosão de corações ao final.",
+      "image": "",
+      "alt": "Cena interativa da página Para Dudix",
+      "company": { "name": "Projeto autoral", "logo": "", "url": "" },
+      "links": [
+        { "label": "Site", "url": "https://dudix.vercel.app" }
+      ],
+      "summary": "Uma página de presente que conduz o visitante por uma animação até revelar um poema.",
+      "techs": ["HTML", "CSS", "JavaScript", "anime.js", "Tailwind CSS"],
+      "description": "A página foi feita como um presente: ao clicar em começar, uma animação preenche o nome com uma máscara de água, uma barra de progresso avança e uma explosão de corações abre caminho para o poema.\n\nAs transições são orquestradas com anime.js e CSS, com estados de início e reinício controlados por JavaScript. É um exercício curto de narrativa visual, timing e uso de máscaras em SVG."
+    },
+    {
+      "id": "app-previsao",
+      "featured": false,
+      "categories": ["Front-end & UI", "Back-end & APIs"],
+      "kicker": "Dados meteorológicos · JavaScript + Node.js",
+      "title": "WeatherSphere",
+      "caption": "Dashboard meteorológico com globo 3D, camadas de temperatura, chuva e vento para cidades do mundo.",
+      "image": "",
+      "alt": "Dashboard meteorológico com globo 3D",
+      "company": { "name": "Projeto autoral", "logo": "", "url": "" },
+      "links": [
+        { "label": "Site", "url": "https://app-previsao-sable.vercel.app" }
+      ],
+      "summary": "Painel que cruza dados de temperatura, precipitação e vento em um globo interativo.",
+      "techs": ["JavaScript", "Express", "OpenWeatherMap API", "WebGL", "HTML", "CSS"],
+      "description": "O WeatherSphere mostra o clima de várias cidades ao mesmo tempo. O globo 3D alterna entre camadas de temperatura, precipitação e vento, com pontos posicionados por latitude e longitude sobre dados atualizados em tempo real.\n\nO servidor em Express faz o proxy da OpenWeatherMap, mantém cache em memória e evita expor a chave no cliente. Ao lado do globo, uma tabela compara mais de dez países, e a busca sugere cidades enquanto o usuário digita. O tema claro e escuro alternam sem recarregar a página."
+    },
+    {
+      "id": "dashboard-ixc",
+      "featured": false,
+      "categories": ["Front-end & UI", "Back-end & APIs"],
+      "kicker": "Dashboard ISP · React + IXC",
+      "title": "Dashboard IXC",
+      "caption": "Painel de indicadores de provedor que consome a API do IXC: base, inadimplência, LTV e faturamento.",
+      "image": "",
+      "alt": "Dashboard de indicadores de provedor",
+      "company": { "name": "Projeto autoral", "logo": "", "url": "" },
+      "links": [
+        { "label": "Site", "url": "https://dashboard-ixc.vercel.app" }
+      ],
+      "summary": "Painel que resume a saúde financeira de um provedor a partir dos dados do sistema IXC.",
+      "techs": ["React", "Vite", "Tailwind CSS", "Chart.js", "Express", "Node.js", "IXC API"],
+      "description": "O Dashboard IXC transforma a base de clientes de um provedor em indicadores de acompanhamento. O back-end em Express encapsula as chamadas à API do IXC em um serviço próprio e expõe rotas para clientes, inadimplentes, LTV, valor total, valor pago no mês, novos usuários no ano e tempo médio na base.\n\nO front-end em React consome essas rotas e monta os gráficos com Chart.js, com formatação de datas por dayjs e layout responsivo em Tailwind. A separação deixa a regra de negócio no servidor e mantém as credenciais da integração fora do navegador."
+    },
+    {
+      "id": "ara",
+      "featured": false,
+      "categories": ["IA & Dados", "Conceitos & Especialidades"],
+      "kicker": "Acessibilidade · HTML + JavaScript",
+      "title": "ARA",
+      "caption": "Assistente de acessibilidade com leitura em voz, Libras, alto contraste e filtros para daltonismo.",
+      "image": "",
+      "alt": "Interface da assistente de acessibilidade ARA",
+      "company": { "name": "Projeto autoral", "logo": "", "url": "" },
+      "links": [
+        { "label": "Site", "url": "https://ara-ia.vercel.app" }
+      ],
+      "summary": "Assistente conversacional pensada para diferentes barreiras de acesso, com ajustes visuais e de leitura.",
+      "techs": ["HTML", "CSS", "JavaScript", "Tailwind CSS", "Speech Synthesis", "VLibras"],
+      "description": "A ARA começa perguntando qual barreira o visitante enfrenta — visão, audição, mobilidade ou compreensão — e adapta a conversa a partir disso. As respostas podem ser lidas em voz alta pela Web Speech API, e o site integra o VLibras para tradução em Libras.\n\nO painel de acessibilidade reúne alto contraste, aumento de fonte em cinco níveis e filtros para protanopia, deuteranopia e tritanopia. A navegação por teclado é documentada na própria interface, com atalhos para percorrer elementos, ativar botões e fechar modais. É um projeto de estudo sobre acessibilidade como requisito de produto, não como camada final."
+    },
+    {
+      "id": "squad-kc",
+      "featured": false,
+      "categories": ["Front-end & UI", "IA & Dados"],
+      "kicker": "Landing + chatbot · React + shadcn/ui",
+      "title": "Squad KC",
+      "caption": "Página de apresentação de um squad de Mato Grosso do Sul com chatbot de ajuda e componentes shadcn/ui.",
+      "image": "",
+      "alt": "Página inicial do Squad KC",
+      "company": { "name": "Projeto autoral", "logo": "", "url": "" },
+      "links": [
+        { "label": "Site", "url": "https://squad-kc-ms-ia-de-ajuda.vercel.app" }
+      ],
+      "summary": "Landing de divulgação de um squad de IA com atendimento por chatbot.",
+      "techs": ["React", "TypeScript", "Vite", "Tailwind CSS", "shadcn/ui", "Radix UI", "TanStack Query"],
+      "description": "O Squad KC é uma landing de página única para apresentar um squad de inteligência artificial de Mato Grosso do Sul. A interface foi montada com shadcn/ui sobre Radix, com seções de apresentação, serviços e contato.\n\nUm chatbot embutido responde às dúvidas mais comuns sem tirar o visitante da página. O projeto também serviu para experimentar o conjunto completo de componentes do shadcn, formulários com React Hook Form e validação por Zod."
+    },
+    {
+      "id": "paleta-de-cores",
+      "featured": false,
+      "categories": ["Front-end & UI", "Conceitos & Especialidades"],
+      "kicker": "Utilitário · ColorThief",
+      "title": "Paleta de Cores",
+      "caption": "Extrai as 12 cores dominantes de qualquer imagem e copia o código HEX com um clique.",
+      "image": "",
+      "alt": "Extrator de paleta de cores a partir de imagem",
+      "company": { "name": "Projeto autoral", "logo": "", "url": "" },
+      "links": [
+        { "label": "Site", "url": "https://paleta-de-cor-imagem.vercel.app" },
+        { "label": "Repositório", "url": "https://github.com/exdrama23/PaletaDeCorImagem" }
+      ],
+      "summary": "Ferramenta que lê uma imagem no navegador e devolve uma paleta pronta para uso.",
+      "techs": ["HTML", "Tailwind CSS", "JavaScript", "ColorThief"],
+      "description": "A ferramenta recebe uma imagem por upload, desenha em um canvas e usa o ColorThief para calcular as 12 cores dominantes. Cada amostra aparece como um bloco com o valor HEX, pronto para copiar.\n\nTudo roda no navegador, sem enviar o arquivo para servidor. O fundo da página reage à paleta gerada, e a interface usa animações leves de flutuação para dar movimento sem atrapalhar a leitura das cores."
+    },
+    {
+      "id": "portfolio-alec",
+      "featured": false,
+      "categories": ["Front-end & UI"],
+      "kicker": "Portfólio · HTML + CSS",
+      "title": "Portfólio Alec",
+      "caption": "Portfólio pessoal com objetivo profissional, habilidades, certificados e projetos em uma página.",
+      "image": "",
+      "alt": "Página inicial do portfólio de Alec Vinícius",
+      "company": { "name": "Projeto autoral", "logo": "", "url": "" },
+      "links": [
+        { "label": "Site", "url": "https://portiflio-alec.vercel.app" },
+        { "label": "Repositório", "url": "https://github.com/exdrama23/PortiflioAlec" }
+      ],
+      "summary": "Portfólio estático com trajetória, habilidades e uma galeria de certificados.",
+      "techs": ["HTML", "CSS", "JavaScript", "Boxicons"],
+      "description": "Um portfólio de página única com navegação por âncoras entre objetivo profissional, habilidades, certificados e projetos. A galeria de certificados abre as imagens em tamanho maior, e o topo tem um atalho para voltar ao início.\n\nO visual aposta em fundo escuro, tipografia grande e um desfoque em camada para dar profundidade sem imagens pesadas. É a versão anterior do portfólio que hoje você está navegando."
+    },
+    {
+      "id": "inovase-forms",
+      "featured": false,
+      "categories": ["Front-end & UI", "Back-end & APIs"],
+      "kicker": "Gestão esportiva · HTML + JavaScript",
+      "title": "Inovase Forms",
+      "caption": "Interface de plataforma de treinamento com agenda de horários, pagamentos e envio de documentos.",
+      "image": "",
+      "alt": "Tela de formulário da plataforma Inovase",
+      "company": { "name": "Projeto autoral", "logo": "", "url": "" },
+      "links": [
+        { "label": "Site", "url": "https://inovase-forms.vercel.app" }
+      ],
+      "summary": "Front-end de uma plataforma de gestão para centro de treinamento esportivo.",
+      "techs": ["HTML", "Tailwind CSS", "JavaScript", "PWA"],
+      "description": "O Inovase Forms reúne, em uma interface só, o que um aluno precisa para acompanhar o treino: horários disponíveis, pagamentos e envio de documentos. O layout foi desenhado primeiro para o celular, com navegação simples e formulários curtos.\n\nA entrega é um front-end estático com manifest de PWA, organizado em HTML, CSS e JavaScript por módulo. Serve como base visual e de fluxo para a versão integrada a um back-end."
+    },
+    {
+      "id": "mini-jarvis",
+      "featured": false,
+      "categories": ["IA & Dados", "Front-end & UI"],
+      "kicker": "Assistente 3D · Spline + APIs de IA",
+      "title": "Mini J.A.R.V.I.S",
+      "caption": "Assistente de voz com avatar 3D no Spline, respostas via OpenRouter e narração com ElevenLabs.",
+      "image": "",
+      "alt": "Avatar 3D do assistente Mini J.A.R.V.I.S",
+      "company": { "name": "Projeto autoral", "logo": "", "url": "" },
+      "links": [
+        { "label": "Site", "url": "https://mini-j-a-r-v-i-s.vercel.app" }
+      ],
+      "summary": "Experimento de assistente pessoal com avatar animado, voz sintetizada e respostas geradas por IA.",
+      "techs": ["HTML", "CSS", "JavaScript", "Spline", "OpenRouter", "ElevenLabs", "Web Speech API"],
+      "description": "O Mini J.A.R.V.I.S coloca um avatar 3D animado no centro da tela e alterna entre os estados de espera e fala conforme o assistente responde. A cena é carregada do Spline, e o texto aparece junto com a narração.\n\nAs respostas vêm da OpenRouter, a voz é sintetizada pela ElevenLabs e o reconhecimento de fala usa a Web Speech API. As chaves ficam no topo do script e precisam ser preenchidas para o assistente funcionar de ponta a ponta — é um laboratório de integração de APIs de IA no navegador, não um produto final."
+    },
+    {
+      "id": "pesquisa-de-imagens",
+      "featured": false,
+      "categories": ["IA & Dados"],
+      "kicker": "Visão computacional · Python + Flask",
+      "title": "Pesquisa de Imagens",
+      "caption": "Busca imagens por classe em um dataset local, com backend em Python e galeria em modal.",
+      "image": "",
+      "alt": "Galeria de resultados da pesquisa de imagens",
+      "company": { "name": "Projeto autoral", "logo": "", "url": "" },
+      "links": [
+        { "label": "Site", "url": "https://ia-de-pesquisa.vercel.app" }
+      ],
+      "summary": "Interface de consulta a um acervo de imagens organizado por classe.",
+      "techs": ["Python", "Flask", "HTML", "CSS", "JavaScript"],
+      "description": "O projeto explora um acervo de imagens separado por classes: o usuário digita o nome da classe e a galeria é montada com os arquivos correspondentes. Clicar em uma imagem abre um modal com a versão ampliada.\n\nO back-end em Python serve os dados e os arquivos, e o front-end é HTML, CSS e JavaScript puros. Os datasets de pesquisa e de tomates usados nos testes ficam no próprio repositório, o que torna o experimento reproduzível sem serviços externos."
+    },
+    {
+      "id": "api-github",
+      "featured": false,
+      "categories": ["Front-end & UI", "Back-end & APIs"],
+      "kicker": "Consumo de API · React + axios",
+      "title": "GitHub Finder",
+      "caption": "Consulta a API pública do GitHub e mostra nome, bio e avatar de qualquer usuário.",
+      "image": "",
+      "alt": "Busca de perfil na API do GitHub",
+      "company": { "name": "Projeto autoral", "logo": "", "url": "" },
+      "links": [
+        { "label": "Site", "url": "https://api-github-mu-five.vercel.app" }
+      ],
+      "summary": "Aplicação pequena para buscar perfis do GitHub pelo nome de usuário.",
+      "techs": ["React", "TypeScript", "Vite", "axios", "GitHub API"],
+      "description": "Uma aplicação de uma tela só: o usuário digita um nome de usuário, o axios consulta a API pública do GitHub e a interface exibe nome, bio e avatar. Enquanto a resposta não chega, os campos mostram um estado de carregamento.\n\nO projeto foi feito para praticar consumo de API tipado, estados de requisição e tratamento de resposta no React com TypeScript, sem biblioteca de estado ou roteamento."
     }
   ]
 }

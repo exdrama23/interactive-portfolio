@@ -3,33 +3,22 @@
 import * as React from "react"
 import type { MotionValue } from "framer-motion"
 
-// A photo carousel seen through a curved lens. The cards sit on one WebGL canvas:
-// the middle one reads flat, and the further a card travels from the centre, the
-// taller and more bent it grows, with a fringe of chromatic split at the rim.
-// Drag, flick, arrow keys or the buttons; it settles on a spring and loops.
-
 export type LensSlide = {
   title: string
-  /** Small line above the title, e.g. a place or a category. */
   kicker?: string
-  /** One short line under the title. */
   caption?: string
-  /** Photo URL. Portrait (about 4:5) reads best. Remote URLs need CORS. */
   image: string
   alt?: string
 }
 
 export type CurvedLensCarouselProps = {
   slides: LensSlide[]
-  /** Small label, top left. */
   label?: React.ReactNode
-  /** How hard the lens bends the outer cards. 0 is flat. */
+  /** Dica à direita da barra superior (aceita um link, por exemplo). */
+  topRight?: React.ReactNode
   bend?: number
-  /** Stage colour behind the cards. */
   background?: string
-  /** Text colour on the stage. */
   ink?: string
-  /** Stage height. Keep it a definite length; percentages collapse once installed. */
   height?: string
   className?: string
   onChange?: (index: number) => void
@@ -50,45 +39,41 @@ export type CurvedLensCarouselProps = {
 }
 
 // #region motion
-/** Wraps any index into 0..n-1. */
 export function wrap(i: number, n: number): number {
   return n > 0 ? ((i % n) + n) % n : 0
 }
 
-/** Signed distance of slide i from the scroll position, taking the short way round a loop of n. */
 export function offsetOf(i: number, pos: number, n: number): number {
   if (n <= 0) return 0
   const d = wrap(i - pos + n / 2, n) - n / 2
   return d
 }
 
-/** Where a flick comes to rest: the nearest whole slide past the release, at most `max` away. */
 export function restFor(pos: number, velocity: number, max = 3): number {
   const throwTo = pos + Math.max(-max, Math.min(max, velocity * 0.18))
   return Math.round(throwTo)
 }
 
-/** One step of a critically damped spring (slides, slides/s, seconds). */
 export function springStep(pos: number, vel: number, target: number, dt: number, omega = 11): [number, number] {
   const a = (target - pos) * omega * omega - vel * 2 * omega
   const v = vel + a * dt
   return [pos + v * dt, v]
 }
 
-/** Card size in px for a stage of w × h: portrait cards, smaller share of a wide stage. */
+/** Proporção do cartão: paisagem 16:10, para prints de tela sem corte. */
+export const CARD_ASPECT = 1.6
+
 export function cardSize(w: number, h: number): [number, number] {
-  const cw = Math.min(w < 640 ? w * 0.56 : w * 0.22, h * 0.34)
-  return [Math.round(cw), Math.round(cw * 1.25)]
+  const cw = Math.min(w < 640 ? w * 0.82 : w * 0.27, h * 0.62)
+  return [Math.round(cw), Math.round(cw / CARD_ASPECT)]
 }
 
-/** "01" style counter. */
 export function pad2(n: number): string {
   return n < 10 ? "0" + n : String(n)
 }
 
 const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v)
 const easeOut3 = (t: number) => 1 - (1 - t) ** 3
-/** Same curve the reference intro uses on the grow phase. */
 const easeInOutExpo = (t: number) =>
   t <= 0 ? 0 : t >= 1 ? 1 : t < 0.5 ? 2 ** (20 * t - 10) / 2 : (2 - 2 ** (-20 * t + 10)) / 2
 // #endregion
@@ -115,11 +100,23 @@ const FRAG =
   "varying vec2 vUv;varying float vX;" +
   "float box(vec2 q,vec2 b,float r){vec2 d=abs(q)-b+r;return length(max(d,0.))+min(max(d.x,d.y),0.)-r;}" +
   "void main(){" +
-  "float a=uSize.x/uSize.y;vec2 uv=vUv-.5;" +
-  "if(uAspect>a)uv.x*=a/uAspect;else uv.y*=uAspect/a;" +
-  "uv=uv/1.12+.5;uv.x+=uShift;" +
+  "float a=uSize.x/uSize.y;vec2 p=vUv-.5;" +
   "float ca=(.0012+.0045*vX*vX)*(1.+abs(uVel)*1.2);" +
-  "vec3 c=vec3(texture2D(uTex,uv+vec2(ca,0.)).r,texture2D(uTex,uv).g,texture2D(uTex,uv-vec2(ca,0.)).b);" +
+  // Fundo (matte): o print esticado cobrindo o cartão, desfocado e escurecido.
+  "vec2 cb=p;" +
+  "if(uAspect>a)cb.x*=a/uAspect;else cb.y*=uAspect/a;" +
+  "cb=cb/1.2+.5;cb.x+=uShift*.5;" +
+  "vec3 bg=texture2D(uTex,cb+vec2(.012,.008)).rgb+texture2D(uTex,cb-vec2(.012,.008)).rgb" +
+  "+texture2D(uTex,cb+vec2(-.010,.014)).rgb+texture2D(uTex,cb+vec2(.010,-.014)).rgb;" +
+  "bg*=.25*.27;" +
+  // Frente: a imagem INTEIRA (contain com 6% de respiro), preserve o aspecto.
+  "float fk=min(1.,a/uAspect);" +
+  "vec2 he=vec2(.5*(uAspect*fk/a),.5*fk)*.965;" +
+  "vec2 cu=p*(.5/he)+.5;" +
+  "vec3 fg=vec3(texture2D(uTex,cu+vec2(ca,0.)).r,texture2D(uTex,cu).g,texture2D(uTex,cu-vec2(ca,0.)).b);" +
+  "float fd=box(p*uSize,he*uSize,8.);" +
+  "float mk=smoothstep(1.4,-1.4,fd);" +
+  "vec3 c=mix(bg,fg,mk);" +
   "c=mix(vec3(.11,.11,.12),c,uReady);" +
   "c*=1.-.42*min(1.,vX*vX);" +
   "float d=box((vUv-.5)*uSize,uSize*.5,14.);" +
@@ -143,6 +140,9 @@ const CSS =
   ".clc-canvas:active{cursor:grabbing}" +
   ".clc-top{position:absolute;left:clamp(20px,4vw,48px);right:clamp(20px,4vw,48px);top:clamp(18px,3.4vw,36px);display:flex;justify-content:space-between;align-items:center;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--clc-ink);opacity:.62;pointer-events:none}" +
   ".clc-top b{font-weight:500;letter-spacing:.14em}" +
+  // No mobile o botão do menu (hamburguer) fica fixo no canto superior direito;
+  // recua a barra para o link "Ver todos" não ficar embaixo dele.
+  "@media (max-width:767px){.clc-top{right:72px}}" +
   ".clc-copy{position:absolute;left:clamp(20px,4vw,48px);bottom:clamp(22px,4vw,44px);max-width:min(560px,70%);color:var(--clc-ink);pointer-events:none}" +
   ".clc-kicker{display:block;font-size:11px;letter-spacing:.24em;text-transform:uppercase;opacity:.55;margin-bottom:10px}" +
   ".clc-title{font-family:var(--clc-font);font-weight:400;font-size:clamp(44px,7.2vw,104px);line-height:.92;letter-spacing:-.02em;margin:0;display:block}" +
@@ -176,11 +176,13 @@ const CSS =
   ".clc-close:hover{background:linear-gradient(180deg,rgba(255,255,255,.24),rgba(255,255,255,.06));border-color:rgba(255,255,255,.32)}" +
   ".clc-close:focus-visible{outline:2px solid var(--clc-ink);outline-offset:3px}" +
   ".clc-root[data-focus] .clc-close{opacity:1;pointer-events:auto;transform:none}" +
+  // No mobile o botão de fechar não pode ficar sob o botão do menu (hamburguer).
+  "@media (max-width:767px){.clc-close{right:78px}}" +
   ".clc-focus-info{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;transition:opacity .45s ease .12s}" +
   ".clc-root[data-focus] .clc-focus-info{opacity:1}" +
   ".clc-root[data-focus] .clc-top,.clc-root[data-focus] .clc-copy,.clc-root[data-focus] .clc-ctl{opacity:0;pointer-events:none}" +
   ".clc-root[data-entry] .clc-ctl,.clc-root[data-entry] .clc-top,.clc-root[data-entry] .clc-copy{pointer-events:none}" +
-  ".clc-fallback{position:absolute;left:50%;top:50%;width:min(62vw,360px);aspect-ratio:4/5;transform:translate(-50%,-50%);object-fit:cover;border-radius:14px;max-width:none}" +
+  ".clc-fallback{position:absolute;left:50%;top:50%;width:min(62vw,360px);aspect-ratio:16/10;transform:translate(-50%,-50%);object-fit:contain;background:#0b0b0c;border-radius:14px;max-width:none}" +
   ".clc-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}" +
   "@media (max-width:640px){.clc-copy{max-width:calc(100% - 40px);bottom:96px}.clc-ctl{flex-direction:row;align-items:center;left:20px;justify-content:space-between}.clc-bar{width:96px}.clc-top span{display:none}.clc-top b{font-size:10px;letter-spacing:.12em}}" +
   "@media (prefers-reduced-motion:reduce){.clc-ch,.clc-cap,.clc-bar>span,.clc-btn{transition:opacity .2s ease}.clc-ch{transform:none}.clc-cap{transform:none}}"
@@ -201,7 +203,6 @@ function shader(gl: WebGLRenderingContext, type: number, src: string) {
   return s
 }
 
-/** A (segX × segY) grid of quads as triangles, positions 0..1. */
 function grid(segX: number, segY: number): Float32Array {
   const out: number[] = []
   for (let y = 0; y < segY; y++)
@@ -231,7 +232,6 @@ function Chars({ text, base }: { text: string; base: number }) {
   )
 }
 
-/** The caption block. Mounted fresh per slide, then flipped on next frame so the letters rise. */
 function Copy({ slide, shown }: { slide: LensSlide; shown: boolean }) {
   const [on, setOn] = React.useState(false)
   React.useEffect(() => {
@@ -255,6 +255,7 @@ function Copy({ slide, shown }: { slide: LensSlide; shown: boolean }) {
 export default function CurvedLensCarousel({
   slides,
   label = "Field Atlas",
+  topRight,
   bend = 0.55,
   background = "#0e0e10",
   ink = "#f3ede4",
@@ -319,10 +320,13 @@ export default function CurvedLensCarousel({
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([28, 28, 30, 255]))
       for (const [p, v] of [[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]])
         gl.texParameteri(gl.TEXTURE_2D, p, v)
-      const entry = { t, aspect: 0.8, ready: false }
+      const entry = { t, aspect: CARD_ASPECT, ready: false }
+      // Projeto ainda sem capa: mantém o cartão escuro, sem disparar request.
+      if (!s.image) return entry
       const img = new Image()
       if (!s.image.startsWith("data:")) img.crossOrigin = "anonymous"
       img.decoding = "async"
+      img.fetchPriority = "low"
       img.onload = () => {
         if (disposed) return
         gl.bindTexture(gl.TEXTURE_2D, t)
@@ -335,7 +339,6 @@ export default function CurvedLensCarousel({
       return entry
     })
 
-    // Stage size, measured on resize only; the frame loop reads these numbers.
     let W = 1, H = 1, dpr = 1, cw = 1, ch = 1, gap = 1
     let pos = 0, vel = 0, target = 0
 
@@ -405,14 +408,26 @@ export default function CurvedLensCarousel({
       const riseOfCard = (i: number) => (ready ? 1 : animating ? riseOf(i, t) : 0)
       const step = cw + gap
       // Com informações ao redor, o cartão fica menor para abrir espaço.
-      const focusH = Math.min(
-        H * (hasFocusInfo ? (W < 1024 ? 0.38 : 0.52) : 0.8),
+      // A ficha lateral (ProjectFocusInfo) só aparece a partir de 1280px;
+      // abaixo disso o cartão usa a mesma proporção da ficha inferior.
+      const sidePanel = W >= 1280
+      const maxFocusH = Math.min(
+        H * (hasFocusInfo ? (sidePanel ? 0.52 : 0.38) : 0.8),
         900,
       )
-      const focusW = Math.min(W * 0.86, focusH * aspect)
+      // Mantém 16:10 mesmo quando a largura é o limite (senão o cartão em foco
+      // virava quase quadrado e a imagem ficava com faixas sobrando).
+      const focusW = Math.min(W * 0.86, maxFocusH * aspect)
+      const focusH = focusW / aspect
+      // Metade da largura em foco: as colunas de texto usam isso para não
+      // invadir a imagem (antes era um valor fixo de 21svh, do cartão retrato).
+      const halfStr = `${Math.round(focusW / 2)}px`
+      if (root.style.getPropertyValue("--clc-half") !== halfStr) {
+        root.style.setProperty("--clc-half", halfStr)
+      }
       const lift = ((W < 640 ? 0.3 : 0.15) * H) / 2
-      // Em telas estreitas a ficha fica embaixo; sobe um pouco o cartão.
-      const focusInfoLift = hasFocusInfo && W < 1024 ? H * 0.21 : 0
+      // Em telas sem ficha lateral o cartão sobe para a ficha ficar embaixo.
+      const focusInfoLift = hasFocusInfo && !sidePanel ? H * 0.24 : 0
 
       gl.uniform2f(u.uRes, W, H)
       // No foco a lente se achata, para a imagem ampliada ficar reta.
@@ -741,7 +756,7 @@ export default function CurvedLensCarousel({
       <style>{CSS}</style>
       <div className="clc-glow" aria-hidden="true" />
       <canvas ref={canvasRef} className="clc-canvas" aria-hidden="true" />
-      {noGL ? <img className="clc-fallback" src={slide.image} alt={slide.alt ?? slide.title} /> : null}
+      {noGL && slide.image ? <img className="clc-fallback" src={slide.image} alt={slide.alt ?? slide.title} /> : null}
       <div className="clc-grain" aria-hidden="true" />
       {renderFocus ? (
         <div className="clc-focus-info">
@@ -750,7 +765,7 @@ export default function CurvedLensCarousel({
       ) : null}
       <div className="clc-top">
         <b>{label}</b>
-        <span>{hint}</span>
+        {topRight ?? <span>{hint}</span>}
       </div>
       <Copy key={index} slide={slide} shown={shown} />
       <div className="clc-ctl">

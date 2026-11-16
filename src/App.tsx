@@ -1,10 +1,9 @@
 import {BrowserRouter, Routes, Route} from 'react-router-dom';
 import './App.css'
 import Index from './pages/Index';
+import ProjetosTodos from './pages/projetos-todos';
 import { RouteTransitionProvider } from './components/loading';
 import { LoadingPreview } from './components/loading/loading-preview';
-// import Header from './components/Header';
-// import Footer from './components/Footer';
 
 
 function App() {
@@ -17,10 +16,9 @@ function App() {
           {import.meta.env.DEV && (
             <Route path='/__loading-preview' element={<LoadingPreview />} />
           )}
+          <Route path='/projetos' element={<ProjetosTodos />} />
           <Route path='*' element={<Index />} />
           <Route path='/' element={<Index />} />
-          {/* <Route path='/header' element={<Header/>} /> */}
-          {/* <Route path='/footer' element={<Footer/>} /> */}
         </Routes>
       </RouteTransitionProvider>
     </BrowserRouter>

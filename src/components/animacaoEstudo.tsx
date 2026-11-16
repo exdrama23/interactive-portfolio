@@ -21,7 +21,6 @@ const SphericalNavigationHeader: React.FC = () => {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
 
-  // Itens do menu
   const menuItems: Omit<MenuItem3D, 'mesh' | 'position'>[] = [
     { id: 'work', title: 'Work' },
     { id: 'about', title: 'About' },
@@ -33,7 +32,6 @@ const SphericalNavigationHeader: React.FC = () => {
   useEffect(() => {
     if (!containerRef.current) return;
 
-    // Setup Three.js
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x000000);
     
@@ -110,7 +108,6 @@ const SphericalNavigationHeader: React.FC = () => {
       scene.add(line);
     });
 
-    // Eventos do mouse
     const handleMouseMove = (event: MouseEvent) => {
       if (!containerRef.current) return;
       

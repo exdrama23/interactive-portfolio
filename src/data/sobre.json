@@ -15,7 +15,7 @@
     },
     {
       "side": "right",
-      "image": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1600&auto=format&fit=crop",
+      "image": "https://res.cloudinary.com/dtskn1ns3/image/upload/v1794845210/62f7e6b4-3a41-41e5-9e14-7d44f2db5a5f.png",
       "alt": "Estudante desenvolvendo aplicações web em um notebook",
       "body": "Com o incentivo da minha mãe, comecei minha jornada em Análise e Desenvolvimento de Sistemas no SENAI, onde descobri o desenvolvimento web e novas tecnologias. Em 2023, essa descoberta mudou meus planos e despertou uma nova paixão. Já em 2024, comecei a atuar como freelancer e encontrei um novo objetivo: construir meu próprio negócio, criando aplicações que resolvam problemas reais e transformem ideias em realidade.",
       "info": {
@@ -27,7 +27,7 @@
     },
     {
       "side": "left",
-      "image": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=1600&auto=format&fit=crop",
+      "image": "https://res.cloudinary.com/dtskn1ns3/image/upload/v1794847613/f17fa58f-052c-4389-b71b-eac14c64540d.png",
       "alt": "Tela com código de um sistema corporativo",
       "body": "Na ACESSO.NET, comecei a desenvolver sistemas corporativos para provedores de internet, trabalhando com protocolos como TR-069, TR-369 e TR-181. Entre frontend, backend e decisões arquiteturais, enfrentei desafios de escalabilidade, explorei novas tecnologias como Go e aprofundei meus conhecimentos em arquitetura de software.",
       "info": {
@@ -39,7 +39,7 @@
     },
     {
       "side": "right",
-      "image": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=1600&auto=format&fit=crop",
+      "image": "https://res.cloudinary.com/dtskn1ns3/image/upload/v1794845755/8f724a2d-da99-45a0-be82-ce02fe59b102.png",
       "alt": "Equipe trabalhando em uma startup",
       "body": "Além da carreira profissional, participei da criação de startups, desenvolvi projetos independentes e participei de hackathons. Também fundei a SSB junto a outros três sócios, buscando conectar inovação, soluções para o mercado e desenvolvimento profissional no ambiente universitário.",
       "info": {
@@ -63,8 +63,9 @@
     },
     {
       "side": "right",
-      "image": "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=1600&auto=format&fit=crop",
-      "alt": "Minha motivação continua sendo a mesma de quando programar era apenas uma brincadeira: a vontade de descobrir, construir e transformar ideias em algo real. Mesmo depois de tornar isso minha profissão, continuo me surpreendendo com cada novo conhecimento e me empolgando com as possibilidades que a tecnologia oferece.\n\nNas horas vagas, programar continua sendo meu hobby e uma das minhas formas favoritas de passar o tempo. Afinal, para mim, desenvolver vai muito além do trabalho: é uma atividade que ainda me diverte, principalmente ao ver uma ideia ganhar vida e se transformar em algo concreto.",
+      "image": "https://res.cloudinary.com/dtskn1ns3/image/upload/v1794846742/18830d6c-12a8-4398-afc1-a6be0da6e732.png",
+      "alt": "Grupo de pessoas colaborando em uma mesa de trabalho",
+      "body": "Programar começou como brincadeira e hoje é profissão, mas a vontade de descobrir, construir e transformar ideias em algo real continua a mesma. A cada novo conhecimento me surpreendo com as possibilidades que a tecnologia abre. Nas horas vagas, codar segue sendo meu hobby favorito — ver uma ideia ganhar vida e virar algo concreto ainda é o que mais me diverte.",
       "info": {
         "meta": "O que continua",
         "title": "A mesma motivação",
@@ -79,7 +80,7 @@
     "location": ["Brasil · remoto", "sistemas corporativos & produtos digitais"]
   },
   "social": [
-    { "label": "LinkedIn", "url": "https://www.linkedin.com/in/alec-vinicius/" },
+    { "label": "LinkedIn", "url": "https://linkedin.com/in/alec-vinicius-souza-carvalho-949918302/" },
     { "label": "Instagram", "url": "https://www.instagram.com/alecvinicius/" }
   ]
 }

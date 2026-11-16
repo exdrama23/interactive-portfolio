@@ -1,11 +1,5 @@
 "use client"
 
-// Pixel World Preloader v2 — High-Detail 16-Bit Edition
-// Combines the 3-monitor racing-chair programmer setup (black cat, cactus,
-// Monster & Red Bull cans, warm rim lighting) with the cozy bedroom details
-// (split AC unit, venetian blinds, bookshelves, framed posters, warm wood floor)
-// and seamlessly dives into the hero inside the center monitor.
-//
 // Estrutura da pasta:
 //   camera.ts                   -> curva da câmera, tempo das etapas, helpers
 //   pixel-scene.tsx             -> toda a arte (SVG) da cena
@@ -28,25 +22,15 @@ import {
 } from "./pixel-scene"
 
 export interface PixelWorldPreloaderProps {
-  /** Content revealed once the camera finishes diving into the center monitor. Defaults to AlecPortfolioHero. */
   children?: React.ReactNode
-  /** Run forever as a showcase loop. Defaults to false. */
   loop?: boolean
-  /** Real loading progress (0–100). Leave undefined to use the simulated load curve. */
   progress?: number
-  /** Total duration of the camera journey in ms. Defaults to 7800ms. */
   durationMs?: number
-  /** Show the minimalist HUD (progress count, scene label, skip button). Defaults to true. */
   hud?: boolean
-  /** Google Fonts stylesheet for pixel, script and mono faces. Pass null to skip. */
   fontHref?: string | null
-  /** Root container height (must be a definite length, never %). Defaults to "100svh". */
   height?: string
-  /** Callback fired once when the camera finishes merging into the Hero screen. */
   onComplete?: () => void
-  /** Callback fired when the final crossfade starts (page can be mounted behind it). */
   onRevealStart?: () => void
-  /** Extra root classes. */
   className?: string
 }
 
@@ -63,16 +47,9 @@ const FONT_PROBES = [
 const HOLD_MS = 380
 const FADE_MS = 650
 
-/**
- * The 200cqh camera world (sky + room + chair + CRT) as a memoized component.
- * It has no props, so the per-percent HUD updates in the parent never re-render
- * these hundreds of SVG nodes — the scene is built once and only transformed
- * through CSS variables.
- */
 const IntroScene = React.memo(function IntroScene() {
   return (
     <div className="pw-scene">
-      {/* TOP HALF (0 to 100cqh): Starry Night, Pixel Moon & City Skyline */}
       <div className="pw-sky">
         <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="pw-pixel-svg">
           {STARS.map((st, idx) => (
@@ -118,22 +95,18 @@ const IntroScene = React.memo(function IntroScene() {
         </div>
       </div>
 
-      {/* BOTTOM HALF (100cqh to 200cqh): High-Detail 16-bit Bedroom + 3-Monitor Setup */}
       <div className="pw-room-wrap">
         {/* Background room, bed, AC, shelves, desk, side monitors, cat, cans */}
         <PixelRoomBackgroundSvg />
 
-        {/* THE CENTER MONITOR SCREEN: Contains the exact Hero scaled via cqw/cqh */}
         <div className="pw-monitor-screen">
           <AlecPortfolioHero />
         </div>
 
-        {/* Foreground Programmer & Racing Chair (overlaps monitor bottom, glides down on zoom) */}
         <div className="pw-fg-chair-layer">
           <PixelProgrammerChairSvg />
         </div>
 
-        {/* Exterior Brick & Window Sill that fades away as the camera passes inside */}
         <div className="pw-exterior-mask">
           <ExteriorBuildingMaskSvg />
         </div>
@@ -172,15 +145,15 @@ export default function PixelWorldPreloader({
   // Em telas em pé a arte do quarto mantém a proporção 16:9 (ver preloader.css)
   // e o monitor central fica no centro do viewport: a câmera acompanha isso.
   const portraitRef = React.useRef(false)
-  // Evita reflow do hero a cada frame: só atualiza em passos de 0.5%.
-  const lastHeroWRef = React.useRef(-1)
+  // Liga as pausas das partículas só quando a cena começa a ampliar.
+  const zoomRef = React.useRef(false)
+  // Evita escrever a escala do hero no DOM a cada frame.
+  const heroKRef = React.useRef(-1)
 
-  // Apply camera CSS custom properties directly on rootRef (0 React re-renders per frame)
   const applyCameraVars = React.useCallback((normT: number) => {
     const el = rootRef.current
     if (!el) return
-    const portrait = portraitRef.current
-    const cam = pwCamera(normT, portrait)
+    const cam = pwCamera(normT, portraitRef.current)
     const pamp = pwClamp01(1 - (normT - 0.65) / 0.3)
     const crtOp = pwClamp01(1 - (normT - 0.8) / 0.2)
     el.style.setProperty("--pw-tx", cam.tx.toFixed(4))
@@ -190,19 +163,22 @@ export default function PixelWorldPreloader({
     el.style.setProperty("--pw-chair-drop", cam.chairDrop.toFixed(2))
     el.style.setProperty("--pw-pamp", pamp.toFixed(3))
     el.style.setProperty("--pw-crt-op", crtOp.toFixed(3))
-    if (portrait) {
-      // A caixa do hero é DOM: em vez de esticar, ela se estreita até o
-      // tamanho que, sob a escala atual da câmera, ocupa a largura do
-      // viewport. No fim (scale 5) ela coincide com a tela em pé.
-      const ratio = (2.8125 * window.innerWidth) / (window.innerHeight * cam.scale)
-      const pctW = Math.min(1, ratio) * 100
-      if (normT >= 1 || Math.abs(pctW - lastHeroWRef.current) >= 0.5) {
-        lastHeroWRef.current = pctW
-        el.style.setProperty("--pw-hero-w", pctW.toFixed(2) + "%")
-      }
-    } else {
-      lastHeroWRef.current = -1
-      el.style.removeProperty("--pw-hero-w")
+
+    // Escala do hero: no desktop ele é desenhado em tamanho final e reduzido
+    // para 1/5 (a abertura do monitor). No retrato o monitor é mais largo que
+    // 1/5 do viewport, então compensamos a escala da câmera para o hero ficar
+    // sempre 1:1 com a tela e o monitor recortá-lo.
+    const heroK = portraitRef.current ? 1 / cam.scale : 0.2
+    if (Math.abs(heroK - heroKRef.current) >= 0.002) {
+      heroKRef.current = heroK
+      el.style.setProperty("--pw-hero-k", heroK.toFixed(4))
+    }
+
+    // Só escreve no DOM quando o estado muda (evita invalidar estilo por frame).
+    const zoom = normT >= 0.55
+    if (zoom !== zoomRef.current) {
+      zoomRef.current = zoom
+      el.dataset.pwZoom = zoom ? "true" : "false"
     }
   }, [])
 
@@ -265,8 +241,6 @@ export default function PixelWorldPreloader({
     applyCameraVars(0)
 
     const tick = (now: number) => {
-      // Time-based smoothing: same feel at 60fps, but the journey still lasts
-      // ~durationMs on slow devices instead of stretching with low frame rates.
       const dt = Math.min(250, Math.max(0, now - last))
       last = now
       const real = progressRef.current
@@ -328,8 +302,6 @@ export default function PixelWorldPreloader({
     return () => window.clearTimeout(timer)
   }, [phase, loop, restart])
 
-  // The final hold/fade has begun: the host can mount the real page underneath
-  // while the gate is still opaque, so it is fully settled before the crossfade.
   React.useEffect(() => {
     if (phase === "hold" || phase === "fade") onRevealRef.current?.()
   }, [phase])
@@ -338,8 +310,6 @@ export default function PixelWorldPreloader({
   const onPointerMove = (e: React.PointerEvent) => {
     const el = rootRef.current
     if (!el || reduced) return
-    // The gate covers the whole viewport (inset: 0), so we can use window
-    // dimensions instead of reading getBoundingClientRect() on every move.
     pointer.current.x = (e.clientX / window.innerWidth) * 2 - 1
     pointer.current.y = (e.clientY / window.innerHeight) * 2 - 1
     if (pointer.current.raf) return
@@ -381,7 +351,6 @@ export default function PixelWorldPreloader({
         } as React.CSSProperties
       }
     >
-      {/* Real Hero/Page underneath, already rendered at 100% viewport for seamless match-cut */}
       {revealedContent}
 
       {done && !loop ? null : (
@@ -402,7 +371,6 @@ export default function PixelWorldPreloader({
           {/* Pixel CRT Scanlines */}
           <div className="pw-crt" aria-hidden="true" />
 
-          {/* HUD Overlay (the skip button must stay reachable, so no aria-hidden here) */}
           {hud ? (
             <div className="pw-hud" data-hide={pct >= 96 || phase === "fade"}>
               <div className="pw-hud-top">

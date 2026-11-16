@@ -64,7 +64,6 @@ const NavButton = ({
 export default function OrganicHeader() {
   const { width } = useWindowSize();
   
-  // Constantes de tamanho reduzidas
   const SIDE_HEIGHT = 48; 
   const CENTER_HEIGHT = 75; 
   const CENTER_WIDTH = 660; 

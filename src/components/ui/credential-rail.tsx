@@ -3,33 +3,15 @@
 import * as React from "react"
 import { createPortal } from "react-dom"
 
-/**
- * Credential Rail — adapted from the skate-deck rail.
- *
- * The cards hang by printed lanyards from a metal rail, swing with the pointer
- * and lift into a detail view on click. Pull a card and the whole lanyard
- * pivots on the bar; release and it swings back like a real badge. Instead of
- * deck photos, each card gets two React faces (front / back) drawn at its real
- * pixel width, so a credential can be laid out with the same numbers at any
- * size.
- */
-
 export interface RailItem {
   id: string
-  /** Accessible name, caption and detail title. */
   name: string
-  /** Collection / institution line. */
   series?: string
-  /** Short tag hung from the hook, e.g. a status. */
   tag?: string
   description?: string
-  /** Short facts shown as chips in the detail view. */
   details?: string[]
-  /** Cord colours and printed motif. */
   strap?: { color: string; ink: string; pattern?: "mandala" | "grid" | "orbit" | "circuit" }
-  /** Card face. `w` is the rendered card width in px. */
   front: (w: number) => React.ReactNode
-  /** Reverse face, shown when the card is turned. */
   back: (w: number) => React.ReactNode
 }
 
@@ -42,9 +24,7 @@ export interface CredentialRailLabels {
 
 export interface CredentialRailProps extends React.ComponentProps<"section"> {
   items: RailItem[]
-  /** Shown under the rail while no card faces the front. */
   caption?: string
-  /** Small line under the caption. */
   hint?: string
   autoplay?: boolean
   interval?: number
@@ -76,7 +56,6 @@ const HOLE_Y = 0.05
 const FOOT_PX = 34
 const FOOT = 0.1
 const STAGE_K = 1 + RAIL_Y + HOOK_LEN - HOLE_Y + FOOT
-/** Verlet rope: fixed 120 Hz steps keep the lanyard stable while dragged. */
 const ROPE_STEP = 1 / 120
 const ROPE_GRAVITY = 2400
 const ROPE_ITER = 18
@@ -91,7 +70,6 @@ const DEFAULT_LABELS: CredentialRailLabels = {
   open: "Abrir",
 }
 
-/** Rounded credential board, same proportions as DECK_ASPECT. */
 const DECK_PATH =
   "M32,4 H206 C224,4 234,14 234,32 V352 C234,370 224,380 206,380 H32 C14,380 4,370 4,352 V32 C4,14 14,4 32,4 Z"
 
@@ -285,11 +263,6 @@ function Defs({ uid }: { uid: string }) {
   )
 }
 
-/**
- * The lanyard: two printed strands come down from the rail, meet at a buckle
- * and hold the card through a metal clip. It lives inside the hanging group,
- * so it swings with the card and stays attached to the rail.
- */
 function lanyardFrame(h: number) {
   const railDrop = -((HOOK_LEN - HOLE_Y) * h)
   const height = HOLE_Y * h - railDrop
@@ -307,7 +280,6 @@ function lanyardFrame(h: number) {
   }
 }
 
-/** Static chrome for the lanyard; `paint` updates its paths from the rope. */
 function Lanyard({
   h,
   color,
@@ -695,8 +667,6 @@ export function CredentialRail({
     const tag = tags.current[i]
     if (tag) tag.style.transform = `rotate(${(-9 + (s.tag[i] ?? 0)).toFixed(2)}deg) scale(${tagScale(h).toFixed(3)})`
 
-    // Redraw the lanyard so it follows the simulated rope. The two strands are
-    // pinned to the bar; the buckle and clip move with the verlet points.
     const svg = lants.current[i]
     if (rope && svg) {
       const g = lanyardFrame(h)
@@ -814,7 +784,6 @@ export function CredentialRail({
         }
       }
 
-      // Verlet lanyards: fixed 120 Hz steps, whatever the frame rate.
       acc.current += dt
       const rigs = ropes.current
       let rounds = 0
@@ -950,8 +919,6 @@ export function CredentialRail({
     }
   }, [active, impulse])
 
-  // Build one verlet lanyard per credential. The anchors live on the bar, the
-  // buckle and clip hang below, and the card follows the clip.
   React.useLayoutEffect(() => {
     if (!size.width || !count) {
       ropes.current = []

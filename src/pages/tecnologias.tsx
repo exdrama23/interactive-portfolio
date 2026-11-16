@@ -223,7 +223,7 @@ export function Tecnologias() {
     <section
       id="skills"
       ref={sectionRef}
-      className="relative z-20 w-full text-stone-200 antialiased selection:bg-stone-100 selection:text-black"
+      className="pointer-events-none relative z-20 w-full text-stone-200 antialiased selection:bg-stone-100 selection:text-black"
       style={{
         height: `calc(100svh + ${Math.round(distance * TRACK_SCROLL)}px)`,
         marginTop: 'calc(-1 * var(--handoff-overlap, 100svh))',

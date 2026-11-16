@@ -1,4 +1,3 @@
-// import { FlowingSidebar } from '../components/Header';
 import { useEffect, useState } from 'react';
 import HeroPortal from '../components/HeroPortal';
 import Sidebar from '../components/Sidebar';
@@ -54,13 +53,6 @@ export function Index() {
           details={FOOTER.details}
           theme="night"
         />
-      {/* <section className="h-screen flex flex-col items-center justify-center px-6 text-center">
-        <ParticleText />
-      </section> */}
-
-      {/* <section className="py-32 bg-gradient-to-b from-transparent via-purple-900/10 to-transparent relative overflow-hidden">
-        
-      </section> */}
       </main>
       )}
 

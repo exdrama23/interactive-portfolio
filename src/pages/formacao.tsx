@@ -10,6 +10,7 @@ import senaiLogo from '../assets/img/logos/senai.png'
 import senaiLogoLight from '../assets/img/logos/senai-light.png'
 import unitLogo from '../assets/img/logos/unit-light.png'
 import formacaoData from '../data/formacao.json'
+import { sectionScrollTop } from '../lib/section-scroll'
 
 interface Tema {
   card: string
@@ -950,16 +951,10 @@ export function Formacao() {
         // centralizado (`top - max(80, (vh - altura) / 2)`), então a seção
         // parava na metade do caminho entre Formações e Projetos. Agora cai
         // exatamente onde a seção repousa, só que com o cartão de certificado.
-        const el = document.getElementById('formacao')
-        if (!el) return
-        let top = 0
-        let node: HTMLElement | null = el
-        while (node) {
-          top += node.offsetTop
-          node = node.offsetParent as HTMLElement | null
-        }
+        const top = sectionScrollTop('formacao')
+        if (top === null) return
         window.scrollTo({
-          top: Math.max(0, top),
+          top,
           behavior: reduceMotion ? 'auto' : 'smooth',
         })
       })

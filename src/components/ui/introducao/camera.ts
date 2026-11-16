@@ -21,7 +21,6 @@ export function pwEaseInOutCubic(t: number) {
   return k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2
 }
 
-/** Deterministic Mulberry32 PRNG for SSR-safe procedural pixel stars & skyline. */
 export function pwRand(seed: number) {
   let a = seed >>> 0
   return function () {
@@ -33,7 +32,6 @@ export function pwRand(seed: number) {
   }
 }
 
-/** Simulated loading curve t ∈ [0, 1] -> pct ∈ [0, 100]. */
 export function pwSimulated(t: number) {
   const k = pwClamp01(t)
   const ease = 1 - Math.pow(1 - k, 1.85)
@@ -47,9 +45,7 @@ export function pwPad(pct: number) {
   return (n < 10 ? "00" : n < 100 ? "0" : "") + n
 }
 
-// Center monitor inner screen coordinates in the 100cqw x 200cqh world:
-// Left = 52cqw, Top = 128cqh (28cqh inside room), Width = 20cqw, Height = 20cqh.
-// Center = (62cqw, 138cqh). At scale = 100 / 20 = 5.0, the screen fills 100% of viewport.
+// Esq = 52cqw, Topo = 128cqh (28cqh dentro do quarto), Largura = 20cqw, Altura = 20cqh.
 // IMPORTANTE: se mudar o tamanho/posição do monitor em preloader.css
 // (.pw-monitor-screen) e em pixel-scene.tsx (PixelRoomBackgroundSvg), atualize
 // estas três constantes com os mesmos números.
@@ -67,11 +63,6 @@ export type PwCamera = {
 }
 
 /**
- * Computes the continuous camera matrix for normalized progress t ∈ [0, 1]:
- * - Stage 1 [0.00 .. 0.24]: Starry night & Pixel Moon
- * - Stage 2 [0.24 .. 0.66]: Smooth pan down through bedroom window into the cozy room
- * - Stage 3 [0.66 .. 1.00]: Push in past the programmer's chair into the center monitor (scale = 5.0)
- *
  * `portrait` liga o enquadramento de tela em pé: a arte do quarto é recortada
  * (não esticada) e o monitor central fica no centro do viewport, então a
  * câmera centraliza em 50cqw em vez de 62cqw.
@@ -107,7 +98,6 @@ export function pwCamera(t: number, portrait = false): PwCamera {
     cy = pwLerp(146, MON_CY, posEase)
     scale = pwLerp(1.28, FINAL_SCALE, zoomEase)
     winFade = 0
-    // As camera gets close to the center screen, the chair slides down out of the lens path
     chairDrop = pwSmoothstep((u - 0.15) / 0.7) * 42
   }
 

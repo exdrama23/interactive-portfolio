@@ -11,10 +11,6 @@
 
 import { pwRand } from "./camera"
 
-/* ------------------------------------------------------------------
-   1. PORTFOLIO HERO COMPONENT (exact match for the reference hero screen)
-   ------------------------------------------------------------------ */
-
 const PERSPECTIVE_DOTS = (() => {
   const dots: { cx: number; cy: number; r: number; op: number }[] = []
   const rows = 26
@@ -181,16 +177,6 @@ export function PixelMoonSvg() {
   )
 }
 
-/**
- * 320x180 High-Detail 16-bit Pixel Art Room Background:
- * - Left side (x: 0..108): Cozy bedroom (framed posters, wooden bookshelves
- *   with colorful books, BMO robot lamp, split AC unit above window with venetian blinds,
- *   warm moonlight/sunset glow, cozy bed with layered blanket, rug, open cardboard box).
- * - Right side (x: 108..320): 3-Monitor Developer Battlestation
- *   (U-shaped desk with drawers, sleeping black cat, potted cactus, mechanical keyboard,
- *   Monster & Red Bull energy cans, speaker, architectural CAD on left monitor, city bars on right monitor).
- * - Center monitor inner screen is mapped to x:166.4..230.4 (52cqw..72cqw), y:50.4..86.4 (28cqh..48cqh).
- */
 export function PixelRoomBackgroundSvg() {
   return (
     <svg viewBox="0 0 320 180" preserveAspectRatio="none" className="pw-pixel-svg" aria-hidden="true">
@@ -219,7 +205,6 @@ export function PixelRoomBackgroundSvg() {
         <rect x="218" y="34" width="2" height="2" fill="#f59e0b" />
       </g>
 
-      {/* Large recessed back molding behind the 3 monitors */}
       <rect x="142" y="22" width="112" height="72" fill="#15142b" stroke="#252347" strokeWidth="2" />
       <rect x="146" y="26" width="104" height="64" fill="#191833" />
 
@@ -232,7 +217,6 @@ export function PixelRoomBackgroundSvg() {
       {Array.from({ length: 9 }, (_, i) => (
         <rect key={i} x="0" y={137 + i * 5} width="320" height="1" fill="#24141e" />
       ))}
-      {/* Warm floor highlight under the desk & chair */}
       <polygon points="154,133 242,133 268,180 128,180" fill="#d97746" opacity="0.24" />
       <polygon points="166,133 230,133 248,180 148,180" fill="#fbbf24" opacity="0.15" />
 
@@ -242,12 +226,10 @@ export function PixelRoomBackgroundSvg() {
       <rect x="26" y="146" width="58" height="2" fill="#591828" />
       <rect x="26" y="168" width="58" height="2" fill="#591828" />
 
-      {/* Open pixel cardboard box & game controller on floor */}
       <rect x="18" y="158" width="18" height="14" fill="#7c4d3a" stroke="#120d1a" strokeWidth="1.2" />
       <rect x="19" y="159" width="16" height="4" fill="#331c19" />
       <rect x="15" y="156" width="5" height="3" fill="#9c654f" />
       <rect x="34" y="156" width="5" height="3" fill="#9c654f" />
-      {/* Little socks / gamepad next to rug */}
       <rect x="44" y="172" width="6" height="3" fill="#cbd5e1" />
       <rect x="52" y="171" width="4" height="4" fill="#94a3b8" />
 
@@ -267,12 +249,10 @@ export function PixelRoomBackgroundSvg() {
       <rect x="64" y="31" width="1.5" height="1.5" fill="#fde047" />
       <rect x="84" y="36" width="1.5" height="1.5" fill="#93c5fd" />
       <rect x="56" y="44" width="1.2" height="1.2" fill="#fff" />
-      {/* Distant silhouette in window */}
       <rect x="47" y="68" width="12" height="17" fill="#0f172a" />
       <rect x="59" y="62" width="14" height="23" fill="#1e1b4b" />
       <rect x="73" y="66" width="20" height="19" fill="#0f172a" />
 
-      {/* Venetian Blinds (Top half of window) */}
       <rect x="45" y="26" width="50" height="22" fill="#1c162e" />
       {Array.from({ length: 6 }, (_, i) => (
         <rect key={i} x="46" y={28 + i * 3.4} width="48" height="1.6" fill="#352a4f" />
@@ -280,19 +260,15 @@ export function PixelRoomBackgroundSvg() {
       {/* Window center mullion & sill */}
       <rect x="69" y="26" width="2" height="60" fill="#1c162e" />
       <rect x="42" y="86" width="56" height="4" fill="#4a354f" stroke="#0e0b16" strokeWidth="1.2" />
-      {/* Coffee mug on window sill */}
       <rect x="88" y="81" width="5" height="5" fill="#f97316" stroke="#0e0b16" strokeWidth="1" />
       <rect x="89" y="82" width="3" height="1.5" fill="#fde047" />
 
-      {/* Warm diagonal light beam from window onto bed & floor */}
       <polygon points="46,48 94,48 76,144 10,144" fill="#fde68a" opacity="0.08" />
 
       {/* ================= 4. WALL POSTERS & BOOKSHELVES ================= */}
-      {/* Upper wooden shelf with books & bottles */}
       <rect x="12" y="42" width="28" height="3" fill="#6b3e2e" stroke="#0e0b16" strokeWidth="1" />
       <rect x="14" y="45" width="3" height="3" fill="#47281e" />
       <rect x="35" y="45" width="3" height="3" fill="#47281e" />
-      {/* Books on upper shelf */}
       <rect x="26" y="32" width="3" height="10" fill="#ef4444" stroke="#0e0b16" strokeWidth="0.8" />
       <rect x="29" y="33" width="3" height="9" fill="#f59e0b" stroke="#0e0b16" strokeWidth="0.8" />
       <rect x="32" y="31" width="4" height="11" fill="#3b82f6" stroke="#0e0b16" strokeWidth="0.8" />
@@ -301,27 +277,23 @@ export function PixelRoomBackgroundSvg() {
 
       {/* Lower wooden shelf above bed */}
       <rect x="12" y="68" width="28" height="3" fill="#6b3e2e" stroke="#0e0b16" strokeWidth="1" />
-      {/* Cute BMO-style boxy robot lamp & books on lower shelf */}
       <rect x="14" y="56" width="9" height="12" fill="#cbd5e1" stroke="#0e0b16" strokeWidth="1" />
       <rect x="16" y="58" width="5" height="5" fill="#0f172a" />
       <rect x="25" y="58" width="3" height="10" fill="#ec4899" stroke="#0e0b16" strokeWidth="0.8" />
       <rect x="28" y="59" width="3" height="9" fill="#eab308" stroke="#0e0b16" strokeWidth="0.8" />
       <rect x="31" y="57" width="4" height="11" fill="#14b8a6" stroke="#0e0b16" strokeWidth="0.8" />
 
-      {/* Framed Pixel Posters on Left Wall */}
       <rect x="2" y="52" width="8" height="14" fill="#0f172a" stroke="#0e0b16" strokeWidth="1" />
       <rect x="3" y="54" width="6" height="8" fill="#38bdf8" />
       <rect x="2" y="72" width="8" height="16" fill="#0f172a" stroke="#0e0b16" strokeWidth="1" />
       <rect x="3" y="74" width="6" height="10" fill="#f43f5e" />
 
-      {/* ================= 5. COZY BED NEXT TO WINDOW ================= */}
       {/* Bed Frame & Headboard */}
       <rect x="8" y="92" width="6" height="42" fill="#4a2825" stroke="#0e0b16" strokeWidth="1.4" />
       <rect x="12" y="108" width="76" height="22" fill="#281e3d" stroke="#0e0b16" strokeWidth="1.4" />
       {/* Pillow */}
       <rect x="15" y="101" width="18" height="9" rx="2" fill="#cbd5e1" stroke="#0e0b16" strokeWidth="1.2" />
       <rect x="17" y="102" width="14" height="6" fill="#f8fafc" />
-      {/* Layered Duvet / Blanket with Fold */}
       <rect x="31" y="104" width="10" height="20" fill="#94a3b8" stroke="#0e0b16" strokeWidth="1" />
       <rect x="39" y="105" width="48" height="20" fill="#3b2d54" stroke="#0e0b16" strokeWidth="1.2" />
       <rect x="41" y="107" width="44" height="10" fill="#4c3b6e" />
@@ -330,12 +302,10 @@ export function PixelRoomBackgroundSvg() {
       <rect x="12" y="125" width="76" height="2" fill="#7c4a3e" />
 
       {/* ================= 6. U-SHAPED DEVELOPER DESK & DRAWERS ================= */}
-      {/* Left Cabinet Under Desk */}
       <rect x="102" y="114" width="34" height="44" fill="#1e203b" stroke="#0b0914" strokeWidth="1.6" />
       <rect x="105" y="118" width="28" height="36" fill="#252847" />
       <rect x="116" y="148" width="2" height="2" fill="#d97746" />
 
-      {/* Right 3-Drawer Cabinet Under Desk */}
       <rect x="260" y="114" width="38" height="44" fill="#1e203b" stroke="#0b0914" strokeWidth="1.6" />
       <rect x="263" y="118" width="32" height="10" fill="#252847" stroke="#0b0914" strokeWidth="1.2" />
       <rect x="263" y="130" width="32" height="10" fill="#252847" stroke="#0b0914" strokeWidth="1.2" />
@@ -345,10 +315,8 @@ export function PixelRoomBackgroundSvg() {
       <rect x="275" y="134" width="8" height="2" fill="#0b0914" />
       <rect x="275" y="146" width="8" height="2" fill="#0b0914" />
 
-      {/* Main Desk Surface with Warm Rim-Lit Edge */}
       <rect x="98" y="106" width="204" height="5" fill="#7c4d3b" stroke="#0b0914" strokeWidth="1.6" />
       <rect x="100" y="107" width="200" height="2" fill="#e08e5a" />
-      {/* Desk under-bevel & inner support legs */}
       <rect x="102" y="111" width="196" height="4" fill="#3d2729" />
       <rect x="144" y="115" width="4" height="36" fill="#191b33" stroke="#0b0914" strokeWidth="1.2" />
       <rect x="248" y="115" width="4" height="36" fill="#191b33" stroke="#0b0914" strokeWidth="1.2" />
@@ -359,7 +327,6 @@ export function PixelRoomBackgroundSvg() {
       {/* Monitor Stand */}
       <rect x="126" y="88" width="8" height="18" fill="#1e203b" stroke="#0b0914" strokeWidth="1.4" />
       <rect x="118" y="104" width="22" height="3" fill="#333659" stroke="#0b0914" strokeWidth="1.2" />
-      {/* Monitor Outer Frame with Warm Rim Light */}
       <rect x="104" y="45" width="56" height="43" rx="1" fill="#2b2745" stroke="#0b0914" strokeWidth="1.8" />
       <rect x="105" y="46" width="54" height="1.5" fill="#e08e5a" />
       <rect x="105" y="86" width="54" height="1.5" fill="#d97746" />
@@ -382,14 +349,11 @@ export function PixelRoomBackgroundSvg() {
         <rect key={i} x="142" y={56 + i * 3.5} width={i % 2 ? 8 : 10} height="1.4" fill={i === 1 || i === 4 ? "#f59e0b" : "#64748b"} />
       ))}
 
-      {/* --- CENTER MONITOR BEZEL (Screen opening is exact x:166.4..230.4, y:50.4..86.4) --- */}
       {/* Monitor Stand */}
       <rect x="194" y="89" width="8" height="17" fill="#1e203b" stroke="#0b0914" strokeWidth="1.4" />
-      {/* Outer Bezel with warm rim highlight */}
       <rect x="163" y="47" width="70" height="43" rx="1" fill="#2b2745" stroke="#0b0914" strokeWidth="1.8" />
       <rect x="164" y="48" width="68" height="1.5" fill="#e08e5a" />
       <rect x="164" y="88" width="68" height="1.5" fill="#d97746" />
-      {/* Inner dark frame holding the DOM Hero Portal */}
       <rect x="165.5" y="49.5" width="65" height="37.8" fill="#0b0914" />
 
       {/* --- RIGHT MONITOR (Orange/Coral Skyline Bars & Code Timeline) --- */}
@@ -408,7 +372,6 @@ export function PixelRoomBackgroundSvg() {
       <rect x="251" y="56" width="6" height="20" fill="#d97746" />
       <rect x="257" y="62" width="5" height="14" fill="#f59e0b" />
       <rect x="263" y="58" width="7" height="18" fill="#e08e5a" />
-      {/* Little pixel windows inside the bars */}
       <rect x="253" y="58" width="1.2" height="1.2" fill="#1c2238" />
       <rect x="253" y="62" width="1.2" height="1.2" fill="#1c2238" />
       <rect x="265" y="61" width="1.2" height="1.2" fill="#1c2238" />
@@ -429,7 +392,6 @@ export function PixelRoomBackgroundSvg() {
       <rect x="118" y="95" width="22" height="9" fill="#262038" />
       <rect x="120" y="97" width="4" height="4" fill="#d97746" />
 
-      {/* SLEEPING BLACK CAT (Curled up on left desk) */}
       <g className="pw-cat-breathe">
         {/* Curled body */}
         <rect x="103" y="95" width="24" height="11" rx="4" fill="#191926" stroke="#08070d" strokeWidth="1.5" />
@@ -449,7 +411,6 @@ export function PixelRoomBackgroundSvg() {
         <rect x="101" y="102" width="10" height="4" rx="2" fill="#191926" stroke="#08070d" strokeWidth="1.2" />
       </g>
 
-      {/* POTTED CACTUS (Next to cat) */}
       {/* Terracotta pot */}
       <polygon points="141,100 149,100 148,107 142,107" fill="#b4532a" stroke="#0b0914" strokeWidth="1.2" />
       <rect x="140" y="98.5" width="10" height="2.5" fill="#d97746" stroke="#0b0914" strokeWidth="1" />
@@ -459,7 +420,6 @@ export function PixelRoomBackgroundSvg() {
       <rect x="140.5" y="93" width="2" height="4" fill="#16a34a" stroke="#0b0914" strokeWidth="0.9" />
       <rect x="147.5" y="92" width="2" height="4" fill="#16a34a" stroke="#0b0914" strokeWidth="0.9" />
 
-      {/* MECHANICAL KEYBOARD (With individual pixel keycaps) */}
       <polygon points="153,100 174,100 176,106 151,106" fill="#2b2640" stroke="#0b0914" strokeWidth="1.2" />
       {Array.from({ length: 6 }, (_, i) => (
         <rect key={i} x={154 + i * 3} y="101.2" width="2" height="1.4" fill="#d97746" />
@@ -468,7 +428,6 @@ export function PixelRoomBackgroundSvg() {
         <rect key={i} x={155 + i * 3} y="103.2" width="2.2" height="1.4" fill="#e2e8f0" />
       ))}
 
-      {/* MONSTER ENERGY CAN (Black can with iconic 3 green claws) */}
       <rect x="227" y="90" width="10" height="16" rx="1.5" fill="#11131c" stroke="#08070d" strokeWidth="1.3" />
       <rect x="228" y="89.5" width="8" height="1.5" fill="#cbd5e1" />
       {/* 3 neon green claw marks */}
@@ -478,14 +437,12 @@ export function PixelRoomBackgroundSvg() {
       <rect x="228.5" y="101.5" width="7" height="1.2" fill="#94a3b8" />
       <rect x="228" y="104.5" width="8" height="1" fill="#64748b" />
 
-      {/* RED BULL CAN (Silver & Blue quadrants with red bull mark) */}
       <rect x="239" y="90" width="9.5" height="16" rx="1.5" fill="#e2e8f0" stroke="#08070d" strokeWidth="1.3" />
       <rect x="240" y="89.5" width="7.5" height="1.5" fill="#94a3b8" />
       {/* Blue & silver split */}
       <rect x="239.8" y="91.5" width="4.2" height="5" fill="#2563eb" />
       <rect x="244" y="96.5" width="4" height="5.5" fill="#2563eb" />
       <rect x="239.8" y="102" width="8" height="2.5" fill="#1d4ed8" />
-      {/* Red bull emblem in center */}
       <rect x="241.5" y="95.5" width="4.5" height="2" fill="#ef4444" />
       <rect x="243" y="95.8" width="1.5" height="1.5" fill="#fde047" />
 
@@ -501,17 +458,10 @@ export function PixelRoomBackgroundSvg() {
   )
 }
 
-/**
- * FOREGROUND LAYER: The Programmer & Racing Gaming Chair.
- * Rendered in a separate SVG layer above the center monitor so the top of the head
- * naturally overlaps the bottom bezel of the center monitor, and slides smoothly down
- * when the camera zooms into the Hero screen.
- */
 export function PixelProgrammerChairSvg() {
   return (
     <svg viewBox="0 0 320 180" preserveAspectRatio="none" className="pw-pixel-svg" aria-hidden="true">
       <g className="pw-breathe">
-        {/* 1. PROGRAMMER HEAD & OVER-EAR HEADPHONES (Looking slightly left toward window) */}
         {/* Headphone headband */}
         <path
           d="M185 78 C185 65, 209 65, 209 78"
@@ -528,7 +478,6 @@ export function PixelProgrammerChairSvg() {
         {/* Dark hair & head */}
         <rect x="187" y="68" width="20" height="18" rx="6" fill="#17152b" stroke="#0b0914" strokeWidth="1.8" />
         <rect x="189" y="70" width="16" height="12" rx="4" fill="#221f3d" />
-        {/* Subtle left-side warm skin/glasses rim showing he is glancing toward the window */}
         <rect x="185.5" y="75" width="2.5" height="5" fill="#e08e5a" />
         <rect x="185" y="75.5" width="2" height="1.8" fill="#38bdf8" />
         {/* Left & Right Headphone Ear Cups */}
@@ -537,7 +486,6 @@ export function PixelProgrammerChairSvg() {
         <rect x="206.5" y="74" width="4" height="9" rx="1.2" fill="#2b2745" stroke="#0b0914" strokeWidth="1.4" />
         <rect x="208" y="75.5" width="1.5" height="6" fill="#d97746" />
 
-        {/* 2. PROGRAMMER SHOULDERS / HOODIE ARMS EXTENDING TO DESK */}
         <polygon
           points="174,96 162,115 171,118 182,102"
           fill="#1b1934"
@@ -550,7 +498,6 @@ export function PixelProgrammerChairSvg() {
           stroke="#0b0914"
           strokeWidth="1.8"
         />
-        {/* Rim light on hoodie sleeves */}
         <line x1="173" y1="97" x2="163" y2="114" stroke="#e08e5a" strokeWidth="1.4" />
         <line x1="221" y1="97" x2="231" y2="114" stroke="#e08e5a" strokeWidth="1.4" />
 
@@ -563,7 +510,6 @@ export function PixelProgrammerChairSvg() {
           strokeWidth="2.2"
           strokeLinejoin="round"
         />
-        {/* Main dark chair body inset inside the rim light */}
         <polygon
           points="191,84 203,84 209,94 219,106 215,139 179,139 175,106 185,94"
           fill="#181730"
@@ -595,7 +541,6 @@ export function PixelProgrammerChairSvg() {
       </g>
 
       {/* 4. CHAIR ARMRESTS, SEAT CUSHION & 5-STAR ROLLING BASE */}
-      {/* Left & Right Padded Armrests with orange highlight */}
       <rect x="163" y="120" width="11" height="5" rx="1" fill="#d97746" stroke="#0b0914" strokeWidth="1.5" />
       <rect x="164" y="121" width="9" height="2" fill="#fbbf24" />
       <rect x="166" y="125" width="6" height="17" fill="#181730" stroke="#0b0914" strokeWidth="1.5" />
@@ -608,7 +553,6 @@ export function PixelProgrammerChairSvg() {
       <rect x="168" y="139" width="58" height="7" rx="2" fill="#141329" stroke="#0b0914" strokeWidth="1.8" />
       <rect x="176" y="146" width="42" height="5" fill="#0e0d1c" stroke="#0b0914" strokeWidth="1.4" />
 
-      {/* Programmer's shoes/legs visible under the chair */}
       <rect x="180" y="151" width="8" height="11" fill="#252342" stroke="#0b0914" strokeWidth="1.4" />
       <rect x="179" y="160" width="10" height="5" rx="1" fill="#0b0914" />
       <rect x="206" y="151" width="8" height="11" fill="#252342" stroke="#0b0914" strokeWidth="1.4" />
@@ -634,7 +578,6 @@ export function PixelProgrammerChairSvg() {
 export function ExteriorBuildingMaskSvg() {
   return (
     <svg viewBox="0 0 320 180" preserveAspectRatio="none" className="pw-pixel-svg" aria-hidden="true">
-      {/* Dark brick facade surrounding the window opening */}
       <path
         fillRule="evenodd"
         d="M0 0 H320 V180 H0 Z M24 14 H296 V164 H24 Z"

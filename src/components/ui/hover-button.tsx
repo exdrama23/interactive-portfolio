@@ -4,19 +4,11 @@ export interface HoverSlatButtonProps
   extends React.HTMLAttributes<HTMLDivElement> {
   initialText: string
   hoverText: string
-  /** Extra classes for each individual slat. */
   cellClassName?: string
-  /** Background/text classes for the resting slat face. */
   baseClassName?: string
-  /** Background/text classes for the face that slides in on hover. */
   hoverClassName?: string
 }
 
-/**
- * Slat button: each letter sits in its own tile. On hover a second word slides
- * in, alternating from top and bottom, so the label clicks over like a split
- * flap display. Both labels must be the same length.
- */
 const HoverSlatButton = React.forwardRef<HTMLDivElement, HoverSlatButtonProps>(
   (
     {

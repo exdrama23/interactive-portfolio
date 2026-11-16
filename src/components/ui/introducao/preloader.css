@@ -58,7 +58,6 @@
   height: 100%;
 }
 
-/* ---- Sky Layer (0% to 100% height of scene) ---- */
 .pw-sky {
   position: absolute;
   left: 0;
@@ -98,7 +97,6 @@
   }
 }
 
-/* ---- Room & Building Layer (100% to 200% height of scene) ---- */
 .pw-room-wrap {
   position: absolute;
   left: 0;
@@ -117,7 +115,9 @@
   transition: opacity 100ms linear;
 }
 
-/* ---- The Center Monitor Portal (Exact 20cqw x 20cqh at left:52cqw, top:28cqh of room) ---- */
+/* ---- Portal do monitor central (20cqw x 20cqh em left:52cqw, top:28cqh do quarto) ----
+   Sem `container-type`: o hero dentro dele é medido pelo tamanho do gate (ver
+   `.pw-hero`), não por esta caixa. */
 .pw-monitor-screen {
   position: absolute;
   left: 52cqw;
@@ -127,11 +127,9 @@
   z-index: 3;
   background: #ffffff;
   overflow: hidden;
-  container-type: size;
   box-shadow: 0 0 2.6cqw rgba(255, 200, 150, 0.32);
 }
 
-/* ---- Foreground Programmer & Racing Chair Layer (Z-index above monitor, slides down on zoom) ---- */
 .pw-fg-chair-layer {
   position: absolute;
   inset: 0;
@@ -258,13 +256,22 @@
   box-shadow: 0 0 12px #f59e0b;
 }
 
-/* ============================================================================
-   PORTFOLIO HERO (the screen living inside the center monitor)
-   ============================================================================ */
+/* O hero é desenhado no tamanho FINAL (viewport inteiro) e reduzido para caber
+   na abertura do monitor. Como a câmera amplia a cena até 5x, a conta fecha
+   exatamente (100cqw / 5 = 20cqw = abertura do monitor) e o texto deixa de ser
+   rasterizado minúsculo para depois ser esticado — é isso que deixava a tela
+   borrada durante o mergulho.
+   `--pw-hero-k` vem do motor: 0.2 no desktop (a abertura do monitor é 1/5 do
+   viewport) e 1/escala no retrato, mantendo o hero sempre em 1:1 com a tela —
+   o monitor recorta o que ainda não cabe, como uma câmera entrando no texto. */
 .pw-hero {
-  position: relative;
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 100cqw;
+  height: 100cqh;
+  transform: translate(-50%, -50%) scale(var(--pw-hero-k, 0.2));
+  transform-origin: center center;
   container-type: size;
   background: #ffffff;
   color: #111111;
@@ -463,12 +470,19 @@
     left: calc(50% - 17.78cqh);
     width: 35.56cqh;
   }
-  /* Largura definida pelo motor (--pw-hero-w): 100% no início da aproximação
-     e a proporção do viewport no hold. */
-  .pw-hero {
-    width: var(--pw-hero-w, 100%);
-    margin-inline: auto;
-  }
+}
+
+/* --------------------------------------------------------------------------
+   Durante o mergulho a cena está ampliada até 5x: cada partícula animada vira
+   uma área grande de repintura por frame. Pausar as animações decorativas faz
+   o zoom rodar liso sem mudar nada do que está na tela (elas ficam paradas).
+   -------------------------------------------------------------------------- */
+.pw-root[data-pw-zoom='true'] .pw-star,
+.pw-root[data-pw-zoom='true'] .pw-cloud-drift,
+.pw-root[data-pw-zoom='true'] .pw-float-pix,
+.pw-root[data-pw-zoom='true'] .pw-breathe,
+.pw-root[data-pw-zoom='true'] .pw-cat-breathe {
+  animation-play-state: paused;
 }
 
 /* --------------------------------------------------------------------------
