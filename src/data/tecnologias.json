@@ -1,10 +1,10 @@
 {
   "eyebrow": "Hard skills",
   "title": "Tecnologias que eu uso.",
-  "description": "Cada nó é uma ferramenta que já coloquei em produção. As 14 principais fecham o círculo; o centro abre o resto da stack.",
-  "descriptionReduced": "Cada nó é uma ferramenta que já coloquei em produção. As 14 principais fecham o círculo; o centro abre o resto da stack — com e sem logo oficial.",
-  "hint": "role para percorrer as áreas",
-  "footer": "hard skills — 2026",
+  "description": "As 14 principais fecham o círculo; o centro abre o resto da stack.",
+  "descriptionReduced": "As 14 principais fecham o círculo; o centro abre o resto da stack com e sem logo oficial.",
+  "hint": "Continue com o scroll para percorrer as áreas",
+  "footer": "hard skills 2026",
   "boardCount": 14,
   "categories": [
     "Front-end & UI",

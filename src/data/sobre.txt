@@ -1,0 +1,86 @@
+{
+  "headline": ["Sobre", "mim."],
+  "story": [
+    {
+      "side": "left",
+      "image": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=1600&auto=format&fit=crop",
+      "alt": "Código aberto em um editor, primeiros experimentos com programação",
+      "body": "Minha jornada começou quando ganhei meu primeiro computador e me encantei pelo universo dos jogos. A curiosidade me levou a explorar a programação, começando com Lua e, mais tarde, descobrindo Python através do Curso em Vídeo. O que começou como uma forma de criar vantagens nos jogos se transformou em uma paixão e despertou um grande objetivo: ter minha própria empresa de desenvolvimento de jogos.",
+      "info": {
+        "meta": "O começo",
+        "title": "O primeiro contato",
+        "body": "Quando ganhei meu primeiro computador, tudo o que eu pensava era em jogar e explorar aquele universo incrível. Fiquei tão fascinado que comecei a buscar maneiras de entender como tudo aquilo funcionava.\n\nNesse processo, minhas primeiras linhas de código foram escritas em Lua, com o objetivo de criar aplicações que me dessem vantagens nos jogos. Naquela época, tudo parecia mágico, e essa curiosidade me motivou a continuar estudando.\n\nFoi então que conheci Python, por meio do famoso Curso em Vídeo, e descobri um mundo de novas possibilidades. Aos poucos, comecei a enxergar a programação não apenas como um hobby, mas como algo que gostaria de fazer pelo resto da vida.\n\nFoi assim que surgiu um grande objetivo: ter minha própria empresa de desenvolvimento de jogos.\n\nMas, para chegar lá, eu precisava começar de algum lugar...",
+        "tags": ["Início", "Curiosidade", "Experimentação"]
+      }
+    },
+    {
+      "side": "right",
+      "image": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1600&auto=format&fit=crop",
+      "alt": "Estudante desenvolvendo aplicações web em um notebook",
+      "body": "Com o incentivo da minha mãe, comecei minha jornada em Análise e Desenvolvimento de Sistemas no SENAI, onde descobri o desenvolvimento web e novas tecnologias. Em 2023, essa descoberta mudou meus planos e despertou uma nova paixão. Já em 2024, comecei a atuar como freelancer e encontrei um novo objetivo: construir meu próprio negócio, criando aplicações que resolvam problemas reais e transformem ideias em realidade.",
+      "info": {
+        "meta": "Formação técnica",
+        "title": "SENAI",
+        "body": "Ao perceber meu entusiasmo, minha mãe me deu a oportunidade de escolher entre cursar Informática Básica no IFS ou Análise e Desenvolvimento de Sistemas (ADS) no SENAI. Após conhecer a proposta do curso e conversar com os professores, não tive dúvidas sobre minha escolha.\n\nAli encontrei a oportunidade de explorar o desenvolvimento web e conhecer um universo além dos jogos. Ao iniciar o curso, em 2023, tive contato com tecnologias como JavaScript, C#, TypeScript, React e C++, além de adquirir conhecimentos que transformaram minha visão sobre o futuro.\n\nFoi nesse período que descobri minha paixão pelo desenvolvimento web e deixei para trás a ideia de criar uma empresa de jogos. Em 2024, comecei a trabalhar como freelancer, desenvolvendo soluções e descobrindo que poderia transformar essa experiência em meu próprio negócio: uma empresa dedicada a criar aplicações e resolver problemas reais.\n\nO que mais me encanta no desenvolvimento web é ver a surpresa e a satisfação das pessoas ao receberem um sistema que torna suas ideias realidade.",
+        "tags": ["SENAI", "Desenvolvimento web", "Base técnica"]
+      }
+    },
+    {
+      "side": "left",
+      "image": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=1600&auto=format&fit=crop",
+      "alt": "Tela com código de um sistema corporativo",
+      "body": "Em fevereiro de 2026, concluí minha formação técnica e, em **2 de março de 2026**, iniciei uma nova etapa como Desenvolvedor de Sistemas na **ACESSO.NET**, atuando no desenvolvimento de sistemas corporativos, arquitetura de software e integração de plataformas.",
+      "info": {
+        "meta": "2026 · ACESSO.NET",
+        "title": "Sistemas corporativos",
+        "body": "Desenvolvimento de sistemas corporativos, arquitetura de software e integração de plataformas — o dia a dia de quem transforma regra de negócio em produto funcionando.",
+        "tags": ["ACESSO.NET", "Arquitetura", "Integrações"]
+      }
+    },
+    {
+      "side": "right",
+      "image": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=1600&auto=format&fit=crop",
+      "alt": "Equipe trabalhando em uma startup",
+      "body": "Paralelamente à minha trajetória profissional, comecei a transformar ideias próprias em iniciativas empresariais, participando da concepção, estruturação e desenvolvimento de startups como a **VIVAJU** e a **LPG (Link Petróleo e Gás)**. Também mantenho minha atuação em projetos independentes de desenvolvimento, levando essa experiência para além do ambiente corporativo.",
+      "info": {
+        "meta": "Produto próprio",
+        "title": "VIVAJU e LPG",
+        "body": "Da ideia à estruturação: participação na concepção e no desenvolvimento de startups, levando a experiência de produto para além do ambiente corporativo.",
+        "tags": ["Startups", "Produto", "Empreendedorismo"]
+      }
+    },
+    {
+      "side": "left",
+      "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1600&auto=format&fit=crop",
+      "alt": "Rede global de sistemas distribuídos",
+      "body": "Atualmente, curso **Ciência da Computação na Universidade Tiradentes (UNIT)** e direciono meus estudos e minha atuação para arquitetura de soluções, sistemas distribuídos, aplicações modulares e desenvolvimento de produtos digitais.",
+      "info": {
+        "meta": "UNIT · em andamento",
+        "title": "Ciência da Computação",
+        "body": "Arquitetura de soluções, sistemas distribuídos e aplicações modulares: a base teórica que sustenta o que já faço na prática.",
+        "tags": ["UNIT", "Sistemas distribuídos", "Arquitetura"]
+      }
+    },
+    {
+      "side": "right",
+      "image": "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=1600&auto=format&fit=crop",
+      "alt": "Mesa de trabalho com anotações e ideias",
+      "body": "Minha motivação continua sendo a mesma daquela época em que programar era apenas uma brincadeira: a vontade de descobrir, construir e transformar ideias em algo real.",
+      "info": {
+        "meta": "O que continua",
+        "title": "A mesma motivação",
+        "body": "Descobrir, construir e transformar ideias em algo real. É o que sobrou intacto desde a época em que programar era só uma brincadeira.",
+        "tags": ["Propósito", "Construção"]
+      }
+    }
+  ],
+  "card": {
+    "eyebrow": "Desenvolvedor de Sistemas",
+    "name": "Alec Vinícius",
+    "location": ["Brasil · remoto", "sistemas corporativos & produtos digitais"]
+  },
+  "social": [
+    { "label": "LinkedIn", "url": "https://www.linkedin.com/in/alec-vinicius/" },
+    { "label": "Instagram", "url": "https://www.instagram.com/alecvinicius/" }
+  ]
+}

@@ -67,7 +67,7 @@
       "local": "Aracaju, SE",
       "strapLabel": "CENTRO UNIV. TIRADENTES",
       "descricao": "Bacharelado com foco em fundamentos da computação, algoritmos, estruturas de dados e engenharia de software.",
-      "skills": ["Algoritmos", "Estruturas de dados", "POO", "Engenharia de software"]
+      "skills": ["Arquitetura", "Engenharia de software"]
     },
     {
       "id": "senai-tds",
@@ -83,7 +83,7 @@
       "local": "Aracaju, SE",
       "strapLabel": "CETAF · ARACAJU",
       "descricao": "Curso técnico com foco em desenvolvimento de software, lógica de programação, banco de dados e metodologias ágeis.",
-      "skills": ["Desenvolvimento web", "Metodologias ágeis", "Banco de dados", "Git"]
+      "skills": ["Desenvolvimento web"]
     },
     {
       "id": "inovase-backend",
@@ -98,8 +98,8 @@
       "status": "Cursando",
       "local": "Aracaju, SE",
       "strapLabel": "INOVAÇÃO · SE",
-      "descricao": "Formação em desenvolvimento backend com Python, construção de APIs, modelagem de dados e boas práticas de engenharia.",
-      "skills": ["Python", "APIs", "Banco de dados", "Docker"]
+      "descricao": "Formação em desenvolvimento backend.",
+      "skills": []
     },
     {
       "id": "inovase-frontend",
@@ -114,8 +114,8 @@
       "status": "Concluído",
       "local": "Aracaju, SE",
       "strapLabel": "INOVAÇÃO · SE",
-      "descricao": "Formação em desenvolvimento frontend com React, TypeScript, HTML, CSS e integração com APIs.",
-      "skills": ["React", "TypeScript", "CSS", "APIs"]
+      "descricao": "Formação em desenvolvimento frontend.",
+      "skills": []
     },
     {
       "id": "senai-ia-industrial",
@@ -147,8 +147,8 @@
       "status": "Atual",
       "local": "Aracaju, SE",
       "strapLabel": "ACESSO · ARACAJU",
-      "descricao": "Desenvolvimento full-stack em ecossistemas web e backend, integrando tecnologias tradicionais a soluções de inteligência artificial.",
-      "skills": ["React", "Node.js", "Python", "AWS", "Inteligência artificial"]
+      "descricao": "Desenvolvimento full-stack",
+      "skills": []
     }
   ]
 }
