@@ -440,6 +440,38 @@
 }
 
 /* --------------------------------------------------------------------------
+   Telas em pé (retrato).
+   A arte do quarto é 16:9. Em vez de esticá-la na vertical (o que deformava
+   monitores e cadeira), ela é desenhada na proporção correta e o excesso é
+   recortado nas laterais, mantendo o monitor central no centro da tela.
+   O hero dentro do monitor continua sendo uma caixa DOM: ela se estreita
+   conforme a câmera aproxima, até coincidir com a proporção do viewport no
+   hold final — assim o cruzamento para a home continua alinhado.
+   -------------------------------------------------------------------------- */
+@media (max-aspect-ratio: 1/1) {
+  .pw-room-wrap > .pw-pixel-svg,
+  .pw-fg-chair-layer > .pw-pixel-svg,
+  .pw-exterior-mask > .pw-pixel-svg {
+    position: absolute;
+    top: 0;
+    left: calc(50% - 110.22cqh);
+    width: 177.78cqh; /* 16:9, limitado pela altura do gate */
+    height: 100%;
+  }
+  /* A abertura do monitor central na arte, já recortada e centralizada. */
+  .pw-monitor-screen {
+    left: calc(50% - 17.78cqh);
+    width: 35.56cqh;
+  }
+  /* Largura definida pelo motor (--pw-hero-w): 100% no início da aproximação
+     e a proporção do viewport no hold. */
+  .pw-hero {
+    width: var(--pw-hero-w, 100%);
+    margin-inline: auto;
+  }
+}
+
+/* --------------------------------------------------------------------------
    HUD em telas pequenas.
    Em retrato o rodapé tem pouco espaço: o rótulo da etapa quebra em duas
    linhas à esquerda e o percentual fica isolado à direita, sem se encostar.

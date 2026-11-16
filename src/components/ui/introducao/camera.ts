@@ -71,9 +71,14 @@ export type PwCamera = {
  * - Stage 1 [0.00 .. 0.24]: Starry night & Pixel Moon
  * - Stage 2 [0.24 .. 0.66]: Smooth pan down through bedroom window into the cozy room
  * - Stage 3 [0.66 .. 1.00]: Push in past the programmer's chair into the center monitor (scale = 5.0)
+ *
+ * `portrait` liga o enquadramento de tela em pé: a arte do quarto é recortada
+ * (não esticada) e o monitor central fica no centro do viewport, então a
+ * câmera centraliza em 50cqw em vez de 62cqw.
  */
-export function pwCamera(t: number): PwCamera {
+export function pwCamera(t: number, portrait = false): PwCamera {
   const k = pwClamp01(t)
+  const endCx = portrait ? 50 : MON_CX
   let cx = 50
   let cy = 42
   let scale = 1.06
@@ -89,7 +94,7 @@ export function pwCamera(t: number): PwCamera {
     chairDrop = 0
   } else if (k < 0.66) {
     const u = pwEaseInOutCubic((k - 0.24) / 0.42)
-    cx = pwLerp(50, 53, u)
+    cx = pwLerp(50, portrait ? 50 : 53, u)
     cy = pwLerp(48, 146, u)
     scale = pwLerp(1.02, 1.28, u)
     winFade = pwClamp01(1 - (u - 0.38) / 0.45)
@@ -98,7 +103,7 @@ export function pwCamera(t: number): PwCamera {
     const u = (k - 0.66) / 0.34
     const posEase = pwEaseInOutCubic(u)
     const zoomEase = Math.pow(pwClamp01(u), 2.3)
-    cx = pwLerp(53, MON_CX, posEase)
+    cx = pwLerp(portrait ? 50 : 53, endCx, posEase)
     cy = pwLerp(146, MON_CY, posEase)
     scale = pwLerp(1.28, FINAL_SCALE, zoomEase)
     winFade = 0

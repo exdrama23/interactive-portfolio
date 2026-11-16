@@ -169,11 +169,18 @@ export default function PixelWorldPreloader({
   const progressRef = React.useRef(progress)
   progressRef.current = progress
 
+  // Em telas em pé a arte do quarto mantém a proporção 16:9 (ver preloader.css)
+  // e o monitor central fica no centro do viewport: a câmera acompanha isso.
+  const portraitRef = React.useRef(false)
+  // Evita reflow do hero a cada frame: só atualiza em passos de 0.5%.
+  const lastHeroWRef = React.useRef(-1)
+
   // Apply camera CSS custom properties directly on rootRef (0 React re-renders per frame)
   const applyCameraVars = React.useCallback((normT: number) => {
     const el = rootRef.current
     if (!el) return
-    const cam = pwCamera(normT)
+    const portrait = portraitRef.current
+    const cam = pwCamera(normT, portrait)
     const pamp = pwClamp01(1 - (normT - 0.65) / 0.3)
     const crtOp = pwClamp01(1 - (normT - 0.8) / 0.2)
     el.style.setProperty("--pw-tx", cam.tx.toFixed(4))
@@ -183,6 +190,30 @@ export default function PixelWorldPreloader({
     el.style.setProperty("--pw-chair-drop", cam.chairDrop.toFixed(2))
     el.style.setProperty("--pw-pamp", pamp.toFixed(3))
     el.style.setProperty("--pw-crt-op", crtOp.toFixed(3))
+    if (portrait) {
+      // A caixa do hero é DOM: em vez de esticar, ela se estreita até o
+      // tamanho que, sob a escala atual da câmera, ocupa a largura do
+      // viewport. No fim (scale 5) ela coincide com a tela em pé.
+      const ratio = (2.8125 * window.innerWidth) / (window.innerHeight * cam.scale)
+      const pctW = Math.min(1, ratio) * 100
+      if (normT >= 1 || Math.abs(pctW - lastHeroWRef.current) >= 0.5) {
+        lastHeroWRef.current = pctW
+        el.style.setProperty("--pw-hero-w", pctW.toFixed(2) + "%")
+      }
+    } else {
+      lastHeroWRef.current = -1
+      el.style.removeProperty("--pw-hero-w")
+    }
+  }, [])
+
+  React.useEffect(() => {
+    const mq = window.matchMedia("(max-aspect-ratio: 1/1)")
+    const sync = () => {
+      portraitRef.current = mq.matches
+    }
+    sync()
+    mq.addEventListener("change", sync)
+    return () => mq.removeEventListener("change", sync)
   }, [])
 
   React.useEffect(() => {
