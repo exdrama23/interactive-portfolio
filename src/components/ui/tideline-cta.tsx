@@ -23,7 +23,6 @@ type Props = {
   eyebrow?: string
   headline: ReactNode
   sub?: ReactNode
-  /** 0–1: quanto está cheio. */
   taken: number
   action: string
   href?: string
@@ -125,7 +124,12 @@ export function TidelineCta({
         <div className="tlc__inner">{face}</div>
       </div>
 
-      <a href={href} className="tlc__buoy">
+      <a
+        href={href}
+        className="tlc__buoy"
+        target={/^https?:/i.test(href) ? '_blank' : undefined}
+        rel={/^https?:/i.test(href) ? 'noopener noreferrer' : undefined}
+      >
         {action}
         <svg viewBox="0 0 16 16" aria-hidden="true">
           <path d="M3 8h10M9 4l4 4-4 4" />
