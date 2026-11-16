@@ -5,87 +5,106 @@
     {
       "id": "hapsengenharia",
       "featured": true,
-      "categories": ["Front-end & UI", "Back-end & APIs"],
-      "kicker": "Dashboard · React + TypeScript",
-      "title": "Aurora",
-      "caption": "Painel de operações com métricas em tempo real, permissões por papel e relatórios exportáveis.",
+      "categories": ["Front-end & UI"],
+      "kicker": "Site institucional · React + Vite",
+      "title": "HAPS Engenharia",
+      "caption": "Site institucional da HAPS Engenharia, com apresentação de serviços, projetos e contato direto pelo site.",
       "image": "https://res.cloudinary.com/dtskn1ns3/image/upload/v1794850990/Captura_de_tela_2026-11-16_135034_t16xiu.png",
-      "alt": "Montanhas cobertas de neve ao anoitecer",
-      "company": { "name": "Hapsengenharia", "logo": "", "url": "www.hapsengenharia.com.br/" },
+      "alt": "Página inicial do site da HAPS Engenharia",
+      "company": { "name": "HAPS Engenharia", "logo": "", "url": "https://www.hapsengenharia.com.br/" },
       "links": [
-        { "label": "Repositório", "url": "https://github.com/exdrama23" }
+        { "label": "Site", "url": "https://www.hapsengenharia.com.br/" }
       ],
-      "summary": "Painel de operações em tempo real para acompanhar métricas, permissões e relatórios em um só lugar.",
-      "techs": ["React", "TypeScript", "Node.js", "PostgreSQL", "WebSocket"],
-      "description": "O Aurora nasceu da necessidade de reunir, em uma única tela, indicadores que antes viviam espalhados por planilhas e sistemas internos. O painel acompanha filas, chamados e desempenho operacional em tempo real, com atualizações via WebSocket e filtros por período.\n\nA arquitetura separa a API de leitura da API de escrita, permitindo consultas pesadas sem travar a operação. O controle de acesso é por papel, e todos os relatórios podem ser exportados em CSV ou PDF. O front-end foi construído em React e TypeScript, com componentes reutilizáveis e estados de carregamento consistentes."
+      "summary": "Site institucional da HAPS Engenharia, com serviços, projetos e contato direto pelo site.",
+      "techs": ["React", "TypeScript", "Vite", "Tailwind CSS", "anime.js", "EmailJS", "React Router"],
+      "description": "O site apresenta a HAPS Engenharia em uma página institucional: abertura com chamada para contato, serviços, projetos e diferenciais da empresa. A navegação foi pensada para levar o visitante de uma visão geral ao formulário em poucos cliques, com menu fixo e seções alternadas.\n\nA interface usa React com React Router, Tailwind CSS e anime.js para as entradas e transições. O formulário de contato é enviado pelo EmailJS, sem back-end próprio, e o layout se adapta do celular ao desktop."
     },
     {
-      "id": "nucleo",
+      "id": "vivaju",
       "featured": true,
-      "categories": ["Back-end & APIs", "Banco de Dados & Cache"],
-      "kicker": "API · Node.js + PostgreSQL",
-      "title": "Núcleo",
-      "caption": "Back-end modular com autenticação, filas e integrações — documentado de ponta a ponta.",
+      "categories": ["Front-end & UI", "Back-end & APIs"],
+      "kicker": "Guia da cidade · React + Node.js",
+      "title": "VivaJu",
+      "caption": "Guia digital de comércios, eventos, culinária e pontos turísticos, com mapa, chat e painel da prefeitura.",
       "image": "https://res.cloudinary.com/dtskn1ns3/image/upload/v1794851025/Captura_de_tela_2026-11-16_140252_q20n3f.png",
-      "alt": "Lago cercado por montanhas, água parada refletindo o céu",
+      "alt": "Página inicial do guia VivaJu",
+      "company": { "name": "VIVAJU", "logo": "", "url": "https://github.com/VIVAJU" },
+      "links": [
+        { "label": "Site", "url": "https://vivaju.vercel.app" },
+        { "label": "Repositório", "url": "https://github.com/exdrama23/vivaju" }
+      ],
+      "summary": "Guia da cidade que reúne comércios, eventos e pontos turísticos em um só lugar, com mapa interativo e moderação.",
+      "techs": [
+        "React",
+        "TypeScript",
+        "Vite",
+        "Express",
+        "Prisma",
+        "PostgreSQL",
+        "Socket.io",
+        "Leaflet",
+        "Recharts",
+        "Lottie"
+      ],
+      "description": "O VivaJu funciona como um guia da cidade: comércios, restaurantes, estacionamentos, eventos e pontos turísticos ficam catalogados por categoria, com busca, filtros e sugestões de lugares próximos.\n\nO mapa usa Leaflet com marcadores e popups próprios, e a navegação por categoria reaproveita os mesmos cartões em carrosséis. O back-end em Express com Prisma e PostgreSQL guarda o catálogo e as sugestões enviadas pelos moradores, com autenticação JWT, argon2 e limite de requisições. Há ainda chat com Socket.io, notificações, tarefas agendadas com node-cron e um painel separado para a prefeitura revisar o conteúdo."
+    },
+    {
+      "id": "lpg",
+      "featured": true,
+      "categories": ["Front-end & UI", "IA & Dados"],
+      "kicker": "Matching com IA · React + NestJS",
+      "title": "LPG",
+      "caption": "Plataforma que conecta profissionais e empresas de petróleo e gás com matching por certificações, experiência e competências.",
+      "image": "https://res.cloudinary.com/dtskn1ns3/image/upload/v1794851006/Captura_de_tela_2026-11-16_141358_wbypee.png",
+      "alt": "Página inicial da plataforma LPG",
+      "company": { "name": "LPG · Link Petróleo e Gás", "logo": "", "url": "https://github.com/LPGdevgas" },
+      "links": [
+        { "label": "Organização", "url": "https://github.com/LPGdevgas" }
+      ],
+      "summary": "Plataforma de contratação para o setor de petróleo e gás, com análise de vagas e perfis por IA.",
+      "techs": [
+        "React",
+        "TypeScript",
+        "Vite",
+        "Tailwind CSS",
+        "Three.js",
+        "GSAP",
+        "NestJS",
+        "Prisma",
+        "PostgreSQL",
+        "Redis",
+        "BullMQ",
+        "Socket.io",
+        "Ollama"
+      ],
+      "description": "A LPG conecta profissionais, empresas prestadoras de serviço e contratantes do setor de petróleo e gás. A plataforma analisa vagas e perfis em tempo real e faz o matching com base em certificações, experiência e competências técnicas, reduzindo o tempo de contratação.\n\nO front-end em React e TypeScript usa Tailwind CSS, GSAP e Three.js nas animações e cenas da landing. O back-end em NestJS organiza autenticação, perfis e vagas sobre Prisma e PostgreSQL, com Redis e BullMQ para filas, Socket.io para tempo real, Swagger para o contrato da API e Ollama no apoio à análise dos perfis. Os repositórios são privados; o link leva à organização no GitHub."
+    },
+    {
+      "id": "rio_do_sal",
+      "featured": true,
+      "categories": ["Front-end & UI", "Conceitos & Especialidades"],
+      "kicker": "Plataforma socioambiental · Next.js + WebGL",
+      "title": "Rio do Sal",
+      "caption": "Plataforma sobre o Rio do Sal (SE) com histórias, linha do tempo, galeria e uma proposta de filtragem de esgoto.",
+      "image": "https://res.cloudinary.com/dtskn1ns3/image/upload/v1794852388/3db9e81b-cbfc-4b55-9b89-d2b91ce0fe66.png",
+      "alt": "Página inicial do site Rio do Sal",
       "company": { "name": "Projeto autoral", "logo": "", "url": "" },
       "links": [
-        { "label": "Repositório", "url": "https://github.com/exdrama23" }
+        { "label": "Site", "url": "https://riodosal.vercel.app" },
+        { "label": "Repositório", "url": "https://github.com/exdrama23/rio_do_sal" }
       ],
-      "summary": "API modular com autenticação, filas assíncronas e integrações, documentada de ponta a ponta.",
-      "techs": ["Node.js", "Express", "PostgreSQL", "Redis", "Docker"],
-      "description": "O Núcleo é uma base de back-end pensada para ser reaproveitada em diferentes produtos. Ele reúne autenticação, autorização, envio de e-mails, filas assíncronas e um conjunto de integrações externas prontas para uso.\n\nA organização por módulos mantém cada domínio isolado, com contratos claros entre as camadas. Os processos demorados rodam em filas com Redis, e o ambiente completo sobe com Docker Compose. A documentação cobre desde a configuração inicial até o detalhamento de cada endpoint, facilitando a entrada de novos desenvolvedores."
-    },
-    {
-      "id": "vitrine",
-      "featured": true,
-      "categories": ["Front-end & UI", "Back-end & APIs"],
-      "kicker": "E-commerce · Next.js",
-      "title": "Vitrine",
-      "caption": "Loja completa com catálogo, carrinho persistente e checkout integrado a meios de pagamento.",
-      "image": "https://res.cloudinary.com/dtskn1ns3/image/upload/v1794851006/Captura_de_tela_2026-11-16_141358_wbypee.png",
-      "alt": "Cachoeira entre paredões de rocha e vegetação",
-      "company": { "name": "Cliente independente", "logo": "", "url": "" },
-      "links": [
-        { "label": "Repositório", "url": "https://github.com/exdrama23" }
+      "summary": "Experiência digital sobre o Rio do Sal, unindo resgate histórico, educação ambiental e uma solução para a poluição.",
+      "techs": [
+        "Next.js",
+        "React",
+        "Three.js",
+        "React Three Fiber",
+        "Theatre.js",
+        "GSAP",
+        "Framer Motion",
+        "Tailwind CSS"
       ],
-      "summary": "Loja completa com catálogo, carrinho persistente e checkout integrado a meios de pagamento.",
-      "techs": ["Next.js", "TypeScript", "Tailwind CSS", "Stripe", "PostgreSQL"],
-      "description": "A Vitrine é uma loja construída para ser rápida no primeiro acesso e simples de manter. O catálogo é renderizado no servidor, as imagens passam por otimização automática e o carrinho sobrevive à navegação entre páginas e dispositivos.\n\nO checkout foi integrado a meios de pagamento com confirmação por webhook, tratamento de falhas e reenvio seguro. A área administrativa permite cadastrar produtos, controlar estoque e acompanhar pedidos sem depender de uma plataforma externa."
-    },
-    {
-      "id": "orbe",
-      "featured": true,
-      "categories": ["Front-end & UI", "Conceitos & Especialidades"],
-      "kicker": "Experimento 3D · WebGL",
-      "title": "Orbe",
-      "caption": "Estudo de materiais, luz e movimento em tempo real — a mesma linguagem visual deste portfólio.",
-      "image": "https://res.cloudinary.com/dtskn1ns3/image/upload/v1794852388/3db9e81b-cbfc-4b55-9b89-d2b91ce0fe66.png",
-      "alt": "Pico rochoso sob um céu estrelado",
-      "company": { "name": "Estudo autoral", "logo": "", "url": "" },
-      "links": [
-        { "label": "Repositório", "url": "https://github.com/exdrama23" }
-      ],
-      "summary": "Estudo de materiais, luz e movimento em tempo real que deu origem à linguagem visual deste portfólio.",
-      "techs": ["three.js", "WebGL", "GLSL", "React", "GSAP"],
-      "description": "O Orbe começou como um laboratório para testar materiais, iluminação e movimento sem depender de modelos prontos. Cada cena é construída com geometria simples e shaders próprios, buscando um resultado orgânico com poucos elementos.\n\nO projeto virou a base visual de outras experiências do portfólio: a transição de entrada, o carrossel curvo e os efeitos de profundidade usam as mesmas ideias de câmera, luz e tempo. O desempenho foi ajustado para rodar em telas modestas, com limites de pixel ratio e pausa automática quando a seção sai da tela."
-    },
-    {
-      "id": "rota",
-      "featured": false,
-      "categories": ["Front-end & UI", "Conceitos & Especialidades"],
-      "kicker": "PWA · Offline first",
-      "title": "Rota",
-      "caption": "Aplicação instalável com cache inteligente, sincronização em segundo plano e mapa em campo.",
-      "image": "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=900&h=1125&q=80",
-      "alt": "Floresta enevoada vista do alto",
-      "company": { "name": "Cliente independente", "logo": "", "url": "" },
-      "links": [
-        { "label": "Repositório", "url": "https://github.com/exdrama23" }
-      ],
-      "summary": "Aplicação instalável com cache inteligente, sincronização em segundo plano e mapa em campo.",
-      "techs": ["React", "TypeScript", "PWA", "Service Worker", "IndexedDB"],
-      "description": "O Rota foi feito para funcionar onde a conexão é instável. Rotas, pontos de parada e registros ficam disponíveis offline, e tudo o que é criado em campo é sincronizado automaticamente quando a rede volta.\n\nA aplicação pode ser instalada na tela inicial e usa cache inteligente para não baixar dados repetidos. O mapa foi pensado para uso com uma mão, com controles grandes, leitura rápida e confirmação visual antes de qualquer alteração."
+      "description": "O Rio do Sal é uma plataforma dedicada ao rio que corta Aracaju e Nossa Senhora do Socorro, em Sergipe. O site reúne histórias, uma linha do tempo, galeria e a memória ribeirinha, além de apresentar uma proposta de separação de resíduos e filtragem de esgoto para recuperar o oxigênio da água.\n\nA narrativa é conduzida por uma cena 3D em React Three Fiber, com shaders próprios para o fundo, animações coreografadas no Theatre.js e complementos em GSAP e Framer Motion. O conteúdo fica isolado em arquivos de dados tipados, e o layout alterna entre blocos editoriais e imagens em tela cheia."
     },
     {
       "id": "tr069",
@@ -101,7 +120,18 @@
         { "label": "Site", "url": "https://tr-069.vercel.app" }
       ],
       "summary": "Camada REST sobre o GenieACS para provisionar e monitorar roteadores TR-069/TR-181 em escala.",
-      "techs": ["Node.js", "TypeScript", "Express", "MongoDB", "PostgreSQL", "Redis", "BullMQ", "Socket.io", "Zod", "Docker"],
+      "techs": [
+        "Node.js",
+        "TypeScript",
+        "Express",
+        "MongoDB",
+        "PostgreSQL",
+        "Redis",
+        "BullMQ",
+        "Socket.io",
+        "Zod",
+        "Docker"
+      ],
       "description": "O TR-069 parte de um problema real de ISP: o GenieACS resolve o protocolo, mas expõe uma interface crua, difícil de operar em massa. O projeto embrulha esse motor em uma API modular, com DTOs validados por Zod, contrato OpenAPI gerado a partir dos schemas e autenticação JWT com argon2.\n\nA arquitetura usa injeção de dependência com tsyringe e um barramento de eventos com assinantes de auditoria e de socket, então cada alteração em um CPE vira log e notificação em tempo real. Tarefas demoradas (reboot, upgrade de firmware, coleta de parâmetros) rodam em filas BullMQ sobre Redis. O estado quente fica no MongoDB, a telemetria em PostgreSQL/TimescaleDB, e o deploy é via Docker com CI no GitHub Actions."
     },
     {
@@ -115,30 +145,11 @@
       "alt": "Painel de chamados do InfraDesk",
       "company": { "name": "Projeto autoral", "logo": "", "url": "" },
       "links": [
-        { "label": "Site", "url": "https://infradesk-phi.vercel.app" },
         { "label": "Repositório", "url": "https://github.com/exdrama23/infradesk" }
       ],
       "summary": "Gestão de chamados e demandas de TI com autenticação por papel e conversa em tempo real.",
       "techs": ["NestJS", "Prisma", "PostgreSQL", "Socket.io", "Angular", "TypeScript", "Docker"],
       "description": "O InfraDesk organiza chamados e demandas de TI em um fluxo único: abertura, atribuição, conversa e acompanhamento. O back-end em NestJS separa os domínios de autenticação, tickets, mensagens e jobs, com guards de papel e throttling nas rotas sensíveis.\n\nAs mensagens de um chamado chegam por WebSocket, então a conversa não depende de recarregar a página. Senhas passam por argon2, a API usa helmet e cookie-parser, e o acesso ao banco é feito com Prisma sobre PostgreSQL. O front-end em Angular consome a mesma API com interceptors de autenticação, e o ambiente completo sobe com Docker Compose."
-    },
-    {
-      "id": "rio_do_sal",
-      "featured": false,
-      "categories": ["Front-end & UI", "Conceitos & Especialidades"],
-      "kicker": "Site cultural · Next.js + WebGL",
-      "title": "Rio do Sal",
-      "caption": "Site de capoeira com cenas 3D, animações dirigidas por Theatre.js e acervo de histórias, músicas e galeria.",
-      "image": "",
-      "alt": "Página inicial do site Rio do Sal",
-      "company": { "name": "Projeto autoral", "logo": "", "url": "" },
-      "links": [
-        { "label": "Site", "url": "https://riodosal.vercel.app" },
-        { "label": "Repositório", "url": "https://github.com/exdrama23/rio_do_sal" }
-      ],
-      "summary": "Experiência digital para um grupo de capoeira, com cenas 3D e conteúdo organizado por história, música e memória.",
-      "techs": ["Next.js", "React", "Three.js", "React Three Fiber", "Theatre.js", "GSAP", "Framer Motion", "Tailwind CSS"],
-      "description": "O Rio do Sal transforma o acervo de um grupo de capoeira em um site navegável. As seções cobrem história, raízes, mestres, músicas, galeria, mural e calendário, com páginas individuais para cada relato e uma timeline que amarra a narrativa.\n\nA camada visual usa React Three Fiber e drei para montar a cena do herói, com shaders próprios para o fundo e um nó que referencia a ginga. As animações são coreografadas no Theatre.js e complementadas por GSAP e Framer Motion, enquanto o conteúdo fica separado em arquivos de dados tipados."
     },
     {
       "id": "sete-quedas",
@@ -155,7 +166,16 @@
         { "label": "Repositório", "url": "https://github.com/exdrama23/Sete_Quedas_Portfolio" }
       ],
       "summary": "Portfólio de um mestre de capoeira, unindo biografia, discografia e memória do grupo em uma experiência 3D.",
-      "techs": ["Next.js", "React", "Three.js", "React Three Fiber", "Theatre.js", "GSAP", "Framer Motion", "Tailwind CSS"],
+      "techs": [
+        "Next.js",
+        "React",
+        "Three.js",
+        "React Three Fiber",
+        "Theatre.js",
+        "GSAP",
+        "Framer Motion",
+        "Tailwind CSS"
+      ],
       "description": "O Sete Quedas nasceu da mesma base técnica do Rio do Sal, mas com outro recorte de conteúdo: em vez de um grupo, o site apresenta a trajetória de um mestre, com páginas de biografia por slug, faixas, músicas e registros do mural.\n\nA estrutura repete a cena 3D em WebGL com shaders próprios, as animações dirigidas no Theatre.js e o conteúdo isolado em arquivos de dados. Serviu como exercício de reaproveitar uma arquitetura de front-end trocando apenas o acervo e a identidade visual."
     },
     {
@@ -168,9 +188,7 @@
       "image": "",
       "alt": "Painel de automação GEAP",
       "company": { "name": "Projeto autoral", "logo": "", "url": "" },
-      "links": [
-        { "label": "Site", "url": "https://automa-o-g.vercel.app" }
-      ],
+      "links": [],
       "summary": "Automação de rotinas de um portal corporativo, com agendamento, importação de planilhas e exportação de relatórios.",
       "techs": ["NestJS", "Playwright", "Prisma", "PostgreSQL", "React", "Vite", "Tailwind CSS", "Recharts"],
       "description": "O projeto automatiza o que antes era feito à mão em um portal corporativo. Um Chrome persistente roda em uma VPS com Xvfb e NoVNC, controlado pelo Playwright em modo CDP, o que permite manter a sessão autenticada entre execuções.\n\nO back-end em NestJS agenda as rotinas com @nestjs/schedule, lê planilhas com xlsx e grava o resultado no PostgreSQL (Neon) via Prisma. O front-end em React consulta esses dados, exibe gráficos com Recharts e monta relatórios em .docx e PDF no próprio navegador. Em produção tudo fica atrás de um Nginx, com PM2 cuidando dos processos."
@@ -203,11 +221,19 @@
       "image": "",
       "alt": "Área de trabalho do Aether OS",
       "company": { "name": "Projeto autoral", "logo": "", "url": "" },
-      "links": [
-        { "label": "Site", "url": "https://aether-os-psi-beryl.vercel.app" }
-      ],
+      "links": [],
       "summary": "Sistema operacional fictício no navegador, usado como portfólio interativo com apps reais.",
-      "techs": ["React", "TypeScript", "Vite", "Monaco Editor", "xterm.js", "Zustand", "Tailwind CSS", "IndexedDB", "PWA"],
+      "techs": [
+        "React",
+        "TypeScript",
+        "Vite",
+        "Monaco Editor",
+        "xterm.js",
+        "Zustand",
+        "Tailwind CSS",
+        "IndexedDB",
+        "PWA"
+      ],
       "description": "O Aether OS simula um desktop Linux no navegador, inspirado em Hyprland, KDE e GNOME. Cada aplicativo é um componente de verdade: editor com Monaco, terminal com xterm.js, navegador, arquivos, notas, calculadora, player de música e loja.\n\nO gerenciador de janelas controla foco, arraste, redimensionamento e layouts de encaixe, enquanto o sistema de arquivos persiste em IndexedDB. O estado global fica no Zustand, há diálogo de permissões para recursos sensíveis e o conjunto é instalável como PWA. Os testes de componentes rodam em Vitest."
     },
     {
@@ -224,7 +250,18 @@
         { "label": "Site", "url": "https://ia-acesso.vercel.app" }
       ],
       "summary": "Chat de suporte com RAG sobre uma base própria, embeddings locais e fallback entre provedores de IA.",
-      "techs": ["React", "TypeScript", "Express", "Prisma", "PostgreSQL", "Redis", "Gemini", "OpenAI", "Transformers.js", "MediaPipe"],
+      "techs": [
+        "React",
+        "TypeScript",
+        "Express",
+        "Prisma",
+        "PostgreSQL",
+        "Redis",
+        "Gemini",
+        "OpenAI",
+        "Transformers.js",
+        "MediaPipe"
+      ],
       "description": "O AcessoIA foi feito para responder perguntas repetitivas de acesso sem depender sempre de um modelo grande. O back-end classifica a intenção da mensagem, busca trechos relevantes em uma base de conhecimento e só então monta a resposta, com cache em Redis para perguntas frequentes.\n\nOs embeddings podem ser gerados localmente com Transformers.js e ONNX, e há integrações com Gemini, OpenAI e OpenRouter quando a resposta exige mais contexto. O painel administrativo permite acompanhar métricas, revisar conteúdo e manter a base de FAQ, enquanto o front-end reúne chat, calendário e uma cena 3D feita com React Three Fiber."
     },
     {
@@ -243,24 +280,6 @@
       "summary": "Aplicação de geração de conteúdo com autenticação, histórico pesquisável e controle de cota.",
       "techs": ["Next.js", "React", "Supabase", "PostgreSQL", "OpenAI", "React Hook Form", "Valibot", "Tailwind CSS"],
       "description": "O Flowgen é uma aplicação completa de geração de conteúdo: cadastro, confirmação de e-mail, recuperação de senha e uma área logada com geração, histórico filtrável, detalhe do conteúdo e perfil. A autenticação usa Supabase com SSR, e os formulários são validados com Valibot e React Hook Form.\n\nA geração passa por uma rota de API que conversa com a OpenAI, e um segundo endpoint controla a cota de uso por usuário. O histórico guarda o que foi gerado, permite busca e filtros, e cada item pode ser exportado em PDF no servidor com @react-pdf/renderer."
-    },
-    {
-      "id": "vivaju",
-      "featured": false,
-      "categories": ["Front-end & UI", "Back-end & APIs"],
-      "kicker": "Guia da cidade · React + Node.js",
-      "title": "VivaJu",
-      "caption": "Guia digital de comércios, eventos, culinária e pontos turísticos, com mapa, chat e painel da prefeitura.",
-      "image": "",
-      "alt": "Página inicial do guia VivaJu",
-      "company": { "name": "Projeto autoral", "logo": "", "url": "" },
-      "links": [
-        { "label": "Site", "url": "https://vivaju.vercel.app" },
-        { "label": "Repositório", "url": "https://github.com/exdrama23/vivaju" }
-      ],
-      "summary": "Guia da cidade que reúne comércios, eventos e pontos turísticos em um só lugar, com mapa interativo e moderação.",
-      "techs": ["React", "TypeScript", "Vite", "Express", "Prisma", "PostgreSQL", "Socket.io", "Leaflet", "Recharts", "Lottie"],
-      "description": "O VivaJu funciona como um guia da cidade: comércios, restaurantes, estacionamentos, eventos e pontos turísticos ficam catalogados por categoria, com busca, filtros e sugestões de lugares próximos.\n\nO mapa usa Leaflet com marcadores e popups próprios, e a navegação por categoria reaproveita os mesmos cartões em carrosséis. O back-end em Express com Prisma e PostgreSQL guarda o catálogo e as sugestões enviadas pelos moradores, com autenticação JWT, argon2 e limite de requisições. Há ainda chat com Socket.io, notificações, tarefas agendadas com node-cron e um painel separado para a prefeitura revisar o conteúdo."
     },
     {
       "id": "carla-levita",
@@ -410,9 +429,7 @@
       "image": "",
       "alt": "Tela de formulário da plataforma Inovase",
       "company": { "name": "Projeto autoral", "logo": "", "url": "" },
-      "links": [
-        { "label": "Site", "url": "https://inovase-forms.vercel.app" }
-      ],
+      "links": [],
       "summary": "Front-end de uma plataforma de gestão para centro de treinamento esportivo.",
       "techs": ["HTML", "Tailwind CSS", "JavaScript", "PWA"],
       "description": "O Inovase Forms reúne, em uma interface só, o que um aluno precisa para acompanhar o treino: horários disponíveis, pagamentos e envio de documentos. O layout foi desenhado primeiro para o celular, com navegação simples e formulários curtos.\n\nA entrega é um front-end estático com manifest de PWA, organizado em HTML, CSS e JavaScript por módulo. Serve como base visual e de fluxo para a versão integrada a um back-end."
@@ -467,6 +484,323 @@
       "summary": "Aplicação pequena para buscar perfis do GitHub pelo nome de usuário.",
       "techs": ["React", "TypeScript", "Vite", "axios", "GitHub API"],
       "description": "Uma aplicação de uma tela só: o usuário digita um nome de usuário, o axios consulta a API pública do GitHub e a interface exibe nome, bio e avatar. Enquanto a resposta não chega, os campos mostram um estado de carregamento.\n\nO projeto foi feito para praticar consumo de API tipado, estados de requisição e tratamento de resposta no React com TypeScript, sem biblioteca de estado ou roteamento."
+    },
+    {
+      "id": "emprego",
+      "featured": false,
+      "categories": ["Front-end & UI", "Back-end & APIs"],
+      "kicker": "Plataforma de vagas · React + Express",
+      "title": "EmpreGo",
+      "caption": "Plataforma de empregos com perfis de candidatos e empresas, chat em tempo real e busca por localização.",
+      "image": "",
+      "alt": "Página inicial da plataforma EmpreGo",
+      "company": { "name": "EmpreGo", "logo": "", "url": "https://github.com/emprego-vagas" },
+      "links": [
+        { "label": "Repositório", "url": "https://github.com/emprego-vagas/EmpreGo_react" }
+      ],
+      "summary": "Plataforma de vagas que reúne candidatos e empresas, com perfis completos, chat e notificações em tempo real.",
+      "techs": [
+        "React",
+        "TypeScript",
+        "Vite",
+        "Tailwind CSS",
+        "Express",
+        "Prisma",
+        "PostgreSQL",
+        "Socket.io",
+        "Redis",
+        "Cloudinary",
+        "Resend"
+      ],
+      "description": "O EmpreGo é uma plataforma de vagas que aproxima candidatos e empresas. Cada lado tem seu próprio fluxo de cadastro e edição de perfil, com upload de imagem, banner e currículo, favoritos, idiomas, experiências e projetos.\n\nO back-end em Express e TypeScript usa Prisma sobre PostgreSQL, Socket.io para chat e notificações em tempo real, Redis para cache e limites, Cloudinary para mídia e Resend para e-mails. Há login com Google, geolocalização por IP e tarefas agendadas de manutenção. O front-end em React e Vite consome a API e monta as telas de busca, perfil e conversa."
+    },
+    {
+      "id": "reforca-mais",
+      "featured": false,
+      "categories": ["Front-end & UI", "Conceitos & Especialidades"],
+      "kicker": "Alfabetização digital · Kotlin + Next.js",
+      "title": "Reforça+",
+      "caption": "App Android e landing page de alfabetização digital, com trilhas gamificadas, narração por voz e alto contraste.",
+      "image": "",
+      "alt": "Página inicial da plataforma Reforça+",
+      "company": { "name": "Reforça+", "logo": "", "url": "https://github.com/Reforca-mais" },
+      "links": [
+        { "label": "Site", "url": "https://reforcamais.vercel.app" },
+        { "label": "App (Android)", "url": "https://github.com/Reforca-mais/Reforca-mais-app" },
+        { "label": "Landing page", "url": "https://github.com/Reforca-mais/Recarga-landing-page" }
+      ],
+      "summary": "Plataforma de alfabetização digital para pessoas com déficit de escolaridade, com trilhas, minijogos e acessibilidade.",
+      "techs": ["Kotlin", "Jetpack Compose", "Room", "Next.js", "React", "Three.js", "Theatre.js", "Tailwind CSS"],
+      "description": "O Reforça+ foi pensado para pessoas que não concluíram a alfabetização básica. O app Android organiza o aprendizado em fases e trilhas, com minijogos de ligar pontos, montar palavras e reconhecer sílabas, além de quiz e um painel de progresso.\n\nA acessibilidade é parte da estrutura: narração por voz, alto contraste e ícones simples guiam o uso. O app é escrito em Kotlin com Jetpack Compose e Room para persistência local. A landing page em Next.js apresenta a plataforma com cenas em Three.js e animações dirigidas no Theatre.js."
+    },
+    {
+      "id": "lead-event",
+      "featured": false,
+      "categories": ["Front-end & UI", "Back-end & APIs"],
+      "kicker": "Eventos · Next.js + NestJS",
+      "title": "LeadEvent",
+      "caption": "Captação de leads, credenciamento e outreach automatizado para eventos, com formulários segmentados e triagem.",
+      "image": "",
+      "alt": "Página inicial do LeadEvent",
+      "company": { "name": "Sharks Systems Brazil", "logo": "", "url": "https://github.com/sharks-systems-br" },
+      "links": [
+        { "label": "Site", "url": "https://lead-event-beige.vercel.app" },
+        { "label": "Repositório", "url": "https://github.com/sharks-systems-br/LeadEvent" }
+      ],
+      "summary": "Sistema de captação de leads e credenciamento de eventos, com formulários por perfil e disparos automatizados.",
+      "techs": [
+        "Next.js",
+        "React",
+        "TypeScript",
+        "Tailwind CSS",
+        "shadcn/ui",
+        "NestJS",
+        "MikroORM",
+        "PostgreSQL",
+        "Bun"
+      ],
+      "description": "O LeadEvent organiza a captação de leads de um evento em dois fluxos: influenciadores e patrocinadores. Cada perfil preenche um formulário próprio, com validações e envio opcional de vídeo, e a equipe acompanha tudo em um painel de triagem.\n\nO front-end em Next.js usa Tailwind e shadcn/ui, com contrato OpenAPI compartilhado e checagem automática. O back-end em NestJS com MikroORM e PostgreSQL cuida de autenticação, aprovação e da fila de disparos automatizados para WhatsApp e Instagram, com atraso anti-spam. O Cloudflare Turnstile protege os formulários públicos."
+    },
+    {
+      "id": "consulteja",
+      "featured": false,
+      "categories": ["Back-end & APIs", "Front-end & UI"],
+      "kicker": "Gestão · React + Prisma",
+      "title": "ConsulteJa",
+      "caption": "Plataforma de gestão para pequenos negócios com produtos, funcionários, permissões e histórico de alterações.",
+      "image": "",
+      "alt": "Página inicial do ConsulteJa",
+      "company": { "name": "Sharks Systems Brazil", "logo": "", "url": "https://github.com/sharks-systems-br" },
+      "links": [
+        { "label": "Site", "url": "https://consulte-ja.vercel.app" }
+      ],
+      "summary": "Painel de gestão com catálogo de produtos, equipe, permissões e auditoria das alterações.",
+      "techs": [
+        "React",
+        "TypeScript",
+        "Vite",
+        "Express",
+        "Prisma",
+        "PostgreSQL",
+        "Zod",
+        "BullMQ",
+        "Redis",
+        "Cloudinary",
+        "Resend"
+      ],
+      "description": "O ConsulteJa reúne o cadastro de produtos, funcionários e permissões de uma empresa em um painel único. Cada alteração passa por validação com Zod e fica registrada em um histórico de auditoria, com paginação e cache nas consultas.\n\nO back-end em Express e Prisma usa PostgreSQL, Redis e BullMQ para tarefas em segundo plano, além de Cloudinary e Resend para arquivos e e-mails. A autenticação trabalha com sessões e níveis de acesso, e o front-end em React organiza tudo em telas de busca, cadastro e acompanhamento. O repositório é privado; o link leva ao site."
+    },
+    {
+      "id": "posts-crud",
+      "featured": false,
+      "categories": ["Front-end & UI", "Back-end & APIs"],
+      "kicker": "Micro frontend · Angular 21",
+      "title": "Posts CRUD",
+      "caption": "CRUD de publicações em Angular 21 com Keycloak, SSR e um laboratório de formulários guiado por schema.",
+      "image": "",
+      "alt": "Tela de listagem do Posts CRUD",
+      "company": { "name": "Residências Faculdade", "logo": "", "url": "https://github.com/Residencias-Faculdade" },
+      "links": [
+        { "label": "Site", "url": "https://crud-angular-pi.vercel.app" },
+        { "label": "Repositório", "url": "https://github.com/Residencias-Faculdade/crud-angular" }
+      ],
+      "summary": "CRUD de posts em Angular com autenticação Keycloak, componentes reutilizáveis e formulários gerados por schema.",
+      "techs": [
+        "Angular 21",
+        "TypeScript",
+        "Angular Elements",
+        "Keycloak",
+        "RxJS",
+        "Express SSR",
+        "Vitest",
+        "Docker",
+        "Nginx"
+      ],
+      "description": "O Posts CRUD lista publicações vindas do JSONPlaceholder e permite criar, editar e excluir posts do usuário em memória, com paginação de dez itens e modais de formulário. A feature é separada em domínio, dados, estado e apresentação, com o estado em um store e o acesso HTTP em um repositório.\n\nA autenticação usa Keycloak, com guard e interceptor HTTP, e o projeto também inclui um laboratório em /lab que gera formulários completos a partir de um schema JSON ou YAML. O build sai como Web Component via Angular Elements e roda em Docker com Nginx, com SSR em Express."
+    },
+    {
+      "id": "project-list",
+      "featured": false,
+      "categories": ["Front-end & UI", "Conceitos & Especialidades"],
+      "kicker": "Micro frontend · Angular + Web Components",
+      "title": "Project List",
+      "caption": "Web component Angular para gerenciar workspaces de infraestrutura e emitir o projeto selecionado para outros micro frontends.",
+      "image": "",
+      "alt": "Tela de listagem do Project List",
+      "company": { "name": "Residências Faculdade", "logo": "", "url": "https://github.com/Residencias-Faculdade" },
+      "links": [
+        { "label": "Repositório", "url": "https://github.com/Residencias-Faculdade/crud-project-list" }
+      ],
+      "summary": "CRUD de workspaces empacotado como Web Component, com evento de seleção para integrar outros micro frontends.",
+      "techs": ["Angular 21", "TypeScript", "Angular Elements", "RxJS", "json-server", "Docker", "Nginx"],
+      "description": "O Project List é um CRUD de workspaces de infraestrutura empacotado como Web Component. Ele cadastra, lista, edita e exclui projetos via REST (com json-server no desenvolvimento) e expõe a tag isolada <project-list> para ser montada por qualquer página.\n\nAo selecionar um projeto, o componente dispara o evento project-selected, que a casca usa para alimentar o <member-manager>. O projeto inclui Dockerfile com Nginx para o deploy e pipeline no GitLab CI."
+    },
+    {
+      "id": "member-manager",
+      "featured": false,
+      "categories": ["Front-end & UI", "Conceitos & Especialidades"],
+      "kicker": "Micro frontend · Angular + RBAC",
+      "title": "Member Manager",
+      "caption": "Web component Angular de controle de acesso que filtra membros por projeto e alterna papéis Admin, Operator e Viewer.",
+      "image": "",
+      "alt": "Tela de gerenciamento de membros do Member Manager",
+      "company": { "name": "Residências Faculdade", "logo": "", "url": "https://github.com/Residencias-Faculdade" },
+      "links": [
+        { "label": "Site", "url": "https://crud-member-manager.vercel.app" },
+        { "label": "Repositório", "url": "https://github.com/Residencias-Faculdade/crud-member-manager" }
+      ],
+      "summary": "Componente de RBAC que recebe o projeto por atributo, filtra os membros e permite trocar permissões.",
+      "techs": [
+        "Angular 21",
+        "TypeScript",
+        "Angular Elements",
+        "Angular Material",
+        "CDK",
+        "RxJS",
+        "json-server",
+        "Vitest"
+      ],
+      "description": "O Member Manager gerencia quem tem acesso a cada projeto. O componente recebe o id do projeto por atributo HTML, filtra a lista de membros e permite adicionar, remover e trocar o papel entre Admin, Operator e Viewer; sem projeto selecionado, a interface fica desabilitada.\n\nA tabela e os diálogos usam Angular Material e CDK, e o build é exportado como Web Component com Angular Elements. O consumo esperado é a tag <member-manager project-id=\"...\">, alimentada pelo evento emitido pelo <project-list>."
+    },
+    {
+      "id": "microfrontend",
+      "featured": false,
+      "categories": ["Front-end & UI", "Conceitos & Especialidades"],
+      "kicker": "Biblioteca shell · Vite + Web Components",
+      "title": "atividadengx",
+      "caption": "Biblioteca shell que orquestra micro frontends por Web Components, com Keycloak SSO, Shadow DOM e registro em runtime.",
+      "image": "",
+      "alt": "Tela da shell atividadengx com micro frontends montados",
+      "company": { "name": "Residências Faculdade", "logo": "", "url": "https://github.com/Residencias-Faculdade" },
+      "links": [
+        { "label": "Site", "url": "https://micro-frontend-rho.vercel.app" },
+        { "label": "Repositório", "url": "https://github.com/Residencias-Faculdade/MicroFrontend" }
+      ],
+      "summary": "Casca de micro frontends que descobre, carrega e isola aplicações sem rebuild, com login único via Keycloak.",
+      "techs": ["Vite 6", "TypeScript", "Web Components", "Shadow DOM", "Keycloak", "Nginx", "Docker Compose"],
+      "description": "O atividadengx é uma casca para micro frontends: em vez de acoplar os times em um único build, ela lê um microfrontends.json, injeta o script de cada frontend e monta o Custom Element correspondente dentro de um contêiner isolado por Shadow DOM.\n\nA autenticação é centralizada no Keycloak com PKCE S256 e renovação de token, e a navegação fica em um grid com barra lateral. O deploy é desacoplado: publicar um novo micro frontend não exige rebuild da shell. O ambiente sobe com Docker Compose e o build é servido por Nginx."
+    },
+    {
+      "id": "apicenter-tags",
+      "featured": false,
+      "categories": ["Front-end & UI", "Conceitos & Especialidades"],
+      "kicker": "Micro frontend · Angular 21",
+      "title": "API Center Tags",
+      "caption": "Web component Angular para cadastrar e listar as tags que classificam as APIs do catálogo.",
+      "image": "",
+      "alt": "Tela de cadastro de tags do API Center",
+      "company": { "name": "API Center · SEFAZ", "logo": "", "url": "" },
+      "links": [
+        { "label": "Repositório", "url": "https://github.com/Residencias-Faculdade/apicenter-tags" }
+      ],
+      "summary": "Micro frontend de tags do catálogo de APIs, com formulário e listagem empacotados como Web Component.",
+      "techs": ["Angular 21", "TypeScript", "Angular Elements", "RxJS", "Vitest"],
+      "description": "O API Center Tags é o micro frontend de classificação do catálogo de APIs. Ele oferece formulário e listagem de tags, com validação e estados de carregamento, e é exportado como Web Component para ser montado pela casca do API Center.\n\nO componente segue a mesma estrutura dos demais CRUDs do projeto: feature isolada, serviço HTTP próprio e build com Angular Elements. Faz parte do API Center, iniciativa da SEFAZ para padronizar contratos e centralizar as APIs dos sistemas internos."
+    },
+    {
+      "id": "apicenter-gateway",
+      "featured": false,
+      "categories": ["Front-end & UI", "Back-end & APIs"],
+      "kicker": "Micro frontend · Angular + OpenAPI",
+      "title": "API Center Gateway",
+      "caption": "Micro frontend para cadastrar gateways e backends do catálogo de APIs da SEFAZ, com health check e deploy.",
+      "image": "",
+      "alt": "Tela de gateways do API Center",
+      "company": { "name": "API Center · SEFAZ", "logo": "", "url": "" },
+      "links": [
+        { "label": "Repositório", "url": "https://github.com/Residencias-Faculdade/apicenter-gateway" }
+      ],
+      "summary": "Gestão de gateways e backends do API Center, com health check, pipelines de deploy e histórico de alterações.",
+      "techs": ["Angular 21", "TypeScript", "Angular Elements", "OpenAPI 3.1", "Express", "Vitest"],
+      "description": "O API Center Gateway gerencia os pontos de entrada e os serviços de backend que compõem a arquitetura de integração da SEFAZ. A interface permite cadastrar e consultar gateways, vincular backends, acompanhar o health check, disparar pipelines de deploy no GitLab e consultar o histórico de alterações.\n\nA especificação OpenAPI 3.1 fica em swagger_gateway.json e guia o contrato consumido pelo front-end. O componente é um micro frontend Angular exportado como Web Component, com um mock em Express para desenvolvimento local."
+    },
+    {
+      "id": "curso-prisma",
+      "featured": false,
+      "categories": ["Back-end & APIs", "Conceitos & Especialidades"],
+      "kicker": "Estudo · Express + Prisma",
+      "title": "Curso Prisma",
+      "caption": "API de estudo em Express e Prisma com banco SQL e collection do Postman para praticar consultas.",
+      "image": "",
+      "alt": "Repositório de estudos de Prisma",
+      "company": { "name": "Sharks Systems Brazil", "logo": "", "url": "https://github.com/sharks-systems-br" },
+      "links": [
+        { "label": "Repositório", "url": "https://github.com/sharks-systems-br/cursoprisma" }
+      ],
+      "summary": "Repositório de prática de Prisma com Express, schema SQL e collection do Postman.",
+      "techs": ["Node.js", "Express", "Prisma", "SQL", "Postman"],
+      "description": "O Curso Prisma é um repositório de prática: um servidor Express mínimo conectado ao Prisma, com o schema SQL do banco e uma collection do Postman para exercitar as consultas.\n\nO código é enxuto de propósito, para servir de base de estudo de modelagem, migrations e acesso a dados com Prisma antes de aplicar o padrão em projetos maiores."
+    },
+    {
+      "id": "design-patterns",
+      "featured": false,
+      "categories": ["Conceitos & Especialidades"],
+      "kicker": "Estudo · TypeScript",
+      "title": "Design Patterns",
+      "caption": "Implementações comentadas dos padrões GoF em TypeScript, organizadas por padrão e com testes.",
+      "image": "",
+      "alt": "Repositório de Design Patterns",
+      "company": { "name": "Projeto autoral", "logo": "", "url": "" },
+      "links": [
+        { "label": "Repositório", "url": "https://github.com/exdrama23/Design-Patterns" }
+      ],
+      "summary": "Coleção de padrões criacionais, estruturais e comportamentais implementados e comentados em TypeScript.",
+      "techs": ["TypeScript", "Node.js", "Testes"],
+      "description": "O repositório reúne anotações e implementações dos padrões de projeto do GoF em TypeScript, separados entre criacionais, estruturais e comportamentais. Cada pasta isola um padrão, com o código de exemplo e a explicação do problema que ele resolve.\n\nO material foi produzido a partir do curso gratuito de Otávio Miranda e serve como consulta rápida: os exemplos rodam com npm test e foram escritos para destacar o contraste entre uma solução direta e a versão com o padrão aplicado."
+    },
+    {
+      "id": "sabor-a-vida",
+      "featured": false,
+      "categories": ["Front-end & UI", "Back-end & APIs"],
+      "kicker": "Delivery · React + Express",
+      "title": "Sabor à Vida",
+      "caption": "Sistema de delivery com cardápio, pedidos, entregas por faixa e pagamento via Mercado Pago.",
+      "image": "",
+      "alt": "Página inicial do sistema Sabor à Vida",
+      "company": { "name": "Projeto autoral", "logo": "", "url": "" },
+      "links": [
+        { "label": "Repositório", "url": "https://github.com/exdrama23/Sabor_a_vida" }
+      ],
+      "summary": "Sistema de delivery com cardápio, carrinho, pedidos, cálculo de frete e pagamento integrado.",
+      "techs": [
+        "React",
+        "TypeScript",
+        "Vite",
+        "Tailwind CSS",
+        "Express",
+        "Prisma",
+        "PostgreSQL",
+        "Mercado Pago",
+        "Cloudinary"
+      ],
+      "description": "O Sabor à Vida é um sistema de delivery: o cardápio vem do banco, o pedido passa por status de preparo e entrega, e o valor do frete é calculado por faixas configuráveis. O pagamento usa o Mercado Pago e o pedido gera um QR code para acompanhamento.\n\nO back-end em Express e Prisma guarda produtos, pedidos, pagamentos e configurações de entrega no PostgreSQL, com autenticação de administradores por JWT e refresh tokens. Uploads vão para o Cloudinary, e a integração com WhatsApp apoia o aviso de novos pedidos. O front-end em React e Tailwind consome a API e cobre cardápio, carrinho e área administrativa."
+    },
+    {
+      "id": "interactive-portfolio",
+      "featured": false,
+      "categories": ["Front-end & UI", "Conceitos & Especialidades"],
+      "kicker": "Portfólio · React + Three.js",
+      "title": "Portfólio Interativo",
+      "caption": "Este portfólio: introdução em pixel art, carrossel 3D, livro animado e um acervo navegável de projetos.",
+      "image": "",
+      "alt": "Página inicial deste portfólio",
+      "company": { "name": "Projeto autoral", "logo": "", "url": "" },
+      "links": [
+        { "label": "Site", "url": "https://interactive-portfolio-taupe-seven.vercel.app" },
+        { "label": "Repositório", "url": "https://github.com/exdrama23/interactive-portfolio" }
+      ],
+      "summary": "Portfólio com introdução em pixel art, carrossel WebGL, livro em perspectiva e acervo filtrável de projetos.",
+      "techs": [
+        "React",
+        "TypeScript",
+        "Vite",
+        "Three.js",
+        "React Three Fiber",
+        "GSAP",
+        "Framer Motion",
+        "Tailwind CSS"
+      ],
+      "description": "O portfólio combina uma introdução em pixel art, um carrossel curvo renderizado em WebGL e um livro em perspectiva para apresentar a trajetória. Cada seção tem sua própria coreografia de entrada, e a troca de rota usa uma transição de carregamento compartilhada.\n\nO acervo em /projetos organiza os trabalhos por área e mantém o mesmo componente de cartão da home. A implementação em React e TypeScript usa Three.js e React Three Fiber para as cenas, GSAP e Framer Motion para o movimento, e Tailwind para o sistema visual. O código respeita prefers-reduced-motion nas animações principais."
     }
   ]
 }
