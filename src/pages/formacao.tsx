@@ -6,6 +6,7 @@ import type { RailItem } from '../components/ui/credential-rail'
 import HoverSlatButton from '../components/ui/hover-button'
 import type { StrapPattern } from '../components/ui/lanyard-badge'
 import inovaseLogo from '../assets/img/logos/inovase-light.png'
+import acessoMark from '../assets/img/logos/acesso-mark.png'
 import senaiLogo from '../assets/img/logos/senai.png'
 import senaiLogoLight from '../assets/img/logos/senai-light.png'
 import unitLogo from '../assets/img/logos/unit-light.png'
@@ -73,6 +74,7 @@ const LOGOS: Record<string, string> = {
   senai: senaiLogo,
   senaiLight: senaiLogoLight,
   inovase: inovaseLogo,
+  acessoMark,
 }
 
 function resolveLogo(ref?: string) {
@@ -717,7 +719,23 @@ function TrabalhoFront({ item, s }: { item: Credencial; s: number }) {
         <CardHeader s={s} left="Experiência" right={item.status} />
 
         <div className="flex items-center" style={{ gap: 9 * s, marginTop: 18 * s }}>
-          <MonoBadge tema={tema} s={s} />
+          {tema.logo ? (
+            <img
+              src={tema.logo}
+              alt={item.instituicao}
+              loading="lazy"
+              decoding="async"
+              style={{
+                display: 'block',
+                height: (tema.logoHeight ?? 30) * s,
+                width: 'auto',
+                maxWidth: '100%',
+                objectFit: 'contain',
+              }}
+            />
+          ) : (
+            <MonoBadge tema={tema} s={s} />
+          )}
           <div
             style={{
               fontSize: 8 * s,

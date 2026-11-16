@@ -42,14 +42,16 @@
       "logoBar": "inovase"
     },
     "acesso": {
-      "card": "#101413",
-      "ink": "#f0f6f1",
-      "accent": "#9be8b0",
-      "strap": "#2c4136",
-      "strapInk": "#b9f5c9",
+      "card": "#a11d4c",
+      "ink": "#fff5f8",
+      "accent": "#ffc2d3",
+      "strap": "#7a1538",
+      "strapInk": "#ffd8e4",
       "pattern": "orbit",
-      "seal": "work",
-      "monogram": "A"
+      "seal": "logo",
+      "logo": "acessoMark",
+      "logoBar": "acessoMark",
+      "logoHeight": 30
     }
   },
   "credentials": [
@@ -140,15 +142,15 @@
       "tipo": "trabalho",
       "theme": "acesso",
       "titulo": "Desenvolvedor Júnior",
-      "instituicao": "ACESSO",
-      "detalhe": "Acesso",
+      "instituicao": "ACESSO.NET",
+      "detalhe": "ACESSO.NET",
       "area": "Tempo integral",
       "periodo": "fev. 2026 — o momento",
       "status": "Atual",
       "local": "Aracaju, SE",
-      "strapLabel": "ACESSO · ARACAJU",
-      "descricao": "Desenvolvimento full-stack",
-      "skills": []
+      "strapLabel": "ACESSO.NET · ARACAJU",
+      "descricao": "Desenvolvimento full-stack de sistemas corporativos para provedores de internet, com integração de dispositivos via TR-069, TR-369 e TR-181.",
+      "skills": ["TR-069", "TR-369", "TR-181", "Go", "Arquitetura"]
     }
   ]
 }
