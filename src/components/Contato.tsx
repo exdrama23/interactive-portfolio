@@ -1,9 +1,43 @@
-import { useState, type FormEvent } from 'react'
-import { Mail, MapPin, Send, CheckCircle2 } from 'lucide-react'
+import { useMemo, useState, type FormEvent } from 'react'
+import { Check, CheckCircle2, Copy, Mail, MapPin, Send } from 'lucide-react'
 import { Reveal } from './ui/animations'
+import { SocialTooltip } from './ui/social-media'
+import type { SocialItem } from './ui/social-media'
+import contatoData from '../data/contato.json'
+import linkedinIcon from '../assets/img/icons/linkedin.svg'
 
 type Field = 'name' | 'email' | 'message'
 type Errors = Partial<Record<Field, string>>
+
+interface ContatoLink {
+  id: string
+  label: string
+  href: string
+  color: string
+  brand?: string
+}
+
+interface ContatoData {
+  email: string
+  location: string
+  availability: string
+  links: ContatoLink[]
+}
+
+const DATA = contatoData as ContatoData
+
+const EMAIL_HREF =
+  DATA.links.find(link => link.id === 'email')?.href ?? `mailto:${DATA.email}`
+
+const SOCIAL_ITEMS: SocialItem[] = DATA.links.map(link => ({
+  href: link.href,
+  ariaLabel: link.label,
+  tooltip: link.label,
+  color: link.color,
+  svgUrl: link.brand
+    ? `https://cdn.simpleicons.org/${link.brand}/000000`
+    : linkedinIcon,
+}))
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 
@@ -13,10 +47,22 @@ const FIELD_IDS: Record<Field, string> = {
   message: 'contact-message',
 }
 
+function buildMailto(name: string, email: string, message: string) {
+  const subject = `Contato pelo portfólio: ${name}`
+  const body = `Nome: ${name}\nE-mail: ${email}\n\n${message}`
+  return `mailto:${DATA.email}?subject=${encodeURIComponent(
+    subject,
+  )}&body=${encodeURIComponent(body)}`
+}
+
 export function Contato() {
   const [values, setValues] = useState({ name: '', email: '', message: '' })
   const [errors, setErrors] = useState<Errors>({})
-  const [status, setStatus] = useState<'idle' | 'sending' | 'sent'>('idle')
+  const [status, setStatus] = useState<'idle' | 'sent'>('idle')
+  const [mailtoHref, setMailtoHref] = useState(EMAIL_HREF)
+  const [copied, setCopied] = useState(false)
+
+  const socialItems = useMemo(() => SOCIAL_ITEMS, [])
 
   function validate(): Errors {
     const next: Errors = {}
@@ -56,12 +102,25 @@ export function Contato() {
       return
     }
 
-    setStatus('sending')
-    // Envio simulado (sem backend). Substitua por sua API/serviço de e-mail.
-    window.setTimeout(() => {
-      setStatus('sent')
-      setValues({ name: '', email: '', message: '' })
-    }, 700)
+    const href = buildMailto(
+      values.name.trim(),
+      values.email.trim(),
+      values.message.trim(),
+    )
+
+    setMailtoHref(href)
+    setStatus('sent')
+    window.location.href = href
+  }
+
+  async function copyEmail() {
+    try {
+      await navigator.clipboard.writeText(DATA.email)
+      setCopied(true)
+      window.setTimeout(() => setCopied(false), 2000)
+    } catch {
+      setCopied(false)
+    }
   }
 
   const inputClass = (field: Field) =>
@@ -94,23 +153,44 @@ export function Contato() {
           >
             <p>
               Tem uma ideia, uma vaga ou quer trocar uma ideia sobre
-              desenvolvimento web? Preencha o formulário ou me encontre nos
-              canais abaixo.
+              desenvolvimento web? Preencha o formulário (ele abre seu app de
+              e-mail com a mensagem pronta) ou fale comigo pelos canais abaixo.
             </p>
 
             <div className="space-y-4">
-              <a
-                href="mailto:contato@exemplo.com"
-                className="flex items-center gap-3 text-slate-900 font-medium hover:underline underline-offset-4"
-              >
-                <Mail size={18} className="shrink-0" />
-                contato@exemplo.com
-              </a>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                <a
+                  href={EMAIL_HREF}
+                  className="inline-flex items-center gap-3 text-slate-900 font-medium hover:underline underline-offset-4"
+                >
+                  <Mail size={18} className="shrink-0" />
+                  {DATA.email}
+                </a>
+                <button
+                  type="button"
+                  onClick={copyEmail}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-zinc-200 px-2.5 py-1 text-xs font-medium text-zinc-500 transition-colors hover:border-zinc-300 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2"
+                >
+                  {copied ? <Check size={13} /> : <Copy size={13} />}
+                  {copied ? 'Copiado' : 'Copiar'}
+                </button>
+              </div>
 
               <div className="flex items-center gap-3">
                 <MapPin size={18} className="shrink-0" />
-                Brasil — disponível para trabalho remoto
+                {DATA.location} · {DATA.availability}
               </div>
+            </div>
+
+            <div className="pt-1 pb-14">
+              <p className="mb-4 text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-400">
+                Ou me encontre em
+              </p>
+              <SocialTooltip
+                items={socialItems}
+                className="flex-wrap justify-start"
+                aria-label="Redes e canais de contato"
+              />
             </div>
           </Reveal>
 
@@ -195,24 +275,37 @@ export function Contato() {
                 )}
               </div>
 
-              <div className="flex flex-wrap items-center gap-4">
-                <button
-                  type="submit"
-                  disabled={status === 'sending'}
-                  className="inline-flex items-center gap-2 rounded-xl bg-[#171717] hover:bg-black disabled:opacity-60
-                    text-white text-sm font-semibold tracking-wide px-7 py-4 transition-colors
-                    focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900"
-                >
-                  <Send size={16} />
-                  {status === 'sending' ? 'Enviando...' : 'Enviar mensagem'}
-                </button>
+              <div className="space-y-4">
+                <div className="flex flex-wrap items-center gap-4">
+                  <button
+                    type="submit"
+                    className="inline-flex items-center gap-2 rounded-xl bg-[#171717] hover:bg-black
+                      text-white text-sm font-semibold tracking-wide px-7 py-4 transition-colors
+                      focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900"
+                  >
+                    <Send size={16} />
+                    Abrir e-mail com a mensagem
+                  </button>
 
-                {status === 'sent' && (
-                  <p role="status" className="inline-flex items-center gap-2 text-sm font-medium text-emerald-700">
-                    <CheckCircle2 size={18} />
-                    Mensagem enviada com sucesso!
-                  </p>
-                )}
+                  {status === 'sent' && (
+                    <p role="status" className="inline-flex items-center gap-2 text-sm font-medium text-emerald-700">
+                      <CheckCircle2 size={18} className="shrink-0" />
+                      Mensagem pronta no seu app de e-mail.
+                    </p>
+                  )}
+                </div>
+
+                <p className="text-xs leading-relaxed text-zinc-400">
+                  O formulário não usa servidor: ele monta a mensagem e abre seu
+                  cliente de e-mail. Se nada abrir,{' '}
+                  <a
+                    href={mailtoHref}
+                    className="font-medium text-zinc-600 underline underline-offset-4 hover:text-slate-900"
+                  >
+                    use este link
+                  </a>{' '}
+                  ou copie o endereço acima.
+                </p>
               </div>
             </form>
           </Reveal>

@@ -32,7 +32,8 @@ export const demoItems: MenuItemData[] = [
 ];
 
 export const SOCIAL_LINKS: SocialLink[] = [
-  { id: 'facebook', label: 'Facebook', href: '#' },
-  { id: 'instagram', label: 'Instagram', href: '#' },
-  { id: 'twitter', label: 'Twitter', href: '#' },
+  { id: 'github', label: 'GitHub', href: 'https://github.com/exdrama23' },
+  { id: 'instagram', label: 'Instagram', href: 'https://instagram.com/alec_vinicius/' },
+  { id: 'linkedin', label: 'LinkedIn', href: 'https://linkedin.com/in/alec-vinicius-souza-carvalho-949918302/' },
+  { id: 'telegram', label: 'Telegram', href: 'https://t.me/alecvinicius' },
 ];

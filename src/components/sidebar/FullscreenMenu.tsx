@@ -72,7 +72,7 @@ const FullscreenMenu: React.FC<FullscreenMenuProps> = ({ onClose }) => {
         <nav className="space-y-2 md:space-y-4 flex-1 overflow-y-auto pr-2">{renderNavItems}</nav>
         <div className="flex justify-between items-end pt-8 md:pt-12 border-t border-gray-700 dark:border-gray-300">
           <div className="space-y-6">
-            <div className="flex gap-8">{renderSocialLinks}</div>
+            <div className="flex flex-wrap gap-x-8 gap-y-3">{renderSocialLinks}</div>
             <a href="https://" className="inline-block text-gray-500 dark:text-gray-500 hover:text-white dark:hover:text-black transition-colors text-sm border-b border-gray-600 dark:border-gray-400 hover:border-white dark:hover:border-black pb-1">
               https://
             </a>

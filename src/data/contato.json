@@ -1,0 +1,48 @@
+{
+  "email": "alecvinicius.dev@gmail.com",
+  "location": "Aracaju, SE, Brasil",
+  "availability": "Disponível para trabalho remoto",
+  "links": [
+    {
+      "id": "email",
+      "label": "E-mail",
+      "href": "mailto:alecvinicius.dev@gmail.com?subject=Contato%20pelo%20portf%C3%B3lio",
+      "color": "#ea4335",
+      "brand": "gmail"
+    },
+    {
+      "id": "linkedin",
+      "label": "LinkedIn",
+      "href": "https://linkedin.com/in/alec-vinicius-souza-carvalho-949918302/",
+      "color": "#0a66c2"
+    },
+    {
+      "id": "github",
+      "label": "GitHub",
+      "href": "https://github.com/exdrama23",
+      "color": "#181717",
+      "brand": "github"
+    },
+    {
+      "id": "instagram",
+      "label": "Instagram",
+      "href": "https://instagram.com/alec_vinicius/",
+      "color": "#e1306c",
+      "brand": "instagram"
+    },
+    {
+      "id": "telegram",
+      "label": "Telegram",
+      "href": "https://t.me/alecvinicius",
+      "color": "#26a5e4",
+      "brand": "telegram"
+    },
+    {
+      "id": "discord",
+      "label": "Discord",
+      "href": "https://discord.com/users/691021656499552360",
+      "color": "#5865f2",
+      "brand": "discord"
+    }
+  ]
+}
