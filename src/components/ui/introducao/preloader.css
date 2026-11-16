@@ -439,6 +439,69 @@
   text-transform: uppercase;
 }
 
+/* --------------------------------------------------------------------------
+   HUD em telas pequenas.
+   Em retrato o rodapé tem pouco espaço: o rótulo da etapa quebra em duas
+   linhas à esquerda e o percentual fica isolado à direita, sem se encostar.
+   No topo o rótulo do meio sai (a mesma informação já aparece no rodapé) e
+   nada quebra no meio da palavra.
+   -------------------------------------------------------------------------- */
+@media (max-width: 640px) {
+  .pw-hud-top,
+  .pw-hud-bot {
+    left: 14px;
+    right: 14px;
+  }
+  .pw-hud-top {
+    gap: 10px;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+  }
+  .pw-hud-top > span {
+    white-space: nowrap;
+  }
+  .pw-hud-top > span:nth-child(2) {
+    display: none;
+  }
+  .pw-hud-skip {
+    flex: none;
+    white-space: nowrap;
+    padding: 5px 9px;
+    font-size: 8px;
+    letter-spacing: 0.06em;
+  }
+  .pw-hud-bot {
+    align-items: flex-end;
+    gap: 12px;
+  }
+  .pw-hud-stage {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 64%;
+    font-size: 8px;
+    line-height: 1.5;
+    letter-spacing: 0.1em;
+    white-space: normal;
+  }
+  .pw-hud-pct {
+    flex: none;
+    font-size: clamp(22px, 7.4vw, 34px);
+  }
+}
+
+/* Celulares deitados: altura curta, então o rodapé fica mais colado. */
+@media (max-height: 480px) {
+  .pw-hud-top {
+    top: 10px;
+  }
+  .pw-hud-bot {
+    bottom: 10px;
+  }
+  .pw-hud-pct {
+    font-size: clamp(18px, 4.4vh, 28px);
+  }
+}
+
 /* Quem pediu menos movimento não recebe as animações decorativas. */
 @media (prefers-reduced-motion: reduce) {
   .pw-star,

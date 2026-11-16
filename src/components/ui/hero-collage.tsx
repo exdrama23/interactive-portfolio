@@ -174,6 +174,13 @@ const CSS = `
   .hcl-hud-links{display:none}
   .hcl-hud>span:nth-child(2){text-align:right}
 }
+/* Telas bem estreitas (320px): o selo do ano encostava na saudação. */
+@media (max-width:380px){
+  .hcl-greet{left:5vw;font-size:12px}
+  .hcl-ver{top:9.5vh;right:5vw;width:112px;height:64px}
+  .hcl-ver-num{font-size:36px}
+  .hcl-tag{top:23vh}
+}
 @media (prefers-reduced-motion:reduce){
   .hcl-par{translate:none;transition:none}
   .hcl-ch,.hcl-px,.hcl-clock,.hcl-pill,.hcl-caret,.hcl-pill span{animation:none!important;transform:none!important}
