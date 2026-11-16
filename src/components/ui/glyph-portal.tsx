@@ -232,7 +232,13 @@ export default function GlyphPortal({
       W = pin.clientWidth;
       const smallViewport = section.querySelector<HTMLElement>("[data-gp-viewport]")!.offsetHeight;
       const viewportHeight = Math.max(1, Math.min(root?.clientHeight ?? smallViewport, smallViewport));
-      H = motion.matches ? Math.min(viewportHeight * 0.75, 480) : viewportHeight;
+      // O palco e um pin de viewport inteira nas duas situacoes. Em reduced
+      // motion o pin sai do sticky (vira fluxo), mas mantem a mesma altura: a
+      // colagem de frente e posicionada em vh e a palavra e escalada por H,
+      // entao um teto fixo (antes: min(vh * .75, 480)) comprimia o hero a
+      // metade da tela em monitores grandes e empilhava a colagem sobre a
+      // palavra.
+      H = viewportHeight;
       section.style.setProperty("--gp-height", `${H}px`);
       travel = H * length;
       art.setAttribute("viewBox", `0 0 ${W} ${H}`);
