@@ -181,6 +181,36 @@ html.no-scroll {
   background: #ffffff;
 }
 
+.sidebar-peek--poked {
+  animation: sidebarPeekPoke 620ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+.sidebar-peek--poked .sidebar-peek-dot {
+  background: #ffffff;
+}
+
+@keyframes sidebarPeekPoke {
+  0%,
+  100% {
+    transform: translateY(-50%) translateX(0) rotate(0deg);
+  }
+  22% {
+    transform: translateY(-50%) translateX(-7px) rotate(7deg);
+  }
+  46% {
+    transform: translateY(-50%) translateX(0) rotate(-5deg);
+  }
+  70% {
+    transform: translateY(-50%) translateX(-4px) rotate(3deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar-peek--poked {
+    animation: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .sidebar-peek {
     transition: none;

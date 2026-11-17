@@ -1,18 +1,52 @@
+// Folha de sprites do Nox.
+//
+// As poses vêm em texto de `sprite-art.ts` (30x28, um caractere por pixel). O
+// gato sentado foi desenhado de frente e a caminhada de perfil, então o sheet
+// guarda os dois: o site senta de frente e anda de lado, como na referência.
+//
+// Piscada apaga os pixels do olho e desenha uma linha de 2x1. Boca aberta
+// acrescenta uma linha escura embaixo do focinho. Nada disso altera os quadros
+// originais, então a arte base fica intacta.
+
+import {
+  CAT_H,
+  CAT_W,
+  NOX_PAL,
+  POSE_SIT,
+  POSE_STAND_1,
+  POSE_STAND_2,
+  POSE_STAND_3,
+  POSE_WALK,
+  type CatPose,
+} from './sprite-art'
+
 export type MascotClipName =
   | 'idle'
   | 'walk'
+  | 'trot'
   | 'jump'
+  | 'fall'
   | 'land'
-  | 'wave'
-  | 'pull'
+  | 'hover'
   | 'sit'
   | 'sleep'
+  | 'wake'
+  | 'paw'
+  | 'complain'
+  | 'scared'
+  | 'held'
+  | 'dragged'
+  | 'celebrate'
+  // Nomes antigos que o Mascot.tsx ainda usa.
+  | 'wave'
+  | 'pull'
   | 'yawn'
   | 'point'
-  | 'celebrate'
   | 'scratch'
   | 'leap'
-  | 'fall'
+  // Transições de postura entre sentado e em pé.
+  | 'standup'
+  | 'sitdown'
 
 export interface MascotClip {
   start: number
@@ -28,165 +62,148 @@ export interface MascotSheet {
   clips: Record<MascotClipName, MascotClip>
 }
 
-const FRAME_W = 12
-const FRAME_H = 16
+const EYE = '#141211'
+const GLEAM = '#f6ecd9'
+const OUTLINE = '#171514'
+const SHADOW = '#d5b48b'
 
-const C = {
-  outline: '#141414',
-  hair: '#26262b',
-  skin: '#f0c08a',
-  shirt: '#2f6fde',
-  shirtDark: '#2557b0',
-  pants: '#23283a',
-  shoe: '#f4f4f4',
-}
-
-interface Pose {
-  bob?: number
-  legLift?: boolean
-  armSwing?: -1 | 0 | 1
-  armUp?: boolean
-  armOut?: boolean
-  armsUp?: boolean
+interface Frame extends CatPose {
   blink?: boolean
   mouth?: boolean
-  sit?: boolean
-  scratch?: boolean
+  noShadow?: boolean
+  dx?: number
+  dy?: number
 }
 
-function drawPose(ctx: CanvasRenderingContext2D, ox: number, pose: Pose) {
-  const bob = pose.bob ?? 0
-  const y = (value: number) => value + bob
+const FRAMES: Frame[] = []
+const at: Record<string, number> = {}
 
-  const px = (x: number, py: number, w: number, h: number, color: string) => {
-    ctx.fillStyle = color
-    ctx.fillRect(ox + x, py, w, h)
-  }
+const add = (key: string, frame: Frame) => {
+  at[key] = FRAMES.length
+  FRAMES.push(frame)
+}
 
-  if (pose.sit) {
-    px(2, y(13), 8, 2, C.pants)
-    px(1, y(15), 2, 1, C.shoe)
-    px(9, y(15), 2, 1, C.shoe)
-  } else {
-    px(3, y(12), 2, 3, C.pants)
-    px(7, y(12), 2, 3, C.pants)
-    if (pose.legLift) {
-      px(3, y(14), 2, 1, C.shoe)
-      px(7, y(15), 2, 1, C.shoe)
-    } else {
-      px(3, y(15), 2, 1, C.shoe)
-      px(7, y(14), 2, 1, C.shoe)
+const shade = (pose: CatPose): Frame => ({ ...pose })
+
+// Sentado de frente: parado, piscando e falando.
+add('sit', shade(POSE_SIT))
+add('sitBlink', { ...POSE_SIT, blink: true })
+add('sitMouth', { ...POSE_SIT, mouth: true })
+add('sitMouthL', { ...POSE_SIT, mouth: true, dx: -1 })
+add('sitMouthR', { ...POSE_SIT, mouth: true, dx: 1 })
+add('sitL', { ...POSE_SIT, dx: -1 })
+add('sitR', { ...POSE_SIT, dx: 1 })
+add('sleep', { ...POSE_SIT, blink: true, dy: 1 })
+
+// Levantar e sentar usam os quadros intermediários da própria arte.
+add('down1', shade(POSE_STAND_1))
+add('down2', shade(POSE_STAND_2))
+add('stand', shade(POSE_STAND_3))
+
+// Caminhada: os 6 quadros do ciclo, sem a sombra quando está no ar.
+POSE_WALK.forEach((pose, index) => add(`walk${index}`, shade(pose)))
+add('air', { ...POSE_STAND_3, noShadow: true })
+add('airHigh', { ...POSE_STAND_3, noShadow: true, dy: -1 })
+add('airHighMouth', { ...POSE_STAND_3, noShadow: true, dy: -1, mouth: true })
+
+// Blocos contíguos. Cada clipe lê quadros seguidos na folha, então as
+// sequências que precisam de ordem própria ficam agrupadas no fim.
+add('idle0', shade(POSE_STAND_3))
+add('idle1', shade(POSE_STAND_3))
+add('idle2', { ...POSE_STAND_3, blink: true })
+add('idle3', shade(POSE_STAND_3))
+
+add('rise0', shade(POSE_SIT))
+add('rise1', shade(POSE_STAND_1))
+add('rise2', shade(POSE_STAND_2))
+add('rise3', shade(POSE_STAND_3))
+
+add('settle0', shade(POSE_STAND_3))
+add('settle1', shade(POSE_STAND_2))
+add('settle2', shade(POSE_STAND_1))
+add('settle3', shade(POSE_SIT))
+
+const PAL = new Map(NOX_PAL.map((color, index) => ['123456789abcdef'[index], color]))
+
+function drawPose(
+  ctx: CanvasRenderingContext2D,
+  frame: Frame,
+  x: number,
+  y: number,
+  cell: number,
+) {
+  const { px, headX, headY } = frame
+  const dx = x + (frame.dx ?? 0)
+  const dy = y + (frame.dy ?? 0)
+
+  for (let row = 0; row < CAT_H; row++) {
+    for (let col = 0; col < CAT_W; col++) {
+      const char = px[row * CAT_W + col]
+      if (char === '.') continue
+      const color = PAL.get(char)
+      if (!color) continue
+      if (frame.noShadow && color === SHADOW) continue
+      if (frame.blink && (color === EYE || color === GLEAM)) continue
+      // A sombra do chão é bege no SVG original, feita para fundo creme. No
+      // site o gato passa por seções claras e escuras, então vira um preto
+      // translúcido, que funciona nos dois fundos.
+      ctx.fillStyle = color === SHADOW ? 'rgba(0, 0, 0, 0.22)' : color
+      ctx.fillRect(dx + col, dy + row, cell, cell)
     }
   }
 
-  const armY = y(8) + (pose.armSwing ?? 0)
-  if (!pose.armsUp) {
-    px(2, armY, 1, 3, C.shirt)
-    px(9, armY, 1, 3, C.shirt)
-    px(2, armY + 3, 1, 1, C.skin)
-    px(9, armY + 3, 1, 1, C.skin)
+  if (frame.blink) {
+    ctx.fillStyle = OUTLINE
+    ctx.fillRect(dx + headX + 6, dy + headY + 9, 2, 1)
+    ctx.fillRect(dx + headX + 12, dy + headY + 9, 2, 1)
   }
 
-  px(3, y(7), 6, 5, C.shirt)
-  px(3, y(11), 6, 1, C.shirtDark)
-
-  px(2, y(1), 8, 6, C.outline)
-  px(3, y(2), 6, 4, C.skin)
-  px(2, y(1), 8, 1, C.hair)
-  px(2, y(2), 2, 1, C.hair)
-  px(8, y(2), 2, 1, C.hair)
-
-  if (pose.blink) {
-    px(4, y(4), 1, 1, C.outline)
-    px(7, y(4), 1, 1, C.outline)
-  } else {
-    px(4, y(3), 1, 2, C.outline)
-    px(7, y(3), 1, 2, C.outline)
-  }
-
-  if (pose.mouth) {
-    px(5, y(5), 2, 1, C.outline)
-  }
-
-  if (pose.armUp) {
-    px(9, y(4), 1, 4, C.shirt)
-    px(9, y(3), 1, 1, C.skin)
-  }
-
-  if (pose.armOut) {
-    px(9, y(8), 2, 1, C.shirt)
-    px(11, y(7), 1, 2, C.skin)
-  }
-
-  if (pose.armsUp) {
-    px(1, y(4), 1, 5, C.shirt)
-    px(10, y(4), 1, 5, C.shirt)
-    px(1, y(3), 1, 1, C.skin)
-    px(10, y(3), 1, 1, C.skin)
-  }
-
-  if (pose.scratch) {
-    px(9, y(4), 1, 2, C.skin)
-    px(8, y(6), 1, 1, C.skin)
+  if (frame.mouth) {
+    ctx.fillStyle = OUTLINE
+    ctx.fillRect(dx + headX + 9, dy + headY + 12, 2, 1)
   }
 }
 
-const FRAMES: Pose[] = [
-  {},
-  { blink: true },
-  { legLift: true, armSwing: 1 },
-  { armSwing: 0 },
-  { legLift: true, armSwing: -1 },
-  { armSwing: 0 },
-  { armUp: true, bob: -1 },
-  { bob: 1, armSwing: -1 },
-  { armUp: true },
-  { armUp: true, blink: true },
-  { armOut: true },
-  { armOut: true, bob: 1 },
-  { sit: true },
-  { sit: true, blink: true },
-  { sit: true, blink: true, bob: 1 },
-  { sit: true, blink: true, bob: 2 },
-  { armUp: true, mouth: true, bob: -1 },
-  { armUp: true, mouth: true },
-  { armOut: true },
-  { armOut: true, bob: -1 },
-  { armsUp: true, bob: -1 },
-  { armsUp: true },
-  { scratch: true },
-  { scratch: true, blink: true },
-  { armUp: true, legLift: true, bob: -2 },
-  { armOut: true, legLift: true },
-]
-
-export function createPlaceholderSheet(): MascotSheet {
+export function createMascotSheet(): MascotSheet {
   const canvas = document.createElement('canvas')
-  canvas.width = FRAME_W * FRAMES.length
-  canvas.height = FRAME_H
+  canvas.width = CAT_W * FRAMES.length
+  canvas.height = CAT_H
   const ctx = canvas.getContext('2d')!
   ctx.imageSmoothingEnabled = false
-  FRAMES.forEach((pose, index) => drawPose(ctx, index * FRAME_W, pose))
+
+  FRAMES.forEach((frame, index) => drawPose(ctx, frame, index * CAT_W, 0, 1))
 
   return {
     image: canvas,
-    frameW: FRAME_W,
-    frameH: FRAME_H,
+    frameW: CAT_W,
+    frameH: CAT_H,
     clips: {
-      idle: { start: 0, count: 2, fps: 3, loop: true },
-      walk: { start: 2, count: 4, fps: 9, loop: true },
-      jump: { start: 6, count: 1, fps: 1, loop: false },
-      land: { start: 7, count: 1, fps: 1, loop: false },
-      wave: { start: 8, count: 2, fps: 5, loop: true },
-      pull: { start: 10, count: 2, fps: 8, loop: true },
-      sit: { start: 12, count: 2, fps: 2, loop: true },
-      sleep: { start: 14, count: 2, fps: 1.2, loop: true },
-      yawn: { start: 16, count: 2, fps: 4, loop: true },
-      point: { start: 18, count: 2, fps: 5, loop: true },
-      celebrate: { start: 20, count: 2, fps: 7, loop: true },
-      scratch: { start: 22, count: 2, fps: 3, loop: true },
-      leap: { start: 24, count: 1, fps: 1, loop: false },
-      fall: { start: 25, count: 1, fps: 1, loop: false },
+      idle: { start: at.idle0, count: 4, fps: 3, loop: true },
+      walk: { start: at.walk0, count: 6, fps: 8, loop: true },
+      trot: { start: at.walk0, count: 6, fps: 13, loop: true },
+      jump: { start: at.air, count: 1, fps: 1, loop: false },
+      fall: { start: at.air, count: 1, fps: 1, loop: false },
+      land: { start: at.down2, count: 1, fps: 1, loop: false },
+      hover: { start: at.air, count: 2, fps: 4, loop: true },
+      sit: { start: at.sit, count: 2, fps: 1.6, loop: true },
+      sleep: { start: at.sleep, count: 2, fps: 0.9, loop: true },
+      wake: { start: at.rise0, count: 4, fps: 9, loop: false },
+      paw: { start: at.sitL, count: 2, fps: 4, loop: true },
+      complain: { start: at.sitMouthL, count: 2, fps: 6, loop: true },
+      scared: { start: at.air, count: 1, fps: 1, loop: true },
+      held: { start: at.sit, count: 2, fps: 3, loop: true },
+      dragged: { start: at.sitL, count: 2, fps: 7, loop: true },
+      celebrate: { start: at.airHigh, count: 2, fps: 6, loop: true },
+      wave: { start: at.sitL, count: 2, fps: 5, loop: true },
+      pull: { start: at.sitR, count: 2, fps: 4, loop: true },
+      yawn: { start: at.rise0, count: 4, fps: 9, loop: false },
+      point: { start: at.idle0, count: 4, fps: 3, loop: true },
+      scratch: { start: at.sitMouthL, count: 2, fps: 6, loop: true },
+      leap: { start: at.air, count: 1, fps: 1, loop: false },
+      standup: { start: at.rise0, count: 4, fps: 10, loop: false },
+      sitdown: { start: at.settle0, count: 4, fps: 10, loop: false },
     },
   }
 }
+
+export const createPlaceholderSheet = createMascotSheet
