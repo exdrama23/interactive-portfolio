@@ -16,6 +16,7 @@ import EdgeZone from './sidebar/EdgeZone';
 import FloatingMenu from './sidebar/FloatingMenu';
 import ExpandingMenu from './sidebar/ExpandingMenu';
 import FullscreenMenu from './sidebar/FullscreenMenu';
+import PeekTab from './sidebar/PeekTab';
 
 const hasFinePointer = () => {
   if (typeof window === 'undefined') return false;
@@ -252,7 +253,12 @@ const Sidebar = () => {
           ref={edgeZoneRef}
           onMouseEnter={handleMouseEnterEdgeZone}
           onMouseLeave={handleMouseLeaveEdgeZone}
-        />
+        >
+          <PeekTab
+            visible={state !== 'expanding' && state !== 'fullscreen'}
+            onClick={handleOpenMenu}
+          />
+        </EdgeZone>
       )}
 
       {!canHover && (

@@ -138,6 +138,55 @@ html.no-scroll {
   animation: menuItemIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+.sidebar-peek {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 84px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-right: 0;
+  border-radius: 999px 0 0 999px;
+  background: linear-gradient(90deg, #191919 0%, #0e0e0e 100%);
+  box-shadow:
+    -10px 0 24px rgba(0, 0, 0, 0.26),
+    inset 1px 0 0 rgba(255, 255, 255, 0.16);
+  cursor: pointer;
+  pointer-events: auto;
+  transition: width 200ms ease, filter 200ms ease;
+}
+
+.sidebar-peek:hover,
+.sidebar-peek:focus-visible {
+  width: 28px;
+  filter: brightness(1.25);
+}
+
+.sidebar-peek:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.6);
+  outline-offset: 2px;
+}
+
+.sidebar-peek-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.6);
+  transition: background-color 200ms ease;
+}
+
+.sidebar-peek:hover .sidebar-peek-dot,
+.sidebar-peek:focus-visible .sidebar-peek-dot {
+  background: #ffffff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar-peek {
+    transition: none;
+  }
+}
+
 /* Hero: portal tipográfico sobre a superfície de pontos.
    Deixa apenas o texto centralizado + transição de scroll. */
 .hero-glyph {

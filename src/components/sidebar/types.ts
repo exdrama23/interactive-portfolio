@@ -37,6 +37,7 @@ export interface FullscreenMenuProps {
 export interface EdgeZoneProps {
   onMouseEnter: (e: React.MouseEvent) => void;
   onMouseLeave: (e: React.MouseEvent) => void;
+  children?: React.ReactNode;
 }
 
 export interface ExtendedFloatingMenuProps extends FloatingMenuProps {
