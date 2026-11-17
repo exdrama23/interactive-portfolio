@@ -187,6 +187,71 @@ html.no-scroll {
   }
 }
 
+.mascot-canvas {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+@keyframes mascotBubbleIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(4px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+.mascot-bubble {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  width: max-content;
+  max-width: 190px;
+  padding: 6px 9px;
+  border: 2px solid #191919;
+  border-radius: 2px;
+  background: #ffffff;
+  color: #191919;
+  font: 600 11px/1.35 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 0.02em;
+  text-align: center;
+  white-space: normal;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.18);
+  pointer-events: none;
+  animation: mascotBubbleIn 160ms ease-out both;
+}
+
+.mascot-bubble::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  margin: -4px 0 0 -3px;
+  background: #ffffff;
+  border-right: 2px solid #191919;
+  border-bottom: 2px solid #191919;
+  transform: rotate(45deg);
+}
+
+.mascot-bubble--below {
+  top: calc(100% + 8px);
+  bottom: auto;
+}
+
+.mascot-bubble--below::after {
+  top: auto;
+  bottom: 100%;
+  margin: 0 0 -4px -3px;
+  border-right: 0;
+  border-bottom: 0;
+  border-top: 2px solid #191919;
+  border-left: 2px solid #191919;
+}
+
 /* Hero: portal tipográfico sobre a superfície de pontos.
    Deixa apenas o texto centralizado + transição de scroll. */
 .hero-glyph {

@@ -149,6 +149,17 @@ const Sidebar = () => {
     setTimeout(() => setState('fullscreen'), EXPAND_ANIMATION_DURATION);
   }, [setExactPosition]);
 
+  useEffect(() => {
+    const openFromOutside = () => {
+      const current = stateRef.current;
+      if (current === 'idle' || current === 'edgeHover' || current === 'magneticFollow') {
+        handleOpenMenu();
+      }
+    };
+    window.addEventListener('portfolio:open-sidebar', openFromOutside);
+    return () => window.removeEventListener('portfolio:open-sidebar', openFromOutside);
+  }, [handleOpenMenu]);
+
   /* ---------------------------------------------------------------- */
   /* Efeitos                                                          */
   /* ---------------------------------------------------------------- */

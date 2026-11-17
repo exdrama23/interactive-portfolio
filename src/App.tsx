@@ -4,6 +4,7 @@ import Index from './pages/Index';
 import ProjetosTodos from './pages/projetos-todos';
 import { RouteTransitionProvider } from './components/loading';
 import { LoadingPreview } from './components/loading/loading-preview';
+import Mascot from './components/mascot/Mascot';
 
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
           <Route path='/' element={<Index />} />
         </Routes>
       </RouteTransitionProvider>
+      <Mascot />
     </BrowserRouter>
   )
 }
