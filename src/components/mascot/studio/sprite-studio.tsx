@@ -8,6 +8,8 @@ import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointer
 import artRaw from '../sprite-art.ts?raw'
 import { NOX_PAL } from '../sprite-art'
 import { CAT_H, CAT_W, parseArt, writeArt, type StudioPose } from './format'
+import { Importer, type ImportTarget } from './importer'
+import { StudioNav } from '../studio-nav'
 
 // O índice de cada caractere é a posição na paleta, então a lista de cores
 // manda: se alguém acrescentar um tom, ele aparece aqui sozinho.
@@ -240,6 +242,25 @@ export function SpriteStudio() {
     patchPose({ rows: Array.from({ length: CAT_H }, () => '.'.repeat(CAT_W)) })
   }
 
+  // Aplicar imagem não é desenhar: entra no histórico igual a um traço, para
+  // ctrl+z devolver o quadro de antes.
+  const applyImport = (frames: string[][], target: ImportTarget) => {
+    if (!frames.length) return
+    setHistory((stack) => [...stack.slice(-49), poses])
+    setFuture([])
+    setPoses((list) =>
+      list.map((item, index) => {
+        if (target === 'current') return index === active ? { ...item, rows: frames[0] } : item
+        const walk = /^POSE_WALK\[(\d+)\]$/.exec(item.id)
+        if (!walk) return item
+        const rows = frames[Number(walk[1])] ?? frames[frames.length - 1]
+        return { ...item, rows }
+      }),
+    )
+    setDirty(true)
+    setStatus(`importado: ${frames.length} quadro(s)`)
+  }
+
   const save = async () => {
     const next = writeArt(source, poses)
     setBusy(true)
@@ -396,6 +417,7 @@ export function SpriteStudio() {
         <a href="/__sprite-preview" className="text-xs text-zinc-500 underline hover:text-zinc-300">
           ver todos os clipes
         </a>
+        <StudioNav current="/__sprite-studio" />
         <div className="ml-auto flex items-center gap-2">
           <button onClick={undo} disabled={!history.length} className={BTN}>desfazer</button>
           <button onClick={redo} disabled={!future.length} className={BTN}>refazer</button>
@@ -568,6 +590,8 @@ export function SpriteStudio() {
               grade
             </label>
           </section>
+
+          <Importer onApply={applyImport} />
 
           <section>
             <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500">animação</div>

@@ -4,9 +4,10 @@
 // gato sentado foi desenhado de frente e a caminhada de perfil, então o sheet
 // guarda os dois: o site senta de frente e anda de lado, como na referência.
 //
-// Piscada apaga os pixels do olho e desenha uma linha de 2x1. Boca aberta
-// acrescenta uma linha escura embaixo do focinho. Nada disso altera os quadros
-// originais, então a arte base fica intacta.
+// Piscada fecha os olhos: no sentado apaga os pixels de cada olho e desenha as
+// duas linhas; no perfil pinta a pelagem sobre o olho unico e fecha com uma
+// linha. A boca acrescenta uma linha escura embaixo do focinho. A arte base fica
+// intacta nos dois casos.
 
 import {
   CAT_H,
@@ -65,11 +66,13 @@ export interface MascotSheet {
 const EYE = '#141211'
 const GLEAM = '#f6ecd9'
 const OUTLINE = '#171514'
+const FUR = '#33302c'
 const SHADOW = '#d5b48b'
 
 interface Frame extends CatPose {
-  blink?: boolean
-  mouth?: boolean
+  // 'front' fecha os dois olhos do sentado; 'profile' fecha o olho unico de perfil.
+  blink?: 'front' | 'profile'
+  mouth?: boolean | 'profile'
   noShadow?: boolean
   dx?: number
   dy?: number
@@ -87,13 +90,13 @@ const shade = (pose: CatPose): Frame => ({ ...pose })
 
 // Sentado de frente: parado, piscando e falando.
 add('sit', shade(POSE_SIT))
-add('sitBlink', { ...POSE_SIT, blink: true })
+add('sitBlink', { ...POSE_SIT, blink: 'front' })
 add('sitMouth', { ...POSE_SIT, mouth: true })
 add('sitMouthL', { ...POSE_SIT, mouth: true, dx: -1 })
 add('sitMouthR', { ...POSE_SIT, mouth: true, dx: 1 })
 add('sitL', { ...POSE_SIT, dx: -1 })
 add('sitR', { ...POSE_SIT, dx: 1 })
-add('sleep', { ...POSE_SIT, blink: true, dy: 1 })
+add('sleep', { ...POSE_SIT, blink: 'front', dy: 1 })
 
 // Levantar e sentar usam os quadros intermediários da própria arte.
 add('down1', shade(POSE_STAND_1))
@@ -104,13 +107,13 @@ add('stand', shade(POSE_STAND_3))
 POSE_WALK.forEach((pose, index) => add(`walk${index}`, shade(pose)))
 add('air', { ...POSE_STAND_3, noShadow: true })
 add('airHigh', { ...POSE_STAND_3, noShadow: true, dy: -1 })
-add('airHighMouth', { ...POSE_STAND_3, noShadow: true, dy: -1, mouth: true })
+add('airHighMouth', { ...POSE_STAND_3, noShadow: true, dy: -1, mouth: 'profile' })
 
 // Blocos contíguos. Cada clipe lê quadros seguidos na folha, então as
 // sequências que precisam de ordem própria ficam agrupadas no fim.
 add('idle0', shade(POSE_STAND_3))
 add('idle1', shade(POSE_STAND_3))
-add('idle2', { ...POSE_STAND_3, blink: true })
+add('idle2', { ...POSE_STAND_3, blink: 'profile' })
 add('idle3', shade(POSE_STAND_3))
 
 add('rise0', shade(POSE_SIT))
@@ -143,7 +146,7 @@ function drawPose(
       const color = PAL.get(char)
       if (!color) continue
       if (frame.noShadow && color === SHADOW) continue
-      if (frame.blink && (color === EYE || color === GLEAM)) continue
+      if (frame.blink === 'front' && (color === EYE || color === GLEAM)) continue
       // A sombra do chão é bege no SVG original, feita para fundo creme. No
       // site o gato passa por seções claras e escuras, então vira um preto
       // translúcido, que funciona nos dois fundos.
@@ -152,13 +155,25 @@ function drawPose(
     }
   }
 
-  if (frame.blink) {
+  if (frame.blink === 'front') {
     ctx.fillStyle = OUTLINE
     ctx.fillRect(dx + headX + 6, dy + headY + 9, 2, 1)
     ctx.fillRect(dx + headX + 12, dy + headY + 9, 2, 1)
   }
 
-  if (frame.mouth) {
+  // O olho de perfil ocupa so 2x2; apagar os pixels deixaria buraco. Pinta a
+  // pelagem por cima e fecha com a linha.
+  if (frame.blink === 'profile') {
+    ctx.fillStyle = FUR
+    ctx.fillRect(dx + headX + 5, dy + headY + 7, 2, 2)
+    ctx.fillStyle = OUTLINE
+    ctx.fillRect(dx + headX + 5, dy + headY + 8, 2, 1)
+  }
+
+  if (frame.mouth === 'profile') {
+    ctx.fillStyle = OUTLINE
+    ctx.fillRect(dx + headX + 3, dy + headY + 10, 2, 1)
+  } else if (frame.mouth) {
     ctx.fillStyle = OUTLINE
     ctx.fillRect(dx + headX + 9, dy + headY + 12, 2, 1)
   }

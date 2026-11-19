@@ -3,6 +3,7 @@
 
 import { useEffect, useRef } from 'react'
 import { createMascotSheet, type MascotClipName } from './sprite'
+import { StudioNav } from './studio-nav'
 
 const CLIPS: MascotClipName[] = [
   'idle',
@@ -79,6 +80,9 @@ export function SpritePreview() {
       >
         abrir o studio
       </a>
+      <div className="mb-4">
+        <StudioNav current="/__sprite-preview" />
+      </div>
       <canvas ref={ref} className="block rounded-lg ring-1 ring-zinc-300" />
     </div>
   )

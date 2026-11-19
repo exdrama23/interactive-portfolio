@@ -1,0 +1,179 @@
+{
+  "atlasWidth": 2048,
+  "padding": 1,
+  "frameWidth": 216,
+  "frameHeight": 216,
+  "meta": {
+    "name": "nox",
+    "atlas": "../atlas/nox-atlas.png",
+    "anchor": {
+      "x": 108,
+      "y": 204
+    },
+    "native": {
+      "width": 43,
+      "height": 55,
+      "x": 11,
+      "y": 5
+    },
+    "source": "../reference/nox-master.jpeg",
+    "grid": 13,
+    "scale": 1
+  },
+  "clips": {
+    "idle": {
+      "folder": "idle",
+      "fps": 8,
+      "loop": true,
+      "status": "ready"
+    },
+    "walk": {
+      "folder": "walk",
+      "fps": 12,
+      "loop": true,
+      "status": "ready"
+    },
+    "run": {
+      "folder": "run",
+      "fps": 16,
+      "loop": true,
+      "status": "ready"
+    },
+    "sit": {
+      "folder": "sit",
+      "fps": 6,
+      "loop": true,
+      "status": "ready"
+    },
+    "sleep": {
+      "folder": "sleep",
+      "fps": 3,
+      "loop": true,
+      "status": "ready"
+    },
+    "wake": {
+      "folder": "wake",
+      "fps": 8,
+      "loop": false,
+      "status": "ready"
+    },
+    "jump": {
+      "folder": "jump",
+      "frameWidth": 216,
+      "frameHeight": 280,
+      "anchor": {
+        "x": 108,
+        "y": 268
+      },
+      "air": true,
+      "fps": 12,
+      "loop": false,
+      "status": "ready"
+    },
+    "fall": {
+      "folder": "fall",
+      "frameWidth": 216,
+      "frameHeight": 280,
+      "anchor": {
+        "x": 108,
+        "y": 268
+      },
+      "air": true,
+      "fps": 10,
+      "loop": true,
+      "status": "ready"
+    },
+    "land": {
+      "folder": "land",
+      "frameWidth": 216,
+      "frameHeight": 280,
+      "anchor": {
+        "x": 108,
+        "y": 268
+      },
+      "air": true,
+      "fps": 12,
+      "loop": false,
+      "status": "ready"
+    },
+    "happy": {
+      "folder": "happy",
+      "fps": 10,
+      "loop": true,
+      "status": "ready"
+    },
+    "angry": {
+      "folder": "angry",
+      "fps": 10,
+      "loop": true,
+      "status": "ready"
+    },
+    "scared": {
+      "folder": "scared",
+      "fps": 12,
+      "loop": true,
+      "status": "ready"
+    },
+    "pet": {
+      "folder": "pet",
+      "fps": 8,
+      "loop": true,
+      "status": "ready"
+    },
+    "held": {
+      "folder": "held",
+      "fps": 6,
+      "loop": true,
+      "status": "ready"
+    },
+    "dragged": {
+      "folder": "dragged",
+      "fps": 10,
+      "loop": true,
+      "status": "ready"
+    },
+    "celebrate": {
+      "folder": "celebrate",
+      "fps": 10,
+      "loop": true,
+      "status": "pending",
+      "note": "arte sera refeita pelo usuario; nao extrair do atlas atual"
+    },
+    "scratch": {
+      "folder": "scratch",
+      "fps": 12,
+      "loop": true,
+      "status": "ready"
+    },
+    "yawn": {
+      "folder": "yawn",
+      "fps": 6,
+      "loop": false,
+      "status": "ready"
+    },
+    "meow": {
+      "folder": "meow",
+      "fps": 6,
+      "loop": false,
+      "status": "ready"
+    },
+    "stretch": {
+      "folder": "stretch",
+      "fps": 5,
+      "loop": false,
+      "status": "ready"
+    },
+    "lookAround": {
+      "folder": "lookAround",
+      "fps": 5,
+      "loop": true,
+      "status": "ready"
+    },
+    "tailFlick": {
+      "folder": "tailFlick",
+      "fps": 6,
+      "loop": true,
+      "status": "ready"
+    }
+  }
+}
