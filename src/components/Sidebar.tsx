@@ -35,6 +35,7 @@ const Sidebar = () => {
   const pointerRef = useRef({ x: 0, y: 0 });
   const edgeZoneRef = useRef<HTMLDivElement>(null);
   const floatingMenuRef = useRef<HTMLDivElement>(null);
+  const heroActiveRef = useRef(false);
 
   const { updateMousePosition, startMouseTracking, getMouseSpeed, getElapsed } = useMouseMovement();
   const {
@@ -66,6 +67,7 @@ const Sidebar = () => {
 
   /** Sai do modo magnético, mas só depois de uma pequena tolerância. */
   const scheduleIdle = useCallback(() => {
+    if (heroActiveRef.current) return;
     clearGraceTimeout();
     graceTimeoutRef.current = setTimeout(() => {
       graceTimeoutRef.current = null;
@@ -85,7 +87,7 @@ const Sidebar = () => {
       // "grudado" no mouse indefinidamente, porque o `mouseleave` da faixa era
       // engolido pelo próprio blob (que está por cima dela).
       const distanceFromEdge = window.innerWidth - e.clientX;
-      if (distanceFromEdge > FLOATING_MENU_WIDTH + 20) {
+      if (distanceFromEdge > FLOATING_MENU_WIDTH + 20 && !heroActiveRef.current) {
         scheduleIdle();
         return;
       }
@@ -133,6 +135,13 @@ const Sidebar = () => {
 
   const handleClose = useCallback(() => {
     setState('idle');
+    if (heroActiveRef.current) {
+      const y = pointerRef.current.y || window.innerHeight / 2;
+      setExactPosition(clampMagneticY(y - FLOATING_MENU_HEIGHT / 2));
+      startAnimation();
+      setState('magneticFollow');
+      return;
+    }
     // O cursor pode já estar sobre a faixa quando o menu fecha: re-arma na hora,
     // em vez de esperar um novo `mouseenter` que nunca vem.
     const { x, y } = pointerRef.current;
@@ -140,7 +149,7 @@ const Sidebar = () => {
       setExactPosition(clampMagneticY(y - FLOATING_MENU_HEIGHT / 2));
       setState('edgeHover');
     }
-  }, [setExactPosition]);
+  }, [setExactPosition, startAnimation]);
 
   const handleOpenMenu = useCallback(() => {
     setExactPosition(window.innerHeight / 2 - FLOATING_MENU_HEIGHT / 2);
@@ -174,6 +183,38 @@ const Sidebar = () => {
     window.addEventListener('pointermove', onPointer, { passive: true });
     return () => window.removeEventListener('pointermove', onPointer);
   }, []);
+
+  // No topo (hero) o blob fica ativo; ao rolar, volta ao comportamento padrão.
+  useEffect(() => {
+    const sync = () => {
+      const next = window.scrollY <= 8;
+      const changed = next !== heroActiveRef.current;
+      heroActiveRef.current = next;
+
+      if (!next) {
+        if (stateRef.current !== 'magneticFollow') return;
+        const { x, y } = pointerRef.current;
+        if (window.innerWidth - x <= EDGE_ZONE_WIDTH * 2) {
+          setExactPosition(clampMagneticY(y - FLOATING_MENU_HEIGHT / 2));
+          setState('edgeHover');
+          return;
+        }
+        stopAnimation();
+        setState('idle');
+        return;
+      }
+
+      if (!canHover || !changed || stateRef.current !== 'idle') return;
+      const y = pointerRef.current.y || window.innerHeight / 2;
+      setExactPosition(clampMagneticY(y - FLOATING_MENU_HEIGHT / 2));
+      startAnimation();
+      setState('magneticFollow');
+    };
+
+    sync();
+    window.addEventListener('scroll', sync, { passive: true });
+    return () => window.removeEventListener('scroll', sync);
+  }, [canHover, setExactPosition, startAnimation, stopAnimation]);
 
   useEffect(() => {
     if (!canHover) return;

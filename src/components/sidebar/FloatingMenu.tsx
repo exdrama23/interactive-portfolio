@@ -23,7 +23,7 @@ const FloatingMenu: React.FC<ExtendedFloatingMenuProps> = ({
     };
     apply(magneticY.get());
     return magneticY.on('change', apply);
-  }, [magneticY]);
+  }, [magneticY, isVisible]);
 
   return (
     <AnimatePresence>
