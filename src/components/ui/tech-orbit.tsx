@@ -10,6 +10,8 @@ import {
 import { Plus, X } from 'lucide-react'
 import { EASE } from './easing'
 import { TECH_CATEGORIES, type TechItem } from './tech-data'
+import { LevelBar } from './tech-level'
+import { useTechLevel } from './tech-level-context'
 
 /** viewBox do palco — tudo é posicionado em porcentagem a partir daqui. */
 const SIZE = 800
@@ -45,12 +47,21 @@ function OrbitIcon({ item }: { item: TechItem }) {
   const Icon = item.icon
 
   if (Icon) {
-    return <Icon aria-hidden="true" strokeWidth={1.4} className="h-[18px] w-[18px] text-stone-300" />
+    return (
+      <Icon
+        aria-hidden="true"
+        strokeWidth={1.4}
+        className="h-[18px] w-[18px] text-stone-300 transition-colors duration-300 group-hover:text-white"
+      />
+    )
   }
 
   if (failed || !item.slug) {
     return (
-      <span aria-hidden="true" className="font-serif text-[10px] leading-none text-stone-300">
+      <span
+        aria-hidden="true"
+        className="font-serif text-[10px] leading-none text-stone-300 transition-colors duration-300 group-hover:text-white"
+      >
         {item.name.slice(0, 2).toUpperCase()}
       </span>
     )
@@ -63,8 +74,30 @@ function OrbitIcon({ item }: { item: TechItem }) {
       aria-hidden="true"
       decoding="async"
       onError={() => setFailed(true)}
-      className="h-[18px] w-[18px] object-contain"
+      className="h-[18px] w-[18px] object-contain opacity-80 transition-opacity duration-300 group-hover:opacity-100"
     />
+  )
+}
+
+function OrbitNodeContent({ item, rad }: { item: TechItem; rad: number }) {
+  const open = useTechLevel()
+  return (
+    <button
+      type="button"
+      onClick={() => open(item)}
+      aria-label={`Ver nível de ${item.name}`}
+      className="tech-clickable group relative -translate-x-1/2 -translate-y-1/2 cursor-pointer rounded-full focus-visible:outline-none"
+    >
+      <div className="grid h-9 w-9 place-items-center rounded-full border border-white/15 bg-black shadow-[0_0_0_6px_rgba(0,0,0,0.92)] transition-colors duration-300 group-hover:border-white/45 group-focus-visible:border-white/60 group-focus-visible:ring-2 group-focus-visible:ring-white/60">
+        <OrbitIcon item={item} />
+      </div>
+      <span
+        style={labelStyle(rad)}
+        className="absolute hidden whitespace-nowrap font-mono text-[9px] tracking-[0.16em] text-stone-400 uppercase transition-colors duration-300 group-hover:text-stone-200 md:block"
+      >
+        {item.name}
+      </span>
+    </button>
   )
 }
 
@@ -86,17 +119,7 @@ function OrbitNode({
         top: `${((CY + R * Math.sin(rad)) / SIZE) * 100}%`,
       }}
     >
-      <div className="relative -translate-x-1/2 -translate-y-1/2">
-        <div className="grid h-9 w-9 place-items-center rounded-full border border-white/15 bg-black shadow-[0_0_0_6px_rgba(0,0,0,0.92)]">
-          <OrbitIcon item={item} />
-        </div>
-        <span
-          style={labelStyle(rad)}
-          className="absolute hidden whitespace-nowrap font-mono text-[9px] tracking-[0.16em] text-stone-400 uppercase md:block"
-        >
-          {item.name}
-        </span>
-      </div>
+      <OrbitNodeContent item={item} rad={rad} />
     </div>
   )
 }
@@ -132,17 +155,7 @@ function OrbitItem({
       }}
       className="absolute z-10"
     >
-      <div className="relative -translate-x-1/2 -translate-y-1/2">
-        <div className="grid h-9 w-9 place-items-center rounded-full border border-white/15 bg-black shadow-[0_0_0_6px_rgba(0,0,0,0.92)]">
-          <OrbitIcon item={item} />
-        </div>
-        <span
-          style={labelStyle(rad)}
-          className="absolute hidden whitespace-nowrap font-mono text-[9px] tracking-[0.16em] text-stone-400 uppercase md:block"
-        >
-          {item.name}
-        </span>
-      </div>
+      <OrbitNodeContent item={item} rad={rad} />
     </motion.div>
   )
 }
@@ -159,6 +172,7 @@ interface TechOrbitProps {
 export function TechOrbit({ progress, items, rest }: TechOrbitProps) {
   const reduceMotion = useReducedMotion()
   const [open, setOpen] = useState(false)
+  const [expanded, setExpanded] = useState<string | null>(null)
   const hubRef = useRef<HTMLButtonElement>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
 
@@ -177,6 +191,7 @@ export function TechOrbit({ progress, items, rest }: TechOrbitProps) {
 
   const close = () => {
     setOpen(false)
+    setExpanded(null)
     hubRef.current?.focus()
   }
 
@@ -259,7 +274,7 @@ export function TechOrbit({ progress, items, rest }: TechOrbitProps) {
           aria-expanded={open}
           aria-label={`Ver as ${rest.length} tecnologias que estão fora do círculo`}
           style={reduceMotion ? undefined : { opacity: hubOpacity, scale: hubScale }}
-          className="group absolute top-1/2 left-1/2 z-20 grid h-16 w-16 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-white/15 bg-black text-stone-200 transition-colors duration-500 hover:border-white/40 hover:text-white focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:outline-none"
+          className="tech-clickable group absolute top-1/2 left-1/2 z-20 grid h-16 w-16 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-white/15 bg-black text-stone-200 transition-colors duration-500 hover:border-white/40 hover:text-white focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:outline-none"
         >
           <Plus
             aria-hidden="true"
@@ -321,7 +336,7 @@ export function TechOrbit({ progress, items, rest }: TechOrbitProps) {
                       type="button"
                       onClick={close}
                       aria-label="Fechar"
-                      className="shrink-0 rounded-sm border border-white/15 p-2 text-stone-300 transition-colors hover:border-white/40 hover:text-white focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none"
+                      className="tech-clickable shrink-0 rounded-sm border border-white/15 p-2 text-stone-300 transition-colors hover:border-white/40 hover:text-white focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none"
                     >
                       <X aria-hidden="true" size={18} />
                     </button>
@@ -329,7 +344,8 @@ export function TechOrbit({ progress, items, rest }: TechOrbitProps) {
 
                   <p className="mt-4 max-w-lg text-sm leading-relaxed text-stone-400">
                     O círculo mostra as {items.length} principais. Aqui está o resto da
-                    stack — com e sem logo oficial — organizada por área.
+                    stack — com e sem logo oficial — organizada por área. Clique em uma
+                    tecnologia para ver o nível.
                   </p>
 
                   <div className="mt-7 grid gap-6 sm:mt-8 sm:grid-cols-2 sm:gap-8">
@@ -338,19 +354,54 @@ export function TechOrbit({ progress, items, rest }: TechOrbitProps) {
                         <p className="text-[10px] font-semibold tracking-[0.18em] text-stone-500 uppercase">
                           {group.category}
                         </p>
-                        <ul className="mt-3 space-y-2">
-                          {group.techs.map((tech) => (
-                            <li
-                              key={tech.name}
-                              className="flex items-center gap-2 text-sm text-stone-200 sm:text-[15px]"
-                            >
-                              <span
-                                aria-hidden="true"
-                                className="h-1 w-1 shrink-0 rounded-full bg-stone-500"
-                              />
-                              {tech.name}
-                            </li>
-                          ))}
+                        <ul className="mt-3 space-y-1">
+                          {group.techs.map((tech) => {
+                            const isOpen = expanded === tech.name
+                            return (
+                              <li key={tech.name}>
+                                <button
+                                  type="button"
+                                  aria-expanded={isOpen}
+                                  onClick={() => setExpanded(isOpen ? null : tech.name)}
+                                  className="tech-clickable group flex w-full cursor-pointer items-center gap-2 rounded-sm py-1 text-left text-sm text-stone-200 transition-colors hover:text-white focus-visible:ring-1 focus-visible:ring-white/40 focus-visible:outline-none sm:text-[15px]"
+                                >
+                                  <span
+                                    aria-hidden="true"
+                                    className={`h-1 w-1 shrink-0 rounded-full transition-colors duration-200 ${
+                                      isOpen ? 'bg-stone-200' : 'bg-stone-500 group-hover:bg-stone-300'
+                                    }`}
+                                  />
+                                  <span className="flex-1">{tech.name}</span>
+                                  <Plus
+                                    aria-hidden="true"
+                                    size={12}
+                                    strokeWidth={1.6}
+                                    className={`shrink-0 text-stone-600 transition-all duration-300 group-hover:text-stone-300 ${
+                                      isOpen ? 'rotate-45' : ''
+                                    }`}
+                                  />
+                                </button>
+                                <AnimatePresence initial={false}>
+                                  {isOpen && (
+                                    <motion.div
+                                      initial={{ height: 0, opacity: 0 }}
+                                      animate={{ height: 'auto', opacity: 1 }}
+                                      exit={{ height: 0, opacity: 0 }}
+                                      transition={{ duration: 0.28, ease: EASE }}
+                                      className="overflow-hidden"
+                                    >
+                                      <div className="flex items-center gap-3 pt-1.5 pb-2.5 pl-3">
+                                        <span className="w-9 shrink-0 font-mono text-[10px] tracking-[0.08em] text-stone-400">
+                                          {tech.level}%
+                                        </span>
+                                        <LevelBar level={tech.level} className="flex-1" />
+                                      </div>
+                                    </motion.div>
+                                  )}
+                                </AnimatePresence>
+                              </li>
+                            )
+                          })}
                         </ul>
                       </div>
                     ))}
