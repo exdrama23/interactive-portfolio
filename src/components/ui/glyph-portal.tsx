@@ -222,7 +222,7 @@ export default function GlyphPortal({
       section.style.setProperty("--gp-reveal", String(isStatic ? 1 : smooth(0.78, 0.9, p)));
       section.style.setProperty("--gp-field-scale", String(1 + .16 * smooth(0, .82, p)));
       section.style.setProperty("--gp-caption-hit", p < 0.08 ? "auto" : "none");
-      section.dataset.gpEntered = String(p >= 0.9);
+      section.dataset.gpEntered = String(p >= 0.78);
       section.dataset.gpProgress = p.toFixed(5);
       if (p !== lastProgress) { lastProgress = p; progressRef.current?.(p); }
     };

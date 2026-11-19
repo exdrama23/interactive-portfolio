@@ -10,6 +10,7 @@ import {
 import { Cloud, Database, Smartphone, type LucideIcon } from 'lucide-react'
 import { TechOrbit } from '../components/ui/tech-orbit'
 import { TECH_CATEGORIES, type TechItem } from '../components/ui/tech-data'
+import { TechNameButton } from '../components/ui/tech-level'
 import tecnologiasData from '../data/tecnologias.json'
 
 interface TechJSON {
@@ -17,6 +18,7 @@ interface TechJSON {
   slug?: string
   icon?: string
   category: string
+  level: number
 }
 
 interface TecnologiasData {
@@ -46,6 +48,7 @@ function resolveTech(tech: TechJSON): TechItem {
     slug: tech.slug,
     icon: tech.icon ? ICONS[tech.icon] : undefined,
     category: tech.category as TechItem['category'],
+    level: tech.level,
   }
 }
 
@@ -98,7 +101,7 @@ function CategoryPanel({
         {String(index + 1).padStart(2, '0')}
       </span>
 
-      <div className="relative w-full max-w-[520px]">
+      <div className="pointer-events-auto relative w-full max-w-[520px]">
         <div className="flex items-center gap-4 font-mono text-[10px] tracking-[0.26em] text-stone-500 uppercase">
           <span>{String(index + 1).padStart(2, '0')}</span>
           <span className="h-px w-8 bg-white/20" />
@@ -119,7 +122,16 @@ function CategoryPanel({
         </div>
 
         <p className="mt-6 max-w-[42ch] text-[15px] leading-[1.9] text-stone-400 md:text-base">
-          {techs.map((tech) => tech.name).join(' · ')}
+          {techs.map((tech, techIndex) => (
+            <span key={tech.name}>
+              {techIndex > 0 && (
+                <span aria-hidden="true" className="text-stone-600">
+                  {' · '}
+                </span>
+              )}
+              <TechNameButton tech={tech} />
+            </span>
+          ))}
         </p>
       </div>
     </motion.div>
@@ -208,7 +220,16 @@ export function Tecnologias() {
                   </span>
                 </div>
                 <p className="mt-4 text-sm leading-relaxed text-stone-400">
-                  {panel.techs.map((tech) => tech.name).join(' · ')}
+                  {panel.techs.map((tech, techIndex) => (
+                    <span key={tech.name}>
+                      {techIndex > 0 && (
+                        <span aria-hidden="true" className="text-stone-600">
+                          {' · '}
+                        </span>
+                      )}
+                      <TechNameButton tech={tech} />
+                    </span>
+                  ))}
                 </p>
                 <span className="sr-only">Área {index + 1}</span>
               </div>

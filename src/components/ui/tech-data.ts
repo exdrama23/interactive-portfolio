@@ -14,6 +14,7 @@ export interface TechItem {
   slug?: string
   icon?: LucideIcon
   category: TechCategory
+  level: number
 }
 
 const DEFAULT_CATEGORIES: readonly TechCategory[] = [

@@ -553,3 +553,10 @@ body {
     animation: none;
   }
 }
+
+/* O cursor global é um ponto estilizado; nas tecnologias clicáveis o hand
+   padrão volta a aparecer para indicar a ação. */
+.tech-clickable,
+.tech-clickable * {
+  cursor: pointer;
+}

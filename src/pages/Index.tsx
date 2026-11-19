@@ -3,6 +3,7 @@ import HeroPortal from '../components/HeroPortal';
 import Sidebar from '../components/Sidebar';
 import Contato from '../components/Contato';
 import Tecnologias from '../pages/tecnologias';
+import { TechLevelProvider } from '../components/ui/tech-level';
 import Formacao from '../pages/formacao';
 import Projetos from '../pages/projetos';
 import { TidelineCta } from '../components/ui/tideline-cta';
@@ -38,7 +39,9 @@ export function Index() {
       {pageVisible && (
       <main className="relative z-10" inert={introActive ? true : undefined}>
         <HeroPortal />
-        <Tecnologias />
+        <TechLevelProvider>
+          <Tecnologias />
+        </TechLevelProvider>
         <Formacao />
         <Projetos />
         <Contato />
