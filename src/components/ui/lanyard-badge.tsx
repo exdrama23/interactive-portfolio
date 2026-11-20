@@ -24,7 +24,6 @@ export interface LanyardBadgeProps {
   className?: string
 }
 
-// #region physics
 export type Pt = { x: number; y: number; px: number; py: number; w: number }
 export type Link = [number, number, number]
 export type Spin = { a: number; v: number }
@@ -68,7 +67,6 @@ function spinStep(s: Spin, target: number, dt: number, drive: number) {
 function swingAngle(top: Pt, bottom: Pt) {
   return Math.atan2(bottom.x - top.x, bottom.y - top.y)
 }
-// #endregion
 
 const DISPLAY = '"Oswald", "Bebas Neue", "Arial Narrow", Impact, sans-serif'
 const SCRIPT = '"Segoe Script", "Brush Script MT", "Snell Roundhand", cursive'
@@ -380,9 +378,9 @@ export default function LanyardBadge({
     const ctx = canvas?.getContext("2d")
     if (!root || !canvas || !card || !inner || !ctx) return
 
-    const sw = Math.max(14, Math.round(cw * 0.1)) // strap width
-    const lowLen = sw * 2.2 // buckle to ring
-    const arm = ringR * 2 + clipH + ch * 0.55 // ring to the card's centre of mass
+    const sw = Math.max(14, Math.round(cw * 0.1))
+    const lowLen = sw * 2.2
+    const arm = ringR * 2 + clipH + ch * 0.55
     const N = 14
 
     let pts: Pt[] = []
@@ -686,7 +684,7 @@ export default function LanyardBadge({
       }}
     />
   )
-  const s = cw / 240 // built-in faces are laid out at 240px and scale with the card
+  const s = cw / 240
 
   const defaultFront = (
     <div className="relative h-full w-full" style={{ background: cardColor, color: inkColor }}>

@@ -8,16 +8,6 @@ import {
 } from 'react'
 import './tideline-cta-utils/tideline-cta.css'
 
-/**
- * Tideline CTA
- * Seção de fechamento em que a maré sobe até a fração real de "ocupação".
- * Enquanto a seção entra na tela a água sobe, cada palavra inverte exatamente
- * na linha da onda e o botão flutua na superfície como uma boia.
- *
- * A animação é 100% transform + uma máscara estática (nada de clip-path por
- * frame, background-position ou backdrop-filter), então o compositor dá conta
- * sozinho e a onda não engasga em PC fraco.
- */
 
 type Props = {
   eyebrow?: string
@@ -27,7 +17,6 @@ type Props = {
   action: string
   href?: string
   details?: string[]
-  /** Texto do medidor. `{pct}` é trocado pela porcentagem. */
   level?: string
   theme?: 'paper' | 'night'
   motion?: 'full' | 'reduced'
@@ -65,8 +54,6 @@ export function TidelineCta({
     return () => ro.disconnect()
   }, [])
 
-  // Sobe uma vez, quando boa parte da seção está na tela; e pausa a onda
-  // decorativa sempre que a seção sai do viewport (custo zero fora da tela).
   useEffect(() => {
     const el = root.current
     if (!el) return

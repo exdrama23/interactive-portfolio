@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
-import { EASE } from './easing'
-import { ParallaxImage } from './animations'
+import { EASE } from '@/components/ui/easing'
+import { ParallaxImage } from '@/components/ui/animations'
 
 export interface StoryImageProps {
   src: string
@@ -10,7 +10,6 @@ export interface StoryImageProps {
   index: number
   side: 'left' | 'right'
   reduced: boolean
-  /** Quando outra imagem está em foco, esta entra no desfoque de fundo. */
   dimmed: boolean
   onOpen: (index: number) => void
   onHover: (
@@ -20,19 +19,9 @@ export interface StoryImageProps {
       origin: { x: number; y: number } | null
     } | null,
   ) => void
-  /** Wrapper que recebe o zoom de tela (para calcular a origem). */
   zoomRef: React.RefObject<HTMLDivElement | null>
 }
 
-/**
- * Imagem do Sobre. O crescimento vem do zoom da seção (o wrapper inteiro
- * escala), não de um `scale` próprio — assim o efeito é o de um zoom de
- * navegador centrado na imagem.
- *
- *  0 — parada;
- *  1 — zoom discreto na seção;
- *  2 — mais zoom, fundo desfocado e "clique em mim".
- */
 export function StoryImage({
   src,
   alt,
@@ -63,7 +52,6 @@ export function StoryImage({
     }
   }, [])
 
-  // Centro da imagem em % do wrapper — é o ponto que fica parado no zoom.
   const measureOrigin = () => {
     const host = zoomRef.current?.getBoundingClientRect()
     const box = buttonRef.current?.getBoundingClientRect()
@@ -82,8 +70,6 @@ export function StoryImage({
 
   const enter = () => {
     clearTimers()
-    // Em `prefers-reduced-motion` o hover não faz zoom nem desfoque; o clique
-    // continua abrindo o modal.
     if (reduced) return
     setOrigin(measureOrigin())
     timers.current.push(window.setTimeout(() => setStage(1), 80))
@@ -95,9 +81,6 @@ export function StoryImage({
     setStage(0)
   }
 
-  // Se o scroll tirar a imagem de baixo do cursor, ou o mouse sair da janela,
-  // nenhum `mouseleave` dispara — o efeito ficaria "turvo do nada". Aqui o
-  // estado é reconciliado com a posição real do ponteiro.
   useEffect(() => {
     if (stage === 0) return
     const check = () => {

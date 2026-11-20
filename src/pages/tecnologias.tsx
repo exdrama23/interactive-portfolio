@@ -8,9 +8,9 @@ import {
   type MotionValue,
 } from 'framer-motion'
 import { Cloud, Database, Smartphone, type LucideIcon } from 'lucide-react'
-import { TechOrbit } from '../components/ui/tech-orbit'
-import { TECH_CATEGORIES, type TechItem } from '../components/ui/tech-data'
-import { TechNameButton } from '../components/ui/tech-level'
+import { TechOrbit } from '@/components/ui/tecnologias/tech-orbit'
+import { TECH_CATEGORIES, type TechItem } from '@/components/ui/tecnologias/tech-data'
+import { TechNameButton } from '@/components/ui/tecnologias/tech-level'
 import tecnologiasData from '../data/tecnologias.json'
 
 interface TechJSON {

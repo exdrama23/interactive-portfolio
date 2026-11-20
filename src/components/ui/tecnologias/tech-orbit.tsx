@@ -8,26 +8,20 @@ import {
   type MotionValue,
 } from 'framer-motion'
 import { Plus, X } from 'lucide-react'
-import { EASE } from './easing'
+import { EASE } from '@/components/ui/easing'
 import { TECH_CATEGORIES, type TechItem } from './tech-data'
 import { LevelBar } from './tech-level'
 import { useTechLevel } from './tech-level-context'
 
-/** viewBox do palco — tudo é posicionado em porcentagem a partir daqui. */
 const SIZE = 800
 const CX = 400
 const CY = 400
 const R = 250
 
-/**
- * A linha entra pela esquerda (vinda do Sobre), sobe por fora do círculo e
- * fecha o arco no topo (400,150), no sentido horário.
- */
 const LINE_PATH =
   'M0 840 C 50 780 70 680 80 590 C 90 480 85 320 165 210 ' +
   'C 215 140 300 152 400 150 A 250 250 0 1 1 399.9 150'
 
-/** Posição do nome em relação ao nó: fora do círculo, radial. */
 function labelStyle(rad: number): CSSProperties {
   const cos = Math.cos(rad)
   const sin = Math.sin(rad)
@@ -139,8 +133,6 @@ function OrbitItem({
   const x = CX + R * Math.cos(rad)
   const y = CY + R * Math.sin(rad)
 
-  // O arco fecha entre 45% e 100% do progresso recebido; cada nó nasce
-  // quando a ponta do traço passa pelo ângulo dele.
   const at = 0.42 + (index / total) * 0.56
   const opacity = useTransform(progress, [at, at + 0.05], [0, 1])
   const scale = useTransform(progress, [at, at + 0.07], [0.5, 1])
@@ -161,11 +153,8 @@ function OrbitItem({
 }
 
 interface TechOrbitProps {
-  /** Progresso (0 a 1) que desenha a linha e revela os nós. */
   progress: MotionValue<number>
-  /** Tecnologias que ocupam os nós do círculo. */
   items: readonly TechItem[]
-  /** Tecnologias que ficam fora do círculo, listadas no hub. */
   rest: readonly TechItem[]
 }
 
@@ -284,11 +273,6 @@ export function TechOrbit({ progress, items, rest }: TechOrbitProps) {
         </motion.button>
       </div>
 
-      {/* Portal para o <body>: dentro do trilho horizontal da seção existe um
-          ancestral com `transform` (o `x` do carrossel) e `overflow-hidden`.
-          Um `position: fixed` ali se ancora nesse ancestral, não na viewport —
-          o modal abria deslocado e cortado, principalmente em telas pequenas.
-          Com o portal ele sempre centraliza, em qualquer largura. */}
       {typeof document !== 'undefined' &&
         createPortal(
           <AnimatePresence>

@@ -4,20 +4,10 @@ import ParticleText from './ParticleText'
 import HeroCollage from './ui/hero-collage'
 import { Sobre } from '../pages/sobre'
 
-// A palavra-ânima da hero. O modelo (Skeleton Key) entra como colagem ao redor
-// dela — sem a chave e sem a fechadura.
 const HERO_WORD = 'Bem-vindo ao meu mundo'
 
-// Em qual ponto do scroll o Sobre começa a subir (0 a 1).
-// O zoom termina em 0.78; 0.64 faz o Sobre já começar a entrar enquanto a
-// câmera termina de atravessar a letra (sem trecho morto de preto).
 const ABOUT_REVEAL_AT = 0.64
 
-/**
- * Hero com o texto centralizado que "entra" na letra conforme o scroll.
- * A superficie de pontos fica fixa atras do texto durante a transicao e,
- * ao final, a secao Sobre e revelada por cima do preto.
- */
 export function HeroPortal() {
   const [aboutVisible, setAboutVisible] = useState(
     () =>
@@ -26,16 +16,12 @@ export function HeroPortal() {
   )
   const aboutRevealedRef = useRef(aboutVisible)
 
-  // O GlyphPortal congela a face na montagem; espere as fontes da colagem
-  // carregarem para medir a palavra já com a Fleur De Leah.
   const [fontsReady, setFontsReady] = useState(false)
   useEffect(() => {
     let live = true
     let tries = 0
     let timer = 0
     const face = '400 100px "Fleur De Leah"'
-    // O GlyphPortal congela a face na montagem. Só monte quando o check
-    // confirmar que a Fleur De Leah está realmente disponível.
     const verify = () => {
       if (!live) return
       const done = () => {

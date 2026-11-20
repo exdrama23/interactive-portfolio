@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { 
-  Home, 
-  User, 
-  Cpu, 
-  GraduationCap, 
-  Award, 
-  Briefcase, 
+import {
+  Home,
+  User,
+  Cpu,
+  GraduationCap,
+  Award,
+  Briefcase,
   Mail,
   Menu
 } from "lucide-react";
@@ -29,18 +29,18 @@ const useWindowSize = () => {
   return windowSize;
 };
 
-const NavButton = ({ 
-  icon, 
-  label, 
-  href, 
-  active = false 
-}: { 
-  icon: React.ReactNode, 
-  label: string, 
-  href: string, 
-  active?: boolean 
+const NavButton = ({
+  icon,
+  label,
+  href,
+  active = false
+}: {
+  icon: React.ReactNode,
+  label: string,
+  href: string,
+  active?: boolean
 }) => (
-    <a 
+    <a
       href={href}
       className={`
         flex flex-col items-center justify-center gap-1 w-20 h-14 rounded-xl transition-all duration-300 group cursor-pointer
@@ -48,8 +48,8 @@ const NavButton = ({
       `}
     >
         <div className={`transition-transform duration-300 ${active ? '-translate-y-1' : 'group-hover:-translate-y-1'} flex justify-center w-full`}>
-            {React.isValidElement(icon) 
-              ? React.cloneElement(icon as React.ReactElement<{ size?: number }>, { size: 18 }) 
+            {React.isValidElement(icon)
+              ? React.cloneElement(icon as React.ReactElement<{ size?: number }>, { size: 18 })
               : icon}
         </div>
         <span className="text-[9px] font-medium tracking-wide uppercase opacity-80 text-center leading-none w-full">
@@ -63,39 +63,38 @@ const NavButton = ({
 
 export default function OrganicHeader() {
   const { width } = useWindowSize();
-  
-  const SIDE_HEIGHT = 48; 
-  const CENTER_HEIGHT = 75; 
-  const CENTER_WIDTH = 660; 
-  const CURVE_WIDTH = 45; 
-  
+
+  const SIDE_HEIGHT = 48;
+  const CENTER_HEIGHT = 75;
+  const CENTER_WIDTH = 660;
+  const CURVE_WIDTH = 45;
+
   if (width === 0) return null;
 
   const halfScreen = width / 2;
   const halfCenter = CENTER_WIDTH / 2;
-  
+
   const curveStartLeft = halfScreen - halfCenter - CURVE_WIDTH;
   const curveEndLeft = halfScreen - halfCenter;
   const curveStartRight = halfScreen + halfCenter;
   const curveEndRight = halfScreen + halfCenter + CURVE_WIDTH;
 
   const path = `
-    M 0 0 
-    L ${width} 0 
-    L ${width} ${SIDE_HEIGHT} 
-    L ${curveEndRight} ${SIDE_HEIGHT} 
+    M 0 0
+    L ${width} 0
+    L ${width} ${SIDE_HEIGHT}
+    L ${curveEndRight} ${SIDE_HEIGHT}
     C ${curveEndRight - CURVE_WIDTH / 2} ${SIDE_HEIGHT}, ${curveStartRight + CURVE_WIDTH / 2} ${CENTER_HEIGHT}, ${curveStartRight} ${CENTER_HEIGHT}
     L ${curveEndLeft} ${CENTER_HEIGHT}
     C ${curveEndLeft - CURVE_WIDTH / 2} ${CENTER_HEIGHT}, ${curveStartLeft + CURVE_WIDTH / 2} ${SIDE_HEIGHT}, ${curveStartLeft} ${SIDE_HEIGHT}
-    L 0 ${SIDE_HEIGHT} 
+    L 0 ${SIDE_HEIGHT}
     Z
   `;
 
   return (
     <div className="fadeable fixed top-0 left-0 w-full z-50 flex justify-center text-white dark:text-zinc-900 drop-shadow-2xl group pointer-events-none">
-      
-      {/* Wrapper do SVG ajustado dinamicamente */}
-      <div 
+
+      <div
         className="absolute top-0 left-0 w-full pointer-events-none overflow-visible"
         style={{ height: CENTER_HEIGHT + 20 }}
       >
@@ -110,7 +109,7 @@ export default function OrganicHeader() {
             <filter id="glass-shadow" x="-50%" y="-50%" width="200%" height="200%">
               <feDropShadow dx="0" dy="4" stdDeviation="10" floodColor="rgba(0,0,0,0.5)" />
             </filter>
-            
+
             <linearGradient id="glass-gradient-light" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="rgba(20, 20, 20, 0.95)" />
               <stop offset="100%" stopColor="rgba(20, 20, 20, 0.85)" />
@@ -126,7 +125,7 @@ export default function OrganicHeader() {
               <stop offset="50%" stopColor="#800000" />
               <stop offset="100%" stopColor="#4d0000" />
             </linearGradient>
-            
+
             <filter id="glow">
               <feGaussianBlur stdDeviation="2" result="coloredBlur" />
               <feMerge>
@@ -173,16 +172,16 @@ export default function OrganicHeader() {
         </svg>
       </div>
 
-      <div 
+      <div
         className="relative w-full flex justify-center items-start px-8"
         style={{ height: CENTER_HEIGHT }}
       >
-        <div 
+        <div
             className="pointer-events-auto flex items-center justify-center gap-1"
-            style={{ 
-                height: CENTER_HEIGHT, 
+            style={{
+                height: CENTER_HEIGHT,
                 width: CENTER_WIDTH,
-                marginTop: -2 
+                marginTop: -2
             }}
         >
             <NavButton icon={<Home />} label="Início" href="#inicio" active />
@@ -194,8 +193,7 @@ export default function OrganicHeader() {
             <NavButton icon={<Mail />} label="Contato" href="#contato" />
         </div>
 
-        {/* Botão hamburguer alinhado com a nova altura lateral */}
-        <div 
+        <div
           className="pointer-events-auto fixed top-0 right-8 flex items-center gap-4"
           style={{ height: SIDE_HEIGHT }}
         >

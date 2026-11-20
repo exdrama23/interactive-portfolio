@@ -3,12 +3,6 @@ import { createPortal } from 'react-dom'
 import { Maximize2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-/**
- * Livro em miniatura (capa 3D) que abre um leitor em tela cheia.
- *
- * O leitor é carregado só no clique (`React.lazy`), então a biblioteca de
- * folhear não entra no bundle inicial nem atrasa a introdução.
- */
 
 export interface BookPage {
   id: string
@@ -73,12 +67,10 @@ export function PerspectiveBook({
           style={{ width: dims.width, borderRadius: '6px 4px 4px 6px' }}
           className="relative aspect-[49/60] [transform-style:preserve-3d] [transform:rotateY(0deg)] transition-transform duration-300 ease-out group-hover:-translate-x-1 group-hover:scale-[1.05] group-hover:[transform:rotateY(-20deg)] group-focus-visible:-translate-x-1 group-focus-visible:scale-[1.05] group-focus-visible:[transform:rotateY(-20deg)]"
         >
-          {/* Capa */}
           <div
             className="absolute inset-y-0 left-0 flex size-full flex-col overflow-hidden bg-[#0e0e11] p-[11%] text-stone-100 after:pointer-events-none after:absolute after:inset-0 after:rounded-[inherit] after:border after:border-white/12 after:shadow-[0_2px_4px_#00000040,0_12px_24px_#00000059,inset_0_-1px_#00000059,inset_0_2px_2px_#ffffff12,inset_4px_0_4px_#00000040] after:content-['']"
             style={{ transform: 'translateZ(22px)', borderRadius: '6px 4px 4px 6px' }}
           >
-            {/* Lombada */}
             <div
               aria-hidden="true"
               className="absolute top-0 left-0 h-full opacity-60"
@@ -113,7 +105,6 @@ export function PerspectiveBook({
             </div>
           </div>
 
-          {/* Lombada 3D */}
           <div
             aria-hidden="true"
             className="absolute top-[3px] bottom-[3px] left-0 bg-[linear-gradient(90deg,#2a2a2e_0%,#0000_80%),linear-gradient(#151517,#0b0b0d)]"
@@ -123,7 +114,6 @@ export function PerspectiveBook({
             }}
           />
 
-          {/* Miolo / contracapa */}
           <div
             aria-hidden="true"
             className="absolute inset-y-0 left-0 size-full bg-[#0b0b0d]"

@@ -1,4 +1,3 @@
-// Header de Navegação 3D Esférica inspirado em Active Theory
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { gsap } from 'gsap';
@@ -34,7 +33,7 @@ const SphericalNavigationHeader: React.FC = () => {
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x000000);
-    
+
     const camera = new THREE.PerspectiveCamera(
       75,
       containerRef.current.clientWidth / containerRef.current.clientHeight,
@@ -42,7 +41,7 @@ const SphericalNavigationHeader: React.FC = () => {
       1000
     );
     camera.position.z = 10;
-    
+
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(
       containerRef.current.clientWidth,
@@ -50,56 +49,52 @@ const SphericalNavigationHeader: React.FC = () => {
     );
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     containerRef.current.appendChild(renderer.domElement);
-    
+
     sceneRef.current = scene;
     cameraRef.current = camera;
     rendererRef.current = renderer;
-    
-    // Luzes
+
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
-    
+
     const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
     directionalLight.position.set(5, 5, 5);
     scene.add(directionalLight);
-    
-    // Criar itens do menu em uma esfera
+
     const radius = 5;
     menuItems.forEach((item, index) => {
       const phi = Math.acos(-1 + (2 * index) / menuItems.length);
       const theta = Math.sqrt(menuItems.length * Math.PI) * phi;
-      
+
       const position = new THREE.Vector3(
         radius * Math.cos(theta) * Math.sin(phi),
         radius * Math.sin(theta) * Math.sin(phi),
         radius * Math.cos(phi)
       );
-      
-      // Criar geometria para o item
+
       const geometry = new THREE.SphereGeometry(0.3, 16, 16);
-      const material = new THREE.MeshPhongMaterial({ 
+      const material = new THREE.MeshPhongMaterial({
         color: 0x4285f4,
         emissive: 0x4285f4,
         emissiveIntensity: 0.2
       });
-      
+
       const mesh = new THREE.Mesh(geometry, material);
       mesh.position.copy(position);
       mesh.userData = { id: item.id, title: item.title };
       scene.add(mesh);
-      
+
       menuItemsRef.current.push({
         ...item,
         position,
         mesh
       });
-      
-      // Criar linha de conexão com o centro
+
       const lineGeometry = new THREE.BufferGeometry().setFromPoints([
         new THREE.Vector3(0, 0, 0),
         position
       ]);
-      const lineMaterial = new THREE.LineBasicMaterial({ 
+      const lineMaterial = new THREE.LineBasicMaterial({
         color: 0x4285f4,
         transparent: true,
         opacity: 0.3
@@ -110,12 +105,11 @@ const SphericalNavigationHeader: React.FC = () => {
 
     const handleMouseMove = (event: MouseEvent) => {
       if (!containerRef.current) return;
-      
+
       const rect = containerRef.current.getBoundingClientRect();
       mouseRef.current.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
       mouseRef.current.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-      
-      // Rotacionar cena baseado no mouse
+
       if (sceneRef.current) {
         gsap.to(sceneRef.current.rotation, {
           y: mouseRef.current.x * 0.3,
@@ -128,17 +122,16 @@ const SphericalNavigationHeader: React.FC = () => {
 
     const handleClick = () => {
       if (!cameraRef.current || !sceneRef.current) return;
-      
+
       raycasterRef.current.setFromCamera(mouseRef.current, cameraRef.current);
       const intersects = raycasterRef.current.intersectObjects(
         sceneRef.current.children.filter(obj => obj.type === 'Mesh')
       );
-      
+
       if (intersects.length > 0) {
         const clickedItem = intersects[0].object.userData;
         setSelectedItem(clickedItem.id);
-        
-        // Animar zoom no item selecionado
+
         if (cameraRef.current && intersects[0].object.position) {
           gsap.to(cameraRef.current.position, {
             x: intersects[0].object.position.x * 1.5,
@@ -154,14 +147,11 @@ const SphericalNavigationHeader: React.FC = () => {
     containerRef.current.addEventListener('mousemove', handleMouseMove);
     containerRef.current.addEventListener('click', handleClick);
 
-    // Animar
     const animate = () => {
       requestAnimationFrame(animate);
-      
-      // Animar itens do menu
+
       menuItemsRef.current.forEach(item => {
         if (item.mesh) {
-          // Pulsação para item hovered
           if (hoveredItem === item.id) {
             item.mesh.scale.setScalar(1.2);
             (item.mesh.material as THREE.MeshPhongMaterial).emissiveIntensity = 0.5;
@@ -169,12 +159,11 @@ const SphericalNavigationHeader: React.FC = () => {
             item.mesh.scale.setScalar(1);
             (item.mesh.material as THREE.MeshPhongMaterial).emissiveIntensity = 0.2;
           }
-          
-          // Rotação suave
+
           item.mesh.rotation.y += 0.01;
         }
       });
-      
+
       if (rendererRef.current && sceneRef.current && cameraRef.current) {
         rendererRef.current.render(sceneRef.current, cameraRef.current);
       }
@@ -182,10 +171,9 @@ const SphericalNavigationHeader: React.FC = () => {
 
     animate();
 
-    // Atualizar tamanho
     const handleResize = () => {
       if (!containerRef.current || !cameraRef.current || !rendererRef.current) return;
-      
+
       cameraRef.current.aspect = containerRef.current.clientWidth / containerRef.current.clientHeight;
       cameraRef.current.updateProjectionMatrix();
       rendererRef.current.setSize(
@@ -205,7 +193,6 @@ const SphericalNavigationHeader: React.FC = () => {
     };
   }, []);
 
-  // Atualizar hovered item
   useEffect(() => {
     if (!sceneRef.current || !cameraRef.current) return;
 
@@ -214,7 +201,7 @@ const SphericalNavigationHeader: React.FC = () => {
       const intersects = raycasterRef.current.intersectObjects(
         sceneRef.current!.children.filter(obj => obj.type === 'Mesh')
       );
-      
+
       if (intersects.length > 0) {
         setHoveredItem(intersects[0].object.userData.id);
       } else {
@@ -229,14 +216,12 @@ const SphericalNavigationHeader: React.FC = () => {
   return (
     <header className="relative h-screen w-full bg-black">
       <div ref={containerRef} className="absolute inset-0" />
-      
-      {/* Overlay de informações */}
+
       <div className="absolute bottom-10 left-10 text-white z-10">
         <h1 className="text-4xl font-bold mb-2">ACTIVE THEORY</h1>
         <p className="opacity-80">Clique em uma esfera para explorar</p>
       </div>
-      
-      {/* Título do item hovered */}
+
       {hoveredItem && (
         <div className="absolute top-10 left-1/2 transform -translate-x-1/2 text-white z-10">
           <div className="bg-black bg-opacity-50 px-6 py-3 rounded-lg">
@@ -246,8 +231,7 @@ const SphericalNavigationHeader: React.FC = () => {
           </div>
         </div>
       )}
-      
-      {/* Item selecionado */}
+
       {selectedItem && (
         <div className="absolute inset-0 flex items-center justify-center z-20">
           <div className="bg-black bg-opacity-90 p-8 rounded-xl max-w-2xl">

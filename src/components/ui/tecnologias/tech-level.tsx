@@ -9,7 +9,7 @@ import {
 import { createPortal } from 'react-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { X } from 'lucide-react'
-import { EASE } from './easing'
+import { EASE } from '@/components/ui/easing'
 import {
   TechLevelContext,
   levelLabel,

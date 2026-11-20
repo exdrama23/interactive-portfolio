@@ -12,8 +12,6 @@
   transition: opacity 0.3s ease;
 }
 
-/* Texto "escrito" pelo scroll (Sobre): cada caractere acende em sequência.
-   --tw (0 → 1) vem do container; --tw-d é o atraso de cada caractere. */
 .tw-char {
   opacity: clamp(0, calc((var(--tw, 0) - var(--tw-d, 0)) * 26), 1);
 }
@@ -24,9 +22,6 @@
   }
 }
 
-/* Zoom de tela no hover da imagem do Sobre. O wrapper inteiro escala a partir
-   do centro da imagem — o efeito é o de um zoom de navegador, não de uma
-   imagem que cresce sozinha. */
 .sobre-zoom {
   transition: transform 650ms cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -35,7 +30,6 @@
   will-change: transform;
 }
 
-/* Fundo do zoom: texto, traço e as outras imagens perdem foco juntos. */
 [data-zoom-dim] {
   transition:
     filter 500ms cubic-bezier(0.16, 1, 0.3, 1),
@@ -46,11 +40,6 @@
   filter: blur(6px) brightness(0.5);
 }
 
-/* Modal do Sobre: a foto aparece centralizada e é jogada para a esquerda; o
-   painel fica parado. Só depois que ela para é que o texto entra, com
-   animação própria (título sobe, descrição é "digitada" caractere a
-   caractere, tags fecham). Mesma ideia do `bento-gallery` do Landingpage,
-   mas com o painel `w-fit` (foto no tamanho natural). */
 .story-dialog-photo {
   animation: story-dialog-photo 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
@@ -107,7 +96,6 @@
   }
 }
 
-/* O canvas padrão do navegador é branco; o site é todo preto. */
 html,
 body,
 #root {
@@ -121,7 +109,6 @@ html.no-scroll {
   overflow: hidden;
 }
 
-/* Entrada dos itens do menu lateral (sidebar) */
 @keyframes menuItemIn {
   from {
     opacity: 0;
@@ -187,8 +174,6 @@ html.no-scroll {
   }
 }
 
-/* Hero: portal tipográfico sobre a superfície de pontos.
-   Deixa apenas o texto centralizado + transição de scroll. */
 .hero-glyph {
   pointer-events: none;
 }
@@ -206,8 +191,6 @@ html.no-scroll {
   display: none !important;
 }
 
-/* A colagem acompanha o zoom por mais tempo: sai derretendo enquanto a
-   câmera entra dentro da palavra (--gp-progress vai de 0 a 1). */
 .hero-glyph [data-gp-front] {
   opacity: clamp(0, calc(1 - (var(--gp-progress, 0) - 0.28) / 0.24), 1);
   transform: translateY(calc(var(--gp-progress, 0) * 46px))
@@ -216,12 +199,10 @@ html.no-scroll {
   will-change: opacity, transform;
 }
 
-/* O Sobre nasce do preto ainda durante a entrada na letra, sem trecho morto. */
 .hero-glyph[data-gp-motion="on"] [data-gp-content] {
   opacity: clamp(0, calc((var(--gp-progress, 0) - 0.56) / 0.2), 1);
 }
 
-/* Entrada do palavra-ânima da hero (a surface de pontos aparece atrás). */
 @keyframes heroWordIn {
   from {
     opacity: 0;
@@ -242,18 +223,15 @@ html.no-scroll {
 }
 
 .snake-game-animation {
-  /* A cobra tem tamanho 10, e 90 de espaço vazio */
-  stroke-dasharray: 10 90; 
+  stroke-dasharray: 10 90;
   animation: snakeRun 8s linear infinite;
 }
 
 .mask-animation {
-  /* A máscara exibe os commits por 70% do caminho, e esconde eles (come) por 30% logo atrás da cobra */
-  stroke-dasharray: 70 30; 
+  stroke-dasharray: 70 30;
   animation: snakeRun 8s linear infinite;
 }
 
-/* Ambas usam a mesma animação para nunca saírem de sincronia! */
 @keyframes snakeRun {
   from {
     stroke-dashoffset: 100;
@@ -262,129 +240,18 @@ html.no-scroll {
     stroke-dashoffset: 0;
   }
 }
-/* html, body, #root {
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-}
 
-body {
-  font-family: 'Inter', sans-serif;
-  background: #000;
-  margin: 0;
-  min-height: 100vh;
-  color: white;
-  overflow-x: hidden;
-}
-
-/* Suaviza todas as animações 
-* {
-  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
-  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
-}*/
-
- /*Estilo da scrollbar minimalista */
-/* ::-webkit-scrollbar {
-  background: transparent;
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: transparent;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: transparent;
-} */
-
-/* Suaviza os movimentos do cursor */
 * {
   cursor: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="white" opacity="0.3"/><circle cx="16" cy="16" r="8" fill="white"/></svg>') 16 16, auto;
 }
 
-/* Efeito de transição suave para imagens 
-img {
-  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* Melhora a renderização de fontes 
-body {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* apagar*/
-
-/* Adicione ao seu arquivo de estilos global se necessário 
-@keyframes expand {
-  0% {
-    clip-path: circle(0% at var(--circle-center-x) var(--circle-center-y));
-  }
-  100% {
-    clip-path: circle(150% at var(--circle-center-x) var(--circle-center-y));
-  }
-}
-
-/* Animações do Tailwind que podem não estar disponíveis 
-.animate-in {
-  animation: enter 0.5s ease-out;
-}
-
-.fade-in {
-  animation: fadeIn 0.3s ease-out;
-}
-
-.slide-in-from-right-8 {
-  animation: slideInFromRight 0.5s ease-out;
-}
-
-@keyframes enter {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slideInFromRight {
-  from {
-    opacity: 0;
-    transform: translateX(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-} */
-
-/* Fim apagar */
-
-/* Esconde scrollbar visualmente */
 * {
-  scrollbar-width: none;      
-  -ms-overflow-style: none;    
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 *::-webkit-scrollbar {
-  display: none;               
+  display: none;
 }
 .curved-sidebar {
   position: fixed;
@@ -410,10 +277,6 @@ body {
   animation: organic-pulse 3s ease-in-out infinite;
 }
 
-/* Formação: troca de grupo em esteira. A barra fica parada; apenas os cartões
-   correm para a esquerda (saindo) e voltam pela direita (entrando), como se
-   fossem arrastados pela fileira. Usamos a propriedade `translate`, que soma
-   com o `transform` da física dos crachás sem sobrescrevê-lo. */
 .formacao-esteira-out [data-deck] {
   translate: calc(-1 * var(--esteira-x, 42vw)) 0;
   opacity: 0;
@@ -439,8 +302,6 @@ body {
   }
 }
 
-/* Em telas estreitas os cartões são maiores que a viewport; um deslocamento
-   maior garante que entrem e saiam de fora da tela. */
 @media (max-width: 640px) {
   .formacao-esteira-out,
   .formacao-esteira-in {
@@ -459,8 +320,6 @@ body {
   }
 }
 
-/* O cursor global é um ponto estilizado; nas tecnologias clicáveis o hand
-   padrão volta a aparecer para indicar a ação. */
 .tech-clickable,
 .tech-clickable * {
   cursor: pointer;

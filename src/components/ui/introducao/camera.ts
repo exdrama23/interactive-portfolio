@@ -1,7 +1,3 @@
-// ---------------------------------------------------------------------------
-// Câmera e matemática pura da introdução.
-// É AQUI que você mexe se quiser mudar o caminho/velocidade da viagem.
-// ---------------------------------------------------------------------------
 
 export function pwClamp01(v: number) {
   return v < 0 ? 0 : v > 1 ? 1 : v
@@ -45,14 +41,10 @@ export function pwPad(pct: number) {
   return (n < 10 ? "00" : n < 100 ? "0" : "") + n
 }
 
-// Esq = 52cqw, Topo = 128cqh (28cqh dentro do quarto), Largura = 20cqw, Altura = 20cqh.
-// IMPORTANTE: se mudar o tamanho/posição do monitor em preloader.css
-// (.pw-monitor-screen) e em pixel-scene.tsx (PixelRoomBackgroundSvg), atualize
-// estas três constantes com os mesmos números.
 export const MON_CX = 62
 export const MON_CY = 138
 export const MON_W = 20
-export const FINAL_SCALE = 100 / MON_W // 5.0
+export const FINAL_SCALE = 100 / MON_W
 
 export type PwCamera = {
   tx: number
@@ -62,11 +54,6 @@ export type PwCamera = {
   chairDrop: number
 }
 
-/**
- * `portrait` liga o enquadramento de tela em pé: a arte do quarto é recortada
- * (não esticada) e o monitor central fica no centro do viewport, então a
- * câmera centraliza em 50cqw em vez de 62cqw.
- */
 export function pwCamera(t: number, portrait = false): PwCamera {
   const k = pwClamp01(t)
   const endCx = portrait ? 50 : MON_CX
@@ -74,7 +61,7 @@ export function pwCamera(t: number, portrait = false): PwCamera {
   let cy = 42
   let scale = 1.06
   let winFade = 1
-  let chairDrop = 0 // Gently slides the chair/boy down as camera dives into the screen
+  let chairDrop = 0
 
   if (k < 0.24) {
     const u = pwSmoothstep(k / 0.24)

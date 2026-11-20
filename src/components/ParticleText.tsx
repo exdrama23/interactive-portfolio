@@ -1,7 +1,6 @@
 import { useEffect, useRef, type ReactNode } from 'react'
 import * as THREE from 'three'
 
-// ── Grade de pontos (superfície ondulada) ───────────────────────────────────
 const GRID_X      = 120
 const GRID_Y      = 66
 const SEPARATION  = 56
@@ -16,7 +15,6 @@ const POINT_COLOR   = 0x0f172a
 
 interface ParticleGlobeProps {
   children?: ReactNode
-  /** Preenche a altura do contêiner em vez de usar 100vh. */
   fill?: boolean
 }
 
@@ -27,7 +25,6 @@ export default function ParticleGlobe({ children, fill = false }: ParticleGlobeP
     const container = containerRef.current
     if (!container) return
 
-    // ── Renderer / cena / câmera ─────────────────────────────────────────
     const renderer = new THREE.WebGLRenderer({
       antialias:       true,
       alpha:           true,
@@ -50,7 +47,6 @@ export default function ParticleGlobe({ children, fill = false }: ParticleGlobeP
     camera.position.set(0, 380, 900)
     camera.lookAt(0, 0, -200)
 
-    // ── Geometria: grade no plano XZ ─────────────────────────────────────
     const count     = GRID_X * GRID_Y
     const positions = new Float32Array(count * 3)
     const grid      = new Float32Array(count * 2)
@@ -72,7 +68,6 @@ export default function ParticleGlobe({ children, fill = false }: ParticleGlobeP
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
     geometry.setAttribute('aGrid', new THREE.BufferAttribute(grid, 2))
 
-    // ── Material: ondas em shader + reação ao mouse ──────────────────────
     const uniforms = {
       uTime:       { value: 0 },
       uMouse:      { value: new THREE.Vector2(99999, 99999) },
@@ -84,7 +79,7 @@ export default function ParticleGlobe({ children, fill = false }: ParticleGlobeP
       uniforms,
       transparent: true,
       depthWrite:  false,
-      vertexShader: /* glsl */ `
+      vertexShader: `
         uniform float uTime;
         uniform vec2  uMouse;
         uniform float uPixelRatio;
@@ -125,7 +120,7 @@ export default function ParticleGlobe({ children, fill = false }: ParticleGlobeP
           );
         }
       `,
-      fragmentShader: /* glsl */ `
+      fragmentShader: `
         uniform vec3 uColor;
 
         varying float vProx;
@@ -147,7 +142,6 @@ export default function ParticleGlobe({ children, fill = false }: ParticleGlobeP
     const points = new THREE.Points(geometry, material)
     scene.add(points)
 
-    // ── Interação com o mouse ────────────────────────────────────────────
     const raycaster      = new THREE.Raycaster()
     const mouseNDC       = new THREE.Vector2()
     const intersectPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0)
@@ -170,7 +164,6 @@ export default function ParticleGlobe({ children, fill = false }: ParticleGlobeP
       targetMouse.set(99999, 99999)
     }
 
-    // ── Loop de animação ─────────────────────────────────────────────────
     const clock          = new THREE.Clock()
     const reducedMotion  = window.matchMedia('(prefers-reduced-motion: reduce)')
     let   frameId        = 0
@@ -193,7 +186,6 @@ export default function ParticleGlobe({ children, fill = false }: ParticleGlobeP
 
     function start() {
       if (looping || !onScreen || !pageVisible) return
-      // Mesmo visual congelado para quem pediu menos movimento: um frame só.
       if (reducedMotion.matches) {
         draw()
         return
@@ -217,7 +209,6 @@ export default function ParticleGlobe({ children, fill = false }: ParticleGlobeP
 
     start()
 
-    // ── Resize ───────────────────────────────────────────────────────────
     const handleResize = () => {
       const w = container.clientWidth
       const h = container.clientHeight

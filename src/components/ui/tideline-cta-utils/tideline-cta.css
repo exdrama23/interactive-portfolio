@@ -1,16 +1,3 @@
-/* =========================================================================
-   Tideline CTA — "maré" de fechamento
-   -------------------------------------------------------------------------
-   Como a onda não trava:
-   - a subida da água é só `transform: translate3d` (compositor, sem layout);
-   - a face invertida é o MESMO layout da face seca, deslocada em oposição
-     exata à água, então as duas ficam alinhadas pixel a pixel em todo frame;
-   - a borda ondulada é uma máscara ESTÁTICA (SVG em data URI), nunca
-     recalculada por frame — nada de clip-path animado;
-   - a onda decorativa de fundo anda por transform (a animação de
-     background-position obriga repaint a cada frame e é o que engasga);
-   - tudo pausa quando a seção sai da tela.
-   ========================================================================= */
 
 .tlc {
   --tlc-wave-h: 26px;
@@ -19,7 +6,6 @@
   --tlc-dry: #000000;
   --tlc-dry-ink: #f4f1ea;
   --tlc-rule: rgba(12, 12, 12, 0.16);
-  /* distância que a água percorre: começa uma altura inteira abaixo */
   --tlc-rise: var(--tlc-h);
 
   position: relative;
@@ -43,12 +29,9 @@
   --tlc-buoy-hover: #1f1f1f;
 }
 
-/* A seção só "enche" depois que entra na tela. */
 .tlc[data-seen] {
   --tlc-rise: 0px;
 }
-
-/* ------------------------------------------------------------------ faces */
 
 .tlc__layer,
 .tlc__inner {
@@ -69,8 +52,6 @@
   position: absolute;
   inset: 0;
   color: var(--tlc-water-ink);
-  /* anula o deslocamento da água: a face fica sempre no mesmo lugar do
-     documento, só que recortada pela superfície */
   transform: translate3d(
     0,
     calc(-1 * ((1 - var(--tlc-target)) * var(--tlc-h) + var(--tlc-rise))),
@@ -163,8 +144,6 @@
   opacity: 0.6;
 }
 
-/* ------------------------------------------------------------------ água */
-
 .tlc__water {
   position: absolute;
   inset: 0;
@@ -175,9 +154,6 @@
     0
   );
 
-  /* Borda ondulada estática: uma faixa de 26px com a curva + um degradê
-     sólido logo abaixo. As duas máscaras se somam (mask-composite: add),
-     então a altura da seção nunca deforma a amplitude da onda. */
   -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 28' preserveAspectRatio='none'%3E%3Cpath d='M0 14C100 0 200 0 300 14S500 28 600 14 800 0 900 14 1100 28 1200 14V28H0Z' fill='%23000'/%3E%3C/svg%3E"),
     linear-gradient(#000, #000);
   -webkit-mask-size: 100% var(--tlc-wave-h), 100% calc(100% - var(--tlc-wave-h));
@@ -199,8 +175,6 @@
   background: var(--tlc-water);
 }
 
-/* Onda decorativa atrás da superfície. Anda por transform (nunca por
-   background-position) e some suavemente para dentro da água. */
 .tlc__backwave {
   position: absolute;
   top: 12px;
@@ -232,15 +206,11 @@
   }
 }
 
-/* Subida: só transform, e os dois lados com a MESMA curva/duração — assim a
-   soma (água + face) é sempre zero e o texto nunca escorrega. */
 .tlc[data-seen]:not([data-done]) .tlc__water,
 .tlc[data-seen]:not([data-done]) .tlc__inner {
   transition: transform 1500ms cubic-bezier(0.16, 1, 0.3, 1) 80ms;
   will-change: transform;
 }
-
-/* ------------------------------------------------------------------ boia */
 
 .tlc__buoy {
   position: absolute;
@@ -311,8 +281,6 @@
   }
 }
 
-/* -------------------------------------------------------------- responsivo */
-
 @media (max-width: 640px) {
   .tlc__layer--dry {
     min-height: min(72svh, 640px);
@@ -322,8 +290,6 @@
     max-width: 100%;
   }
 
-  /* No celular o conteúdo sobe e a boia desce para a água, num espaço
-     reservado só para ela (nada de sobrepor o texto). */
   .tlc__layer,
   .tlc__inner {
     padding-bottom: 140px;
@@ -347,8 +313,6 @@
     transform: translate3d(-50%, 0, 0);
   }
 }
-
-/* ------------------------------------------------------- movimento reduzido */
 
 .tlc[data-motion='reduced'],
 .tlc[data-motion='reduced'] * {

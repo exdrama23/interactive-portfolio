@@ -1,10 +1,5 @@
 "use client";
 
-/**
- * Glyph Portal © 2026 Christian Katzmann. MIT.
- * Origin: UsefulPortal.astro on https://ktzm.dk → UsefulPortal.tsx → ClarityPortal.tsx.
- * A scroll-driven camera through live type. Keep this notice with copies.
- */
 import { useId, useLayoutEffect, useRef, type CSSProperties, type ReactNode } from "react";
 
 export type GlyphPortalStyle = CSSProperties & {
@@ -232,12 +227,6 @@ export default function GlyphPortal({
       W = pin.clientWidth;
       const smallViewport = section.querySelector<HTMLElement>("[data-gp-viewport]")!.offsetHeight;
       const viewportHeight = Math.max(1, Math.min(root?.clientHeight ?? smallViewport, smallViewport));
-      // O palco e um pin de viewport inteira nas duas situacoes. Em reduced
-      // motion o pin sai do sticky (vira fluxo), mas mantem a mesma altura: a
-      // colagem de frente e posicionada em vh e a palavra e escalada por H,
-      // entao um teto fixo (antes: min(vh * .75, 480)) comprimia o hero a
-      // metade da tela em monitores grandes e empilhava a colagem sobre a
-      // palavra.
       H = viewportHeight;
       section.style.setProperty("--gp-height", `${H}px`);
       travel = H * length;
@@ -394,7 +383,6 @@ export default function GlyphPortal({
         @media(prefers-reduced-motion:reduce){${q} [data-gp-pin]{position:relative!important;} ${q} [data-gp-content]{margin-top:0!important;opacity:1!important;background:var(--gp-field)!important;min-height:0;padding-block:64px;} ${q} [data-gp-caption]{opacity:1!important;}}
         @media(prefers-reduced-motion:reduce){${q} [data-gp-hint]{display:none;}}
       `}</style>
-      {/* JS reveals only measured geometry. The unmeasured poster is reserved for no-JS. */}
       <noscript><style>{`${q} [data-gp-fallback]{display:grid}${q} [data-gp-hint]{display:none}`}</style></noscript>
       <div data-gp-viewport aria-hidden="true" />
       <div data-gp-pin>

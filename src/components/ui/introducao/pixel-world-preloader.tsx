@@ -1,12 +1,5 @@
 "use client"
 
-// Estrutura da pasta:
-//   camera.ts                   -> curva da câmera, tempo das etapas, helpers
-//   pixel-scene.tsx             -> toda a arte (SVG) da cena
-//   preloader.css               -> cores, medidas, HUD
-//   pixel-world-preloader.tsx   -> este motor (progresso, fases, fade, skip)
-//   intro-overlay.tsx           -> como a intro é montada na home
-//   README.md                   -> guia rápido de edição
 
 import * as React from "react"
 import "./preloader.css"
@@ -96,7 +89,6 @@ const IntroScene = React.memo(function IntroScene() {
       </div>
 
       <div className="pw-room-wrap">
-        {/* Background room, bed, AC, shelves, desk, side monitors, cat, cans */}
         <PixelRoomBackgroundSvg />
 
         <div className="pw-monitor-screen">
@@ -142,12 +134,8 @@ export default function PixelWorldPreloader({
   const progressRef = React.useRef(progress)
   progressRef.current = progress
 
-  // Em telas em pé a arte do quarto mantém a proporção 16:9 (ver preloader.css)
-  // e o monitor central fica no centro do viewport: a câmera acompanha isso.
   const portraitRef = React.useRef(false)
-  // Liga as pausas das partículas só quando a cena começa a ampliar.
   const zoomRef = React.useRef(false)
-  // Evita escrever a escala do hero no DOM a cada frame.
   const heroKRef = React.useRef(-1)
 
   const applyCameraVars = React.useCallback((normT: number) => {
@@ -164,17 +152,12 @@ export default function PixelWorldPreloader({
     el.style.setProperty("--pw-pamp", pamp.toFixed(3))
     el.style.setProperty("--pw-crt-op", crtOp.toFixed(3))
 
-    // Escala do hero: no desktop ele é desenhado em tamanho final e reduzido
-    // para 1/5 (a abertura do monitor). No retrato o monitor é mais largo que
-    // 1/5 do viewport, então compensamos a escala da câmera para o hero ficar
-    // sempre 1:1 com a tela e o monitor recortá-lo.
     const heroK = portraitRef.current ? 1 / cam.scale : 0.2
     if (Math.abs(heroK - heroKRef.current) >= 0.002) {
       heroKRef.current = heroK
       el.style.setProperty("--pw-hero-k", heroK.toFixed(4))
     }
 
-    // Só escreve no DOM quando o estado muda (evita invalidar estilo por frame).
     const zoom = normT >= 0.55
     if (zoom !== zoomRef.current) {
       zoomRef.current = zoom
@@ -365,10 +348,8 @@ export default function PixelWorldPreloader({
           onPointerMove={onPointerMove}
           onPointerLeave={onPointerLeave}
         >
-          {/* 200cqh Tall Camera World (memoized, see IntroScene above) */}
           <IntroScene />
 
-          {/* Pixel CRT Scanlines */}
           <div className="pw-crt" aria-hidden="true" />
 
           {hud ? (

@@ -1,16 +1,3 @@
-// ---------------------------------------------------------------------------
-// Portão de transição de ROTA.
-//
-// Uso: envolva o app com <RouteTransitionProvider> (dentro do BrowserRouter).
-// A tela de carregamento NÃO aparece na primeira carga nem na introdução; ela
-// só entra em cena quando a rota muda.
-//
-// Trocar de rota com transição:
-//   const { transitionTo } = useRouteTransition()
-//   transitionTo('/projetos')
-//
-// Links internos (<a href="/x">, <Link to="/x">) são interceptados sozinhos.
-// ---------------------------------------------------------------------------
 
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -37,11 +24,8 @@ interface GateState {
 
 export interface RouteTransitionProviderProps {
   children: ReactNode
-  /** Seção inicial (não dispara transição). */
   initialSection?: string
-  /** Faixa inicial (não dispara transição). */
   initialTrack?: RockTrackId
-  /** Duração padrão da carga simulada. */
   durationMs?: number
 }
 
@@ -60,7 +44,6 @@ export function RouteTransitionProvider({
   )
   const [activeTrack, setActiveTrack] = useState<RockTrackId>(initialTrack)
 
-  // Única fonte de verdade do portão em andamento (fora do render).
   const gateRef = useRef<GateState | null>(null)
   const trackIdx = useRef(Math.max(0, ROCK_TRACK_ORDER.indexOf(initialTrack)))
   const seq = useRef(0)
@@ -112,8 +95,6 @@ export function RouteTransitionProvider({
       const hash = hashFromTarget(g.target)
       navigate(g.target)
       if (hash) {
-        // O scroll fica travado durante o portão; libera e pula para a âncora
-        // enquanto a tela ainda está 100% coberta.
         document.documentElement.classList.remove('no-scroll')
         const top = sectionScrollTop(hash.slice(1))
         if (top !== null) {
@@ -133,7 +114,6 @@ export function RouteTransitionProvider({
     g?.onComplete?.()
   }, [])
 
-  // Intercepta cliques em links internos (a href="/x" e <Link to="/x">).
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
       if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
@@ -155,18 +135,15 @@ export function RouteTransitionProvider({
       const here = window.location
       const samePath = url.pathname === here.pathname && url.search === here.search
       if (samePath && url.hash === here.hash) return
-      // Âncora sem seção correspondente na página: deixa o comportamento nativo.
       if (samePath && url.hash) {
         let id = url.hash.slice(1)
         try {
           id = decodeURIComponent(id)
         } catch {
-          /* id inválido */
         }
         if (!document.getElementById(id)) return
       }
       e.preventDefault()
-      // Âncora na mesma página (#sobre) vira só "#sobre"; rota vira o caminho.
       const to = (samePath ? '' : url.pathname) + url.search + url.hash
       transitionTo(to)
     }
@@ -174,7 +151,6 @@ export function RouteTransitionProvider({
     return () => document.removeEventListener('click', onClick, true)
   }, [transitionTo])
 
-  // Trava o scroll enquanto o portão está de pé.
   useEffect(() => {
     if (!gate) return
     const html = document.documentElement

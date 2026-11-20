@@ -14,16 +14,13 @@ export interface SynapticState {
 
 const CLICK_WINDOW     = 1200
 const NUM_PARTICLES    = 300
-const VACUUM_DURATION  = 4.5   // segundos de aspiração de pixels
+const VACUUM_DURATION  = 4.5
 const FILL_DURATION    = 10.0
 const FINAL_FADE_DUR   = 1.2
-const REVERSE_DURATION = 2.0   // duração do toggle dark → light
+const REVERSE_DURATION = 2.0
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Shaders do feedback de partículas (dark mode)
-// ─────────────────────────────────────────────────────────────────────────────
 
-const QUAD_VERT = /* glsl */`
+const QUAD_VERT =`
   varying vec2 vUv;
   void main() {
     vUv = uv;
@@ -31,7 +28,7 @@ const QUAD_VERT = /* glsl */`
   }
 `
 
-const EFFECT_FRAG = /* glsl */`
+const EFFECT_FRAG =`
 precision highp float;
 
 uniform float uIntensity;
@@ -78,7 +75,7 @@ void main() {
 }
 `
 
-const BLIT_FRAG = /* glsl */`
+const BLIT_FRAG =`
 precision highp float;
 
 uniform sampler2D uTexture;
@@ -113,13 +110,8 @@ void main() {
 }
 `
 
-// ─────────────────────────────────────────────────────────────────────────────
-// VACUUM: feedback de pixels — cada frame desloca UVs em direção ao centro,
-// reamostram o frame anterior e acumulam. Os pixels migram fisicamente
-// para o centro, deixando vazios brancos e acumulando preto no meio.
-// ─────────────────────────────────────────────────────────────────────────────
 
-const VACUUM_ACCUM_FRAG = /* glsl */`
+const VACUUM_ACCUM_FRAG =`
 precision highp float;
 
 uniform sampler2D uAccum;
@@ -133,7 +125,7 @@ uniform float uAspect;
 varying vec2 vUv;
 
 void main() {
-  // 1. Deslocamento de UV em direção ao centro 
+  // 1. Deslocamento de UV em direção ao centro
   float pull = pow(uProgress, 1.8) * 0.065;
 
   vec2 toCenter   = uCenter - vUv;
@@ -145,7 +137,7 @@ void main() {
   vec2 srcUV = vUv + toCenter * pull * distFactor;
   srcUV = clamp(srcUV, 0.001, 0.999);
 
-  // 1b. Noise distortion 
+  // 1b. Noise distortion
   float noiseX = sin(vUv.x * 60.0 + uTime * 3.0) * cos(vUv.y * 55.0 + uTime * 2.3);
   float noiseY = cos(vUv.x * 50.0 + uTime * 2.7) * sin(vUv.y * 65.0 + uTime * 3.3);
   float noiseStr = uProgress * 0.035;
@@ -153,10 +145,10 @@ void main() {
   srcUV += noiseOffset;
   srcUV = clamp(srcUV, 0.001, 0.999);
 
-  // 2. Amostra o acumulado com pull 
+  // 2. Amostra o acumulado com pull
   vec4 pulled = texture(uAccum, srcUV);
 
-  // 3. Mistura com cena original (âncora leve) 
+  // 3. Mistura com cena original (âncora leve)
   vec4 scene  = texture(uScene, vUv);
   float sceneMix = max(0.0, 1.0 - uProgress * 2.5);
   vec4 col = mix(pulled, scene, sceneMix * 0.03);
@@ -167,7 +159,7 @@ void main() {
   float decay      = mix(decayBase, 0.998, centerMask);
   col.rgb *= decay;
 
-  //  5. Escurecimento periférico suave 
+  //  5. Escurecimento periférico suave
   float peripheral = smoothstep(0.0, 0.7, dist);
   float darken     = 1.0 - peripheral * uProgress * 0.25;
   col.rgb *= darken;
@@ -176,7 +168,7 @@ void main() {
   float centerDrain = smoothstep(0.45, 1.0, uProgress) * centerMask * 0.35;
   col.rgb = mix(col.rgb, vec3(0.0), centerDrain);
 
-  //7. Onda de preto do centro (atrasada) 
+  //7. Onda de preto do centro (atrasada)
   float blackWave  = smoothstep(0.7, 1.0, uProgress);
   float blackFront = smoothstep(dist, dist + 0.25, blackWave * 0.85);
   col.rgb = mix(col.rgb, vec3(0.0), blackFront);
@@ -193,7 +185,7 @@ void main() {
 }
 `
 
-const VACUUM_OUT_FRAG = /* glsl */`
+const VACUUM_OUT_FRAG =`
 precision highp float;
 
 uniform sampler2D uAccum;

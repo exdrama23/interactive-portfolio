@@ -10,7 +10,6 @@ import {
 } from 'react'
 import type { MotionValue } from 'framer-motion'
 
-/** Quantos caracteres existem no texto (ignorando a marcação). */
 function countChars(node: ReactNode): number {
   if (node === null || node === undefined || typeof node === 'boolean') return 0
   if (typeof node === 'string' || typeof node === 'number') {
@@ -25,14 +24,6 @@ function countChars(node: ReactNode): number {
   return 0
 }
 
-/**
- * Texto que é "escrito" conforme o scroll. Cada caractere acende na ordem em
- * que seria digitado, e a marcação (`<strong>`, `<br>`) é preservada porque
- * percorremos a árvore de nós em vez de usar o texto cru.
- *
- * O valor `--tw` (0 → 1) é publicado no elemento `hostRef`, então todos os
- * caracteres leem o mesmo progresso via CSS — uma única atualização por frame.
- */
 export function WrittenText({
   progress,
   from,
@@ -77,7 +68,6 @@ export function WrittenText({
         const delay = total > 0 ? (cursor / total) * 0.82 : 0
         cursor += 1
 
-        // O espaço não vira span (quebraria a quebra de linha natural).
         if (char === ' ') {
           return <Fragment key={`space-${cursor}-${offset}`}> </Fragment>
         }

@@ -1,17 +1,10 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
-import { NotchedProjectCard } from '../components/ui/notched-project-card'
-import type { ProjectDetail } from '../components/ui/project-focus-info'
+import { NotchedProjectCard } from '@/components/ui/projetos/notched-project-card'
+import type { ProjectDetail } from '@/components/ui/projetos/project-focus-info'
 import projetosData from '../data/projetos.json'
 
-/**
- * Arquivo de projetos (/projetos).
- *
- * A home mostra os projetos em carrossel; aqui eles aparecem todos em grade,
- * com um filtro por área ao lado das categorias. A página usa os mesmos
- * tokens tipográficos do resto do site (serif para títulos, mono para rótulos).
- */
 
 interface ProjetosData {
   label: string
@@ -38,7 +31,6 @@ const TOTAL_POR_CATEGORIA = CATEGORIAS.reduce<Record<string, number>>(
   {},
 )
 
-/** As capas do carrossel são 16:10; aqui o cartão é 4:3 (corta um pouco). */
 function coverUrl(url: string) {
   return url
     .replace(/([?&])h=\d+/, '$1h=900')
@@ -90,7 +82,6 @@ export function ProjetosTodos() {
         </header>
 
         <div className="mt-10 flex flex-col gap-10 lg:mt-14 lg:flex-row lg:gap-14">
-          {/* Categorias / filtro */}
           <aside className="lg:w-[240px] lg:shrink-0">
             <div className="lg:sticky lg:top-28">
               <p className="text-[10px] font-medium tracking-[0.24em] text-stone-500 uppercase">
@@ -125,7 +116,6 @@ export function ProjetosTodos() {
             </div>
           </aside>
 
-          {/* Grade de projetos */}
           <div className="min-w-0 flex-1">
             <ul
               key={active}

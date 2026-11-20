@@ -1,7 +1,3 @@
-// ---------------------------------------------------------------------------
-// Matemática pura do vinil (progresso, RPM, batida, geometria centralizada).
-// Arquivo sem componentes para não quebrar o Fast Refresh.
-// ---------------------------------------------------------------------------
 
 export function vhpClamp01(v: number) {
   return v < 0 ? 0 : v > 1 ? 1 : v
@@ -57,9 +53,6 @@ export function vhpRGB(c: string, fallback: number[]) {
   return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16) / 255)
 }
 
-/**
- * Geometria centralizada: vinil e explosão de meio-tons no centro exato da tela.
- */
 export function vhpLayout(w: number, h: number) {
   const W = Math.max(1, w)
   const H = Math.max(1, h)

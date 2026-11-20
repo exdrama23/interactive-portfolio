@@ -1,12 +1,3 @@
-// ---------------------------------------------------------------------------
-// Preview manual da tela de carregamento de rota (só em desenvolvimento).
-//
-// Abra http://localhost:5173/__loading-preview
-//   ?track=sharks | vermilion | what_ive_done | eu_protesto
-//   ?section=PROJETOS (nome exibido no rodapé)
-//   ?enter=click  (segura no 100% até você clicar)
-//   ?loop=1       (repete para sempre)
-// ---------------------------------------------------------------------------
 
 import { useSearchParams } from 'react-router-dom'
 import VinylHalftonePreloader from './vinyl-halftone-preloader'

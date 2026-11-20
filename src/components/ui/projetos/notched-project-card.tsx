@@ -3,15 +3,6 @@ import { ArrowUpRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 
-/**
- * NotchedProjectCard
- *
- * Cartão cujo recorte no canto inferior-direito abriga a seta de abrir. O
- * recorte é pintado na cor do fundo da página (`surface`), então ele some
- * quando o cartão está sobre a mesma superfície.
- *
- * Adaptado para o portfólio: sem filtro preto-e-branco e sem selo de ano.
- */
 
 export interface NotchedProjectCardProps {
   href: string
@@ -22,9 +13,7 @@ export interface NotchedProjectCardProps {
   tags?: string[]
   screen?: { src: string; alt: string; className?: string }
   dim?: number
-  /** a cor atrás do cartão; o recorte é pintado nela */
   surface?: string
-  /** preenchimento do disco da seta no hover */
   accent?: string
   accentForeground?: string
   className?: string
@@ -65,8 +54,6 @@ export function NotchedProjectCard({
               )}
             />
           ) : (
-            // Sem capa ainda: um fundo neutro com o nome do projeto, em vez do
-            // ícone de imagem quebrada. Basta preencher "image" no JSON.
             <div
               aria-hidden="true"
               className="absolute inset-0 flex items-center justify-center bg-[radial-gradient(120%_120%_at_20%_0%,#2a2724_0%,#171614_55%,#0b0b0c_100%)]"
@@ -97,7 +84,6 @@ export function NotchedProjectCard({
           )}
         </div>
 
-        {/* o recorte: um bloco com canto côncavo e filetes nas pontas */}
         <div
           aria-hidden="true"
           className="absolute right-0 bottom-0"

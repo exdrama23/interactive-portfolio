@@ -1,17 +1,3 @@
-// ---------------------------------------------------------------------------
-// Vinyl Halftone — tela de carregamento de troca de ROTA.
-//
-// Não é a introdução do site (essa é a "pixel world", em ui/introducao) e não
-// tem relação com o conteúdo das páginas: é um portão independente que cobre a
-// tela inteira. A montagem/uso fica em ./route-transition.tsx.
-//
-// O que ele é:
-// - vinil WebGL + explosão de meio-tons travados no centro da tela;
-// - rótulo central com o retrato (3 camadas de parallax) de cada vocalista;
-// - HUD brutalista nos cantos com metadados e etapas;
-// - nome da SEÇÃO DE DESTINO em letras garrafais no rodapé;
-// - queima de tinta (burn-in) -> giro/carregamento -> dissolução dos pontos.
-// ---------------------------------------------------------------------------
 
 import * as React from "react"
 import { LOADING_DEFAULTS, ROCK_TRACKS, type RockTrackId, type VinylPalette, type VinylPreset } from "./rock-tracks"
@@ -29,53 +15,29 @@ import {
 } from "./vinyl-math"
 
 export interface VinylHalftonePreloaderProps {
-  /** Conteúdo revelado quando o portão sai. */
   children?: React.ReactNode
-  /** Modo demonstração: repete para sempre. */
   loop?: boolean
-  /** Progresso real, 0–100. Sem ele, simula ao longo de `durationMs`. */
   progress?: number
-  /** Duração da carga simulada. */
   durationMs?: number
-  /** "auto" levanta sozinho ao chegar em 100; "click" espera o clique. */
   enter?: "auto" | "click"
-  /** Faixa/ vocalista ativo. */
   track?: RockTrackId
-  /** Nome da seção exibido no final. */
   sectionName?: string
-  /** Começa com a tinta queimando sobre a página atual. */
   burnIn?: boolean
-  /** Chamado com a tela 100% coberta — hora de trocar a rota/DOM. */
   onMidTransition?: () => void
-  /** Preset de cor. */
   preset?: VinylPreset
-  /** Override de cores. */
   palette?: { paper?: string; ink?: string; glow?: string; edge?: string; spark?: string }
-  /** Override do nome da banda. */
   title?: string
-  /** Override do subtítulo (música — vocalista). */
   subtitle?: string
-  /** Palavra exibida enquanto carrega (<100%). */
   loadingWord?: string
-  /** Palavra exibida em 100% (padrão: `sectionName`). */
   readyWord?: string
-  /** Texto girando ao redor do rótulo. */
   ringText?: string
-  /** Etapas exibidas no HUD. */
   stages?: string[]
-  /** BPM do pulso. */
   bpm?: number
-  /** Fonte de display. */
   displayFamily?: string
-  /** Fonte de UI. */
   textFamily?: string
-  /** URL do Google Fonts. `null` desliga. */
   fontHref?: string | null
-  /** Altura do container (comprimento definido). */
   height?: string
-  /** Fired once quando a transição termina. */
   onComplete?: () => void
-  /** Classes extras. */
   className?: string
 }
 
@@ -355,9 +317,6 @@ const VHP_CSS = `
 }
 `
 
-/* ------------------------------------------------------------------
-   RETRATOS DOS VOCALISTAS (3 camadas de parallax: --dp)
-   ------------------------------------------------------------------ */
 
 function SingerPhotoLayer({
   src,
@@ -406,18 +365,13 @@ function SingerCenterEmblem({
   photo?: string
   singer: string
   onPhotoFail?: () => void
-  /** A foto tentou carregar e falhou: o SVG volta e a camada 3 também. */
   photoFailed?: boolean
 }) {
-  // Com foto real no centro, os enfeites da camada 3 (mic, raio, borboletas,
-  // bolinhas) caem por cima do rosto e viram ruído. Só aparecem no SVG.
   const showOverlay = !photo || photoFailed
 
   if (track === "eu_protesto") {
-    // CHARLIE BROWN JR. — CHORÃO
     return (
       <>
-        {/* Camada 1: raios urbanos + shape de skate atravessado */}
         <div className="vhp-par-layer" style={{ ["--dp" as string]: -1.0, ["--bp" as string]: 0.04 } as React.CSSProperties}>
           <svg viewBox="0 0 200 200" width="100%" height="100%">
             <circle cx="100" cy="100" r="88" fill="none" stroke={colors.ink} strokeWidth="3" strokeDasharray="12 8" opacity="0.35" />
@@ -453,7 +407,6 @@ function SingerCenterEmblem({
           }
         />
 
-        {/* Camada 3: microfone e raio punk (só no SVG) */}
         {showOverlay && (
         <div className="vhp-par-layer" style={{ ["--dp" as string]: 2.2, ["--bp" as string]: 0.12 } as React.CSSProperties}>
           <svg viewBox="0 0 200 200" width="100%" height="100%">
@@ -471,7 +424,6 @@ function SingerCenterEmblem({
   }
 
   if (track === "vermilion") {
-    // SLIPKNOT — COREY TAYLOR
     return (
       <>
         <div className="vhp-par-layer" style={{ ["--dp" as string]: -1.1, ["--bp" as string]: 0.05 } as React.CSSProperties}>
@@ -518,7 +470,6 @@ function SingerCenterEmblem({
           }
         />
 
-        {/* Camada 3: borboletas (só no SVG) */}
         {showOverlay && (
         <div className="vhp-par-layer" style={{ ["--dp" as string]: 2.3, ["--bp" as string]: 0.13 } as React.CSSProperties}>
           <svg viewBox="0 0 200 200" width="100%" height="100%">
@@ -532,7 +483,6 @@ function SingerCenterEmblem({
   }
 
   if (track === "what_ive_done") {
-    // LINKIN PARK — CHESTER BENNINGTON
     return (
       <>
         <div className="vhp-par-layer" style={{ ["--dp" as string]: -1.0, ["--bp" as string]: 0.05 } as React.CSSProperties}>
@@ -563,7 +513,6 @@ function SingerCenterEmblem({
           }
         />
 
-        {/* Camada 3: leques + mic (só no SVG) */}
         {showOverlay && (
         <div className="vhp-par-layer" style={{ ["--dp" as string]: 2.25, ["--bp" as string]: 0.12 } as React.CSSProperties}>
           <svg viewBox="0 0 200 200" width="100%" height="100%">
@@ -582,7 +531,6 @@ function SingerCenterEmblem({
     )
   }
 
-  // IMAGINE DRAGONS — DAN REYNOLDS
   return (
     <>
       <div className="vhp-par-layer" style={{ ["--dp" as string]: -1.0, ["--bp" as string]: 0.05 } as React.CSSProperties}>
@@ -615,7 +563,6 @@ function SingerCenterEmblem({
         }
       />
 
-      {/* Camada 3: faíscas (só no SVG) */}
       {showOverlay && (
       <div className="vhp-par-layer" style={{ ["--dp" as string]: 2.3, ["--bp" as string]: 0.13 } as React.CSSProperties}>
         <svg viewBox="0 0 200 200" width="100%" height="100%">
@@ -874,7 +821,6 @@ export default function VinylHalftonePreloader({
       last = now
       const still = o.reduced
 
-      // 1. queima sobre a página atual
       if (L.phase === "burnin") {
         if (now - L.burnAt >= BURNIN_MS) {
           L.phase = "load"
@@ -887,7 +833,6 @@ export default function VinylHalftonePreloader({
         }
       }
 
-      // 2. giro e carga
       const loadElapsed = L.loadAt > 0 ? now - L.loadAt : 0
       if (L.phase === "load") {
         const real = o.progress
@@ -913,7 +858,6 @@ export default function VinylHalftonePreloader({
         setCount(ci)
       }
 
-      // 3. pronto -> saída (dissolução de meio-tons)
       if (L.phase === "ready" && (L.wantExit || (o.enter === "auto" && now - L.readyAt > HOLD_MS))) {
         L.phase = "exit"
         L.exitAt = now
@@ -926,7 +870,6 @@ export default function VinylHalftonePreloader({
         return
       }
 
-      // rotação do prato
       const motor = still ? 0 : vhpRpm(L.pct) * 6 * (L.phase === "exit" ? 1.6 : 1)
       if (!L.scratching) {
         L.vel += (motor - L.vel) * Math.min(1, dt * 2.2)
@@ -938,7 +881,6 @@ export default function VinylHalftonePreloader({
         ringRef.current.setAttribute("transform", "rotate(" + (L.rot % 360).toFixed(2) + ")")
       }
 
-      // parallax do ponteiro
       L.sx += (L.mx - L.sx) * Math.min(1, dt * 3.5)
       L.sy += (L.my - L.sy) * Math.min(1, dt * 3.5)
       const lay = vhpLayout(L.w, L.h)
@@ -950,7 +892,6 @@ export default function VinylHalftonePreloader({
       const beat = still ? 0 : vhpBeat(now - now0, o.bpm)
       gate.style.setProperty("--vhp-beat", beat.toFixed(3))
 
-      // desenho WebGL
       if (ctx && prog && canvas) {
         const c = o.colors
         const s = scale
@@ -1013,7 +954,6 @@ export default function VinylHalftonePreloader({
       try {
         gate.setPointerCapture(e.pointerId)
       } catch {
-        /* noop */
       }
     }
     const onMove = (e: PointerEvent) => {
@@ -1193,7 +1133,7 @@ export default function VinylHalftonePreloader({
                 const state = i === lit ? "on" : i < lit ? "done" : "next"
                 return (
                   <li key={i} className="vhp-stage-pill" data-state={state}>
-                    0{i + 1} // {s}
+                    0{i + 1}
                   </li>
                 )
               })}

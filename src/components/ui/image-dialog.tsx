@@ -10,19 +10,13 @@ export interface StoryImageInfo {
   title: string
   body: string
   tags: string[]
-  /** Linha curta de contexto (ano, lugar, projeto). */
   meta?: string
 }
 
-/** Pede a versão maior da mesma foto para o modal não perder qualidade. */
 function hiRes(src: string) {
   return src.replace(/([?&])w=\d+/, '$1w=2400')
 }
 
-/**
- * Descrição "digitada" depois que a foto para: cada caractere entra com um
- * atraso proporcional à posição, então textos longos não ficam eternos.
- */
 function TypedBody({ text, animate }: { text: string; animate: boolean }) {
   if (!animate) return <>{text}</>
 
@@ -46,19 +40,6 @@ function TypedBody({ text, animate }: { text: string; animate: boolean }) {
   )
 }
 
-/**
- * Modal da imagem.
- *
- * A foto aparece sozinha e centralizada; em seguida é jogada para a esquerda,
- * como no `bento-gallery` do Landingpage. Quando ela termina de deslizar é que
- * o texto entra, com animação própria (título sobe, descrição é "digitada").
- *
- * O painel é `w-fit`: a foto fica no tamanho natural (inteira, sem corte) e a
- * coluna de texto tem a largura do próprio conteúdo.
- *
- * Vai por portal para o `body` porque o header (`z-50`) e a sidebar (`z-40/50`)
- * vivem em contextos de empilhamento acima da seção.
- */
 export function ImageDialog({
   item,
   onClose,
@@ -72,9 +53,6 @@ export function ImageDialog({
   const infoRef = useRef<HTMLDivElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
 
-  // Dimensões naturais da foto que o card já tem em cache. Com elas o painel
-  // nasce no tamanho final, então a animação pode começar no primeiro frame
-  // (sem esperar o decode mudar a largura no meio da entrada).
   const [natural, setNatural] = useState<{
     for: string
     w: number
@@ -98,7 +76,6 @@ export function ImageDialog({
     probe.onload = commit
   }, [item])
 
-  // A versão grande é trocada em segundo plano, quando estiver pronta.
   const [hiResReady, setHiResReady] = useState<{ for: string; url: string } | null>(
     null,
   )
@@ -124,16 +101,11 @@ export function ImageDialog({
     item && hiResReady?.for === item.src ? hiResReady.url : (item?.src ?? '')
   const dims = item && natural?.for === item.src ? natural : null
 
-  // O texto só entra quando a animação da foto termina de verdade, não por
-  // um delay fixo que poderia ser ultrapassado se a imagem demorasse.
   const [textIn, setTextIn] = useState(false)
   useEffect(() => {
     setTextIn(false)
   }, [item])
 
-  // Quanto a foto precisa se deslocar para nascer centralizada: metade da
-  // coluna de texto. Escrito direto no nó (sem estado) para um novo render não
-  // reiniciar a animação de entrada.
   useLayoutEffect(() => {
     if (!item || !dims) return
     const measure = () => {
@@ -169,7 +141,6 @@ export function ImageDialog({
     }
   }, [item, onClose])
 
-  // O painel só existe depois que as dimensões da foto chegam.
   useEffect(() => {
     if (item && dims) closeRef.current?.focus()
   }, [item, dims])
@@ -212,9 +183,6 @@ export function ImageDialog({
               ref={panelRef}
               className="relative flex max-h-[92svh] w-fit max-w-[96vw] flex-col overflow-hidden rounded-[16px] border border-white/10 bg-[#0a0a0a] shadow-2xl shadow-black md:flex-row md:rounded-[22px]"
             >
-              {/* Foto: tamanho natural, inteira e rente às bordas do painel.
-                  É ela que viaja do centro para a esquerda; o painel fica
-                  parado. */}
               <div
                 className={`relative flex shrink-0 items-center justify-center overflow-hidden bg-black ${
                   animate ? 'story-dialog-photo' : ''
@@ -234,7 +202,6 @@ export function ImageDialog({
                 />
               </div>
 
-              {/* Texto: largura própria, sem esticar junto com a foto. */}
               <div
                 ref={infoRef}
                 className="flex min-h-0 w-full flex-col md:w-[420px] md:max-w-[36vw] md:shrink-0"

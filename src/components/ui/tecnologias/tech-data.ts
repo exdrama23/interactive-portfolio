@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react'
-import tecnologiasData from '../../data/tecnologias.json'
+import tecnologiasData from '@/data/tecnologias.json'
 
 export type TechCategory =
   | 'Front-end & UI'

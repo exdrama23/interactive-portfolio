@@ -6,11 +6,6 @@ import { EASE } from './easing'
 import { RELAY_HUB, RELAY_RISE_PCT, RELAY_TILES, relayChain } from './relay-tiles'
 import { TECH_CATEGORIES, type TechItem } from './tech-data'
 
-/**
- * Ritmo da animação da lib: `parameter('relay')` = 120 ms por salto,
- * 700 ms para subir e 1500 ms para descer. Os ícones usam os mesmos
- * atrasos para ficarem colados no topo dos tiles.
- */
 const STEP = 120
 const UP = 700
 const DOWN = 1500
@@ -49,9 +44,7 @@ function BoardIcon({ item }: { item: TechItem }) {
 }
 
 interface TechRelayBoardProps {
-  /** Tecnologias com logo que ocupam os 14 tiles. */
   items: readonly TechItem[]
-  /** Tecnologias que ficam fora da grade, listadas no hub. */
   rest: readonly TechItem[]
 }
 
@@ -62,7 +55,6 @@ export function TechRelayBoard({ items, rest }: TechRelayBoardProps) {
   const hubRef = useRef<HTMLButtonElement>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
 
-  /* A lib publica a folha acesa em `onRead`; reproduzimos o atraso dos saltos. */
   const handleRead = useCallback((text: string) => {
     setLifts((previous) => {
       const want = new Set(relayChain(text))
@@ -152,7 +144,6 @@ export function TechRelayBoard({ items, rest }: TechRelayBoardProps) {
           aria-label="Um hub e quatro ramos de quadrados: o caminho até a ponta sob o ponteiro acende salto a salto."
         />
 
-        {/* ícones das tecnologias, presos ao topo de cada tile */}
         <div aria-hidden="true" className="pointer-events-none absolute inset-0">
           {items.map((item, index) => {
             const tile = RELAY_TILES[index]

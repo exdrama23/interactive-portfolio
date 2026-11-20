@@ -12,7 +12,6 @@ interface RevealProps {
   amount?: number
 }
 
-/** Fade + subida quando o elemento entra na viewport (scroll reveal). */
 export function Reveal({
   children,
   className,
@@ -36,7 +35,6 @@ export function Reveal({
 }
 
 interface GatedRevealProps {
-  /** Controlado externamente (ex.: progresso do portal da hero). */
   shown: boolean
   children: ReactNode
   className?: string
@@ -47,7 +45,6 @@ interface GatedRevealProps {
   scale?: number
 }
 
-/** Fade + subida disparado por um estado externo, não pela viewport. */
 export function GatedReveal({
   shown,
   children,
@@ -81,7 +78,6 @@ interface StaggerGroupProps {
   delayChildren?: number
 }
 
-/** Container que anima os filhos em sequência. */
 export function StaggerGroup({
   children,
   className,
@@ -128,14 +124,9 @@ interface ParallaxImageProps {
   alt: string
   className?: string
   imgClassName?: string
-  /** Deslocamento vertical (px) ao atravessar a viewport. */
   distance?: number
 }
 
-/**
- * Imagem com parallax suave. A escala extra evita que as bordas apareçam
- * durante o movimento.
- */
 export function ParallaxImage({
   src,
   alt,

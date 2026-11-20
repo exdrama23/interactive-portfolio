@@ -31,11 +31,6 @@ export interface CredentialRailProps extends React.ComponentProps<"section"> {
   active?: number | null
   onActiveChange?: (index: number | null) => void
   labels?: CredentialRailLabels
-  /**
-   * Número de cartões usado para calcular o tamanho do palco. Serve para manter
-   * a barra e os cartões no mesmo lugar quando os grupos têm contagens
-   * diferentes (ex.: 4 formações × 1 certificado).
-   */
   layoutCount?: number
 }
 
@@ -319,33 +314,28 @@ function Lanyard({
       className="pointer-events-none absolute overflow-visible"
       style={{ left: "50%", top: g.top, transform: "translateX(-50%)" }}
     >
-      {/* sombra */}
       <g fill="none" stroke="black" strokeOpacity="0.35" strokeLinecap="round" transform="translate(1.2 1.8)">
         <path data-l="left" d={left} strokeWidth={g.strapW} />
         <path data-l="right" d={right} strokeWidth={g.strapW} />
         <path data-l="lower" d={lower} strokeWidth={g.strapW * 0.8} />
       </g>
 
-      {/* fita */}
       <g fill="none" strokeLinecap="butt">
         <path data-l="left" d={left} stroke={color} strokeWidth={g.strapW} />
         <path data-l="right" d={right} stroke={color} strokeWidth={g.strapW} />
         <path data-l="lower" d={lower} stroke={color} strokeWidth={g.strapW * 0.8} />
       </g>
 
-      {/* impressão no cordão */}
       <g fill="none" strokeLinecap="butt">
         <path data-l="left" d={left} stroke={ink} strokeWidth={g.strapW * 0.22} strokeDasharray={dash} opacity={0.9} />
         <path data-l="right" d={right} stroke={ink} strokeWidth={g.strapW * 0.22} strokeDasharray={dash} opacity={0.9} />
       </g>
 
-      {/* brilho da trama */}
       <g fill="none" stroke="white" strokeOpacity="0.22" strokeWidth={Math.max(0.7, g.strapW * 0.12)}>
         <path data-l="left" d={left} />
         <path data-l="right" d={right} />
       </g>
 
-      {/* fivela */}
       <g data-l="buckle" transform={`translate(${g.cx} ${buckle})`}>
         <rect
           x={-g.strapW * 1.15}
@@ -368,7 +358,6 @@ function Lanyard({
         />
       </g>
 
-      {/* clipe metálico que prende o cartão */}
       <g data-l="clip" transform={`translate(${g.cx} ${g.holeY - g.strapW * 0.9})`}>
         <rect
           x={-g.strapW * 0.42}
@@ -554,8 +543,6 @@ export function CredentialRail({
     const measure = () => {
       const width = stage.clientWidth
       if (!width) return
-      // offsetHeight ignora rotações da seção de entrada; getBoundingClientRect
-      // encolheria o palco enquanto a seção ainda está inclinada.
       const chrome = section.offsetHeight - stage.offsetHeight
       const byHeight = (window.innerHeight - chrome - 12 - RAIL_TOP - FOOT_PX) / STAGE_K
       const fit =

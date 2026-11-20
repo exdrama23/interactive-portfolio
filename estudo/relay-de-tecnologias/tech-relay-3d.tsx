@@ -1,24 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { Plus, X, type LucideIcon } from 'lucide-react'
+import { Plus, X } from 'lucide-react'
 import { EASE } from './easing'
+import { TECH_CATEGORIES, type TechItem } from './tech-data'
 
-export type TechCategory =
-  | 'Front-end & UI'
-  | 'Back-end & APIs'
-  | 'Banco de Dados & Cache'
-  | 'Cloud & DevOps'
-  | 'Ferramentas e Plataformas'
-  | 'Conceitos & Especialidades'
-
-export interface TechItem {
-  name: string
-  /** Slug do Simple Icons (logo branco via CDN). */
-  slug?: string
-  /** Ícone lucide para tecnologias sem logo dedicado. */
-  icon?: LucideIcon
-  category: TechCategory
-}
+export type { TechCategory, TechItem } from './tech-data'
 
 const GRID_CELLS = 25
 const HUB_INDEX = Math.floor(GRID_CELLS / 2)
@@ -80,34 +66,20 @@ interface TechRelayProps {
   className?: string
 }
 
-/**
- * Grade de quadrados no estilo "relay": um hub central de onde saem
- * quatro braços, com hairlines que acendem no hover e entrada em cascata
- * a partir do centro. O hub abre a lista das tecnologias sem logo.
- */
 export function TechRelay({ items, extras, className = '' }: TechRelayProps) {
   const reduceMotion = useReducedMotion()
   const [open, setOpen] = useState(false)
   const hubRef = useRef<HTMLButtonElement>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
 
-  const groups = useMemo(() => {
-    const order: TechCategory[] = [
-      'Front-end & UI',
-      'Back-end & APIs',
-      'Banco de Dados & Cache',
-      'Cloud & DevOps',
-      'Ferramentas e Plataformas',
-      'Conceitos & Especialidades',
-    ]
-
-    return order
-      .map((category) => ({
+  const groups = useMemo(
+    () =>
+      TECH_CATEGORIES.map((category) => ({
         category,
         techs: extras.filter((tech) => tech.category === category),
-      }))
-      .filter((group) => group.techs.length > 0)
-  }, [extras])
+      })).filter((group) => group.techs.length > 0),
+    [extras],
+  )
 
   const close = useCallback(() => {
     setOpen(false)
@@ -140,78 +112,92 @@ export function TechRelay({ items, extras, className = '' }: TechRelayProps) {
 
   return (
     <div className={`relative ${className}`}>
-      <div className="group/grid relative mx-auto w-full max-w-[600px]">
-        {/* hairlines + halo do hub */}
-        <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-          <div className="absolute top-1/2 right-0 left-0 h-px -translate-y-1/2 bg-gradient-to-r from-transparent via-white/10 to-transparent transition-colors duration-700 group-hover/grid:via-white/25" />
-          <div className="absolute top-0 bottom-0 left-1/2 w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-white/10 to-transparent transition-colors duration-700 group-hover/grid:via-white/25" />
-          <div className="absolute top-1/2 left-1/2 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/[0.06] blur-3xl" />
-        </div>
+      <div className="group/grid relative mx-auto w-full max-w-[620px] [perspective:1500px]">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -inset-8 rounded-[40px] bg-[radial-gradient(60%_60%_at_50%_45%,rgba(255,255,255,0.09),transparent_72%)] blur-2xl"
+        />
 
-        <ul className="relative grid grid-cols-5 gap-1.5 sm:gap-2.5">
-          {slots.map((item, index) => {
-            const row = Math.floor(index / 5)
-            const col = index % 5
-            const ring = Math.abs(row - 2) + Math.abs(col - 2)
-            const delay = reduceMotion ? 0 : ring * 0.06
+        <div className="relative [transform:rotateX(9deg)] [transform-style:preserve-3d] transition-transform duration-700 ease-out group-hover/grid:[transform:rotateX(5deg)] md:[transform:rotateX(14deg)] md:group-hover/grid:[transform:rotateX(8deg)]">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 [transform:translateZ(-14px)]"
+          >
+            <div className="absolute top-1/2 right-0 left-0 h-px -translate-y-1/2 bg-gradient-to-r from-transparent via-white/10 to-transparent transition-colors duration-700 group-hover/grid:via-white/25" />
+            <div className="absolute top-0 bottom-0 left-1/2 w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-white/10 to-transparent transition-colors duration-700 group-hover/grid:via-white/25" />
+            <div className="absolute top-1/2 left-1/2 h-44 w-44 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/[0.07] blur-3xl" />
+          </div>
 
-            if (!item) {
+          <ul className="relative grid grid-cols-5 gap-1.5 [transform-style:preserve-3d] sm:gap-3">
+            {slots.map((item, index) => {
+              const row = Math.floor(index / 5)
+              const col = index % 5
+              const ring = Math.abs(row - 2) + Math.abs(col - 2)
+              const delay = reduceMotion ? 0 : ring * 0.06
+
+              if (!item) {
+                return (
+                  <li key="hub" className="[transform-style:preserve-3d]">
+                    <motion.div
+                      initial={reduceMotion ? false : { opacity: 0, scale: 0.9 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      viewport={{ once: true, amount: 0.5 }}
+                      transition={{ duration: 0.7, ease: EASE, delay }}
+                      className="h-full [transform-style:preserve-3d]"
+                    >
+                      <button
+                        ref={hubRef}
+                        type="button"
+                        onClick={() => setOpen(true)}
+                        aria-haspopup="dialog"
+                        aria-expanded={open}
+                        aria-label={`Mais ${extras.length} tecnologias sem logo dedicado`}
+                        className="group relative flex aspect-square w-full flex-col items-center justify-center gap-1 rounded-sm border border-white/40 bg-gradient-to-br from-white/[0.16] via-white/[0.06] to-black/50 shadow-[0_10px_0_-2px_rgba(255,255,255,0.14),0_28px_45px_-18px_rgba(0,0,0,0.95)] transition-[transform,border-color,background-color,box-shadow] duration-500 [transform:translateZ(12px)] hover:border-white/80 hover:shadow-[0_16px_0_-2px_rgba(255,255,255,0.2),0_38px_60px_-20px_rgba(0,0,0,0.95)] hover:[transform:translateZ(40px)] focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:outline-none active:[transform:translateZ(28px)]"
+                      >
+                        <span
+                          aria-hidden="true"
+                          className="pointer-events-none absolute -inset-3 -z-10 rounded-sm bg-white/10 blur-xl transition-opacity duration-500 group-hover:opacity-100 md:opacity-60"
+                        />
+                        <Plus
+                          aria-hidden="true"
+                          strokeWidth={1}
+                          className="h-6 w-6 text-white transition-transform duration-500 group-hover:rotate-90 sm:h-8 sm:w-8"
+                        />
+                        <span className="text-[8px] font-medium tracking-[0.22em] text-stone-200 uppercase sm:text-[9px]">
+                          mais
+                        </span>
+                      </button>
+                    </motion.div>
+                  </li>
+                )
+              }
+
               return (
-                <li key="hub">
+                <li key={item.name} className="[transform-style:preserve-3d]">
                   <motion.div
-                    initial={reduceMotion ? false : { opacity: 0, scale: 0.9 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
+                    initial={reduceMotion ? false : { opacity: 0, y: 14, scale: 0.96 }}
+                    whileInView={{ opacity: 1, y: 0, scale: 1 }}
                     viewport={{ once: true, amount: 0.5 }}
-                    transition={{ duration: 0.7, ease: EASE, delay }}
+                    transition={{ duration: 0.6, ease: EASE, delay }}
+                    className="h-full [transform-style:preserve-3d]"
                   >
                     <button
-                      ref={hubRef}
                       type="button"
-                      onClick={() => setOpen(true)}
-                      aria-haspopup="dialog"
-                      aria-expanded={open}
-                      aria-label={`Mais ${extras.length} tecnologias sem logo dedicado`}
-                      className="group flex aspect-square w-full flex-col items-center justify-center gap-1 rounded-sm border border-white/30 bg-white/[0.05] transition duration-500 hover:-translate-y-1 hover:border-white/70 hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none"
+                      aria-label={item.name}
+                      title={item.name}
+                      className="group relative flex aspect-square w-full flex-col items-center justify-center gap-1 rounded-sm border border-white/12 bg-gradient-to-br from-white/[0.08] via-white/[0.03] to-white/[0.01] shadow-[0_8px_0_-2px_rgba(255,255,255,0.08),0_22px_35px_-20px_rgba(0,0,0,0.95)] transition-[transform,border-color,background-color,box-shadow] duration-500 [transform:translateZ(0)] hover:border-white/50 hover:from-white/[0.14] hover:via-white/[0.06] hover:shadow-[0_14px_0_-2px_rgba(255,255,255,0.12),0_32px_45px_-20px_rgba(0,0,0,0.95)] hover:[transform:translateZ(30px)] focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:outline-none active:[transform:translateZ(20px)]"
                     >
-                      <Plus
-                        aria-hidden="true"
-                        strokeWidth={1}
-                        className="h-6 w-6 text-white transition-transform duration-500 group-hover:rotate-90 sm:h-8 sm:w-8"
-                      />
-                      <span className="text-[8px] font-medium tracking-[0.22em] text-stone-300 uppercase sm:text-[9px]">
-                        mais
+                      <TechIcon item={item} />
+                      <span className="hidden text-[8px] leading-tight tracking-wide text-stone-400 uppercase transition-colors duration-500 group-hover:text-stone-100 sm:block sm:text-[9px]">
+                        {item.name}
                       </span>
                     </button>
                   </motion.div>
                 </li>
               )
-            }
-
-            return (
-              <li key={item.name}>
-                <motion.div
-                  initial={reduceMotion ? false : { opacity: 0, y: 14, scale: 0.96 }}
-                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                  viewport={{ once: true, amount: 0.5 }}
-                  transition={{ duration: 0.6, ease: EASE, delay }}
-                  className="h-full"
-                >
-                  <button
-                    type="button"
-                    aria-label={item.name}
-                    title={item.name}
-                    className="group flex aspect-square w-full flex-col items-center justify-center gap-1 rounded-sm border border-white/10 bg-white/[0.02] transition duration-500 hover:-translate-y-1 hover:border-white/45 hover:bg-white/[0.07] focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none"
-                  >
-                    <TechIcon item={item} />
-                    <span className="hidden text-[8px] leading-tight tracking-wide text-stone-400 uppercase transition-colors duration-500 group-hover:text-stone-100 sm:block sm:text-[9px]">
-                      {item.name}
-                    </span>
-                  </button>
-                </motion.div>
-              </li>
-            )
-          })}
-        </ul>
+            })}
+          </ul>
+        </div>
       </div>
 
       <AnimatePresence>

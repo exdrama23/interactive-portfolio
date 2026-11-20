@@ -26,7 +26,6 @@ const hasFinePointer = () => {
 const Sidebar = () => {
   const [state, setState] = useState<MenuState>('idle');
   const [expandY, setExpandY] = useState(0);
-  // Desktop com mouse: usa a faixa lateral. Touch/coarse: só o botão hamburguer.
   const [canHover, setCanHover] = useState(hasFinePointer);
 
   const stateRef = useRef<MenuState>(state);
@@ -47,9 +46,6 @@ const Sidebar = () => {
     stopAnimation,
   } = useMagneticPosition(0);
 
-  /* ---------------------------------------------------------------- */
-  /* Intenção / permanência                                            */
-  /* ---------------------------------------------------------------- */
 
   const clearIntentTimeout = useCallback(() => {
     if (intentTimeoutRef.current) {
@@ -65,7 +61,6 @@ const Sidebar = () => {
     }
   }, []);
 
-  /** Sai do modo magnético, mas só depois de uma pequena tolerância. */
   const scheduleIdle = useCallback(() => {
     if (heroActiveRef.current) return;
     clearGraceTimeout();
@@ -83,9 +78,6 @@ const Sidebar = () => {
       updateMousePosition(e.clientY);
       if (stateRef.current !== 'magneticFollow' && stateRef.current !== 'edgeHover') return;
 
-      // Sai de cena quando o cursor se afasta da borda. Antes o blob ficava
-      // "grudado" no mouse indefinidamente, porque o `mouseleave` da faixa era
-      // engolido pelo próprio blob (que está por cima dela).
       const distanceFromEdge = window.innerWidth - e.clientX;
       if (distanceFromEdge > FLOATING_MENU_WIDTH + 20 && !heroActiveRef.current) {
         scheduleIdle();
@@ -142,8 +134,6 @@ const Sidebar = () => {
       setState('magneticFollow');
       return;
     }
-    // O cursor pode já estar sobre a faixa quando o menu fecha: re-arma na hora,
-    // em vez de esperar um novo `mouseenter` que nunca vem.
     const { x, y } = pointerRef.current;
     if (window.innerWidth - x <= EDGE_ZONE_WIDTH * 2) {
       setExactPosition(clampMagneticY(y - FLOATING_MENU_HEIGHT / 2));
@@ -158,15 +148,11 @@ const Sidebar = () => {
     setTimeout(() => setState('fullscreen'), EXPAND_ANIMATION_DURATION);
   }, [setExactPosition]);
 
-  /* ---------------------------------------------------------------- */
-  /* Efeitos                                                          */
-  /* ---------------------------------------------------------------- */
 
   useEffect(() => {
     stateRef.current = state;
   }, [state]);
 
-  // Reavalia o dispositivo (ex.: trocar de mouse para toque no 2-em-1).
   useEffect(() => {
     const mq = window.matchMedia('(hover: hover) and (pointer: fine)');
     const apply = () => setCanHover(mq.matches);
@@ -175,7 +161,6 @@ const Sidebar = () => {
     return () => mq.removeEventListener('change', apply);
   }, []);
 
-  // Posição do cursor sempre disponível (usada ao fechar o menu).
   useEffect(() => {
     const onPointer = (e: PointerEvent) => {
       pointerRef.current = { x: e.clientX, y: e.clientY };
@@ -184,7 +169,6 @@ const Sidebar = () => {
     return () => window.removeEventListener('pointermove', onPointer);
   }, []);
 
-  // No topo (hero) o blob fica ativo; ao rolar, volta ao comportamento padrão.
   useEffect(() => {
     const sync = () => {
       const next = window.scrollY <= 8;
@@ -224,8 +208,6 @@ const Sidebar = () => {
     return () => window.removeEventListener('mousemove', onMove);
   }, [state, canHover, handleMouseMove]);
 
-  // Antes a decisão era um único check em 10ms. Agora reavalia a cada frame
-  // enquanto o cursor está na faixa: se estiver devagar o bastante, engata.
   useEffect(() => {
     if (!canHover || state !== 'edgeHover') return;
     let frame = 0;
@@ -242,7 +224,6 @@ const Sidebar = () => {
     return () => cancelAnimationFrame(frame);
   }, [state, canHover, getElapsed, getMouseSpeed, clearIntentTimeout]);
 
-  // Peek de primeira visita: aparece sozinho uma vez por sessão (só desktop).
   useEffect(() => {
     if (typeof window === 'undefined') return;
     if (!canHover) return;
@@ -259,7 +240,6 @@ const Sidebar = () => {
       try {
         sessionStorage.setItem('sidebar-peek-v1', '1');
       } catch {
-        /* sessionStorage bloqueado */
       }
       setExactPosition(window.innerHeight / 2 - FLOATING_MENU_HEIGHT / 2);
       setState('edgeHover');

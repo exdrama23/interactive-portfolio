@@ -12,13 +12,6 @@ import {
 } from 'lucide-react'
 import type { BookCover, BookPage } from './perspective-book'
 
-/**
- * Leitor do livro em tela cheia.
- *
- * Este arquivo só é baixado quando o visitante abre o livro (ver
- * `React.lazy` em perspective-book.tsx). Ele concentra tudo que é específico
- * da leitura: folhear, tamanho do texto, tema e atalhos de teclado.
- */
 
 type Theme = 'sepia' | 'light' | 'dark'
 
@@ -78,7 +71,6 @@ export default function BookReader({ cover, pages, onClose }: BookReaderProps) {
     return () => mq.removeEventListener('change', sync)
   }, [])
 
-  // Trava o scroll da página e devolve o foco ao fechar.
   React.useEffect(() => {
     const html = document.documentElement
     const prev = html.classList.contains('no-scroll')
@@ -120,7 +112,6 @@ export default function BookReader({ cover, pages, onClose }: BookReaderProps) {
     return () => window.removeEventListener('keydown', onKey)
   }, [flip, onClose])
 
-  // 0 = capa, 1..N = páginas, N+1 = contracapa
   const pageLabel =
     page >= 1 && page <= total
       ? `Página ${page} de ${total}`
@@ -247,10 +238,6 @@ export default function BookReader({ cover, pages, onClose }: BookReaderProps) {
             onInit={(e: { data: { page: number } }) => setPage(e.data.page)}
             {...settings}
           >
-            {/* Capa
-                O `page-flip` reescreve o atributo `style` do elemento de página
-                para posicioná-lo (style.cssText). Por isso o visual (fundo,
-                cor, padding) mora num filho absoluto, que ele não toca. */}
             <div className="relative overflow-hidden">
               <div
                 className="absolute inset-0 flex flex-col justify-between p-7 ring-1 ring-white/10 ring-inset md:p-9"
@@ -286,7 +273,6 @@ export default function BookReader({ cover, pages, onClose }: BookReaderProps) {
               </div>
             </div>
 
-            {/* Páginas de história */}
             {pages.map((p, i) => (
               <div
                 key={p.id}
@@ -334,7 +320,6 @@ export default function BookReader({ cover, pages, onClose }: BookReaderProps) {
                     ) : null}
                   </div>
 
-                  {/* Rodapé do livro */}
                   <div
                     className="mt-4 flex shrink-0 items-center justify-between border-t pt-3 font-mono text-[9px] tracking-[0.16em] uppercase"
                     style={{ borderColor: t.line, color: t.muted }}
@@ -348,7 +333,6 @@ export default function BookReader({ cover, pages, onClose }: BookReaderProps) {
               </div>
             ))}
 
-            {/* Contracapa */}
             <div className="relative overflow-hidden">
               <div
                 className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center"
@@ -394,7 +378,6 @@ export default function BookReader({ cover, pages, onClose }: BookReaderProps) {
         <span className="hidden md:inline">← → folhear · + − texto · esc fechar</span>
       </footer>
 
-      {/* Navegação por toque (mobile) */}
       <div className="flex items-center justify-center gap-6 border-t border-white/10 py-2 md:hidden">
         <button
           type="button"

@@ -11,7 +11,7 @@ import CurvedLensCarousel from '../components/ui/3d-curved-carousel'
 import {
   ProjectFocusInfo,
   type ProjectDetail,
-} from '../components/ui/project-focus-info'
+} from '@/components/ui/projetos/project-focus-info'
 import projetosData from '../data/projetos.json'
 
 interface ProjetosData {
@@ -22,22 +22,12 @@ interface ProjetosData {
 
 const DATA = projetosData as unknown as ProjetosData
 const PROJETOS: ProjectDetail[] = DATA.projects
-// Só os marcados com "featured": true vão para o carrossel da home. O acervo
-// (/projetos) continua mostrando todos. Se nada estiver marcado, mostra todos
-// para o carrossel nunca ficar vazio.
 const DESTAQUES = PROJETOS.filter((project) => project.featured)
 const SLIDES = DESTAQUES.length > 0 ? DESTAQUES : PROJETOS
 
-// Fases do progresso da secao (0 = topo da secao no topo da tela, 1 = fim):
-// 1) a janela sobe ate o centro; 2) abre ate cobrir a tela; 3) palco parado
-// com a entrada dos cartoes. O restante do progresso (50% -> 100%) fica para
-// o carrossel, entao nao da para passar sem ver a animacao.
 const WINDOW_RISE_END = 0.1
 const WINDOW_OPEN_END = 0.5
 const WINDOW_SIZE = 0.48
-// O carrossel dispara a entrada dos cartoes quando `entrance` cruza 0.54.
-// Remapeamos o progresso para esse gate cair exatamente no instante em que a
-// janela termina de cobrir a tela, sem editar o componente do carrossel.
 const INTRO_GATE = 0.54
 
 export function Projetos() {
@@ -66,9 +56,6 @@ export function Projetos() {
   const { w, h } = viewport
   const side = Math.min(w, h) * WINDOW_SIZE || 1
 
-  // A janela sobe do centro para baixo ate o centro da tela e depois se
-  // estica ate cobrir o viewport. O conteudo e preto liso, entao esticar por
-  // `scale` nao distorce nada - e fica tudo em transform (GPU).
   const rise = useTransform(
     scrollYProgress,
     [0, WINDOW_RISE_END],
@@ -94,8 +81,6 @@ export function Projetos() {
     [0, INTRO_GATE],
   )
 
-  // So depois que a janela cobre a tela o carrossel aceita ponteiro/foco;
-  // antes disso ele esta montado (pre-carrega texturas) mas invisivel.
   useMotionValueEvent(scrollYProgress, 'change', (value) => {
     setOpened(value >= WINDOW_OPEN_END - 0.004)
   })

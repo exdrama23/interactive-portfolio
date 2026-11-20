@@ -1,13 +1,3 @@
-/**
- * Geometria projetada da figura `relay` de `@lucasmarkes/hairline`.
- *
- * A lib desenha um SVG fixo (`viewBox="0 0 400 320"`) com um hub e quatro
- * ramos de tiles isométricos. A câmera e o enquadramento são determinísticos,
- * então as posições abaixo são calculadas uma vez e usadas para sobrepor os
- * ícones das tecnologias exatamente no centro do topo de cada tile.
- *
- * Constantes e fórmula espelham `mount23`/`Cam`/`fit` no bundle da lib.
- */
 
 const AZ = Math.PI / 4
 const K = 0.5
@@ -35,15 +25,10 @@ const BRANCHES: readonly Branch[] = [
 ]
 
 export interface RelayTile {
-  /** Centro do topo do tile, em % da largura do viewBox (400). */
   x: number
-  /** Centro do topo do tile, em % da altura do viewBox (320). */
   y: number
-  /** 1 = ligado ao hub, 2 = intermediário, 3 = folha. */
   dep: number
-  /** Índice do tile pai (`null` no primeiro de cada ramo). */
   parent: number | null
-  /** Identificador que a lib escreve no leitor de tela, só nas folhas. */
   tag: string | null
 }
 
@@ -79,7 +64,6 @@ const raw = (x: number, y: number, z: number): [number, number] => [
   S * ((x * Math.sin(AZ) + y * Math.cos(AZ)) * K - z * ZF),
 ]
 
-/* `fit(C, pts, 200, 166)` centraliza a caixa de todos os cantos dos slabs. */
 const bounds: Array<[number, number, number]> = [
   [-HS3, -HS3, 0],
   [HS3, HS3, 0],
@@ -126,19 +110,13 @@ export const RELAY_TILES: readonly RelayTile[] = nodes.map((node) => {
   }
 })
 
-/** Centro do topo do hub, em % do viewBox (o hub é mais alto que os tiles: HT3). */
 export const RELAY_HUB = (() => {
   const [px, py] = project(0, 0, HT3)
   return { x: percent(px, 400), y: percent(py, 320) }
 })()
 
-/** Quanto o topo de um tile sobe (em % da altura) no hover. */
 export const RELAY_RISE_PCT = percent(RISE * S * ZF, 320)
 
-/**
- * Tiles acesos por uma folha: ela mesma e seus dois ancestrais.
- * Recebe o texto que a lib publica em `onRead` (ex.: "leaf 1·2").
- */
 export function relayChain(tag: string): number[] {
   const leaf = RELAY_TILES.findIndex((tile) => tile.tag === tag)
   if (leaf < 0) return []

@@ -1,18 +1,10 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 
-/**
- * Colagem tipográfica da hero — adaptação do modelo Skeleton Key Preloader
- * (sem a chave e sem o buraco da fechadura). Cada peça é decorativa e usa
- * paralaxe de ponteiro; a palavra-ânima ("Bem-vindo ao meu mundo") é
- * renderizada pelo GlyphPortal, no centro.
- */
 
 const TAGS = ['#fullstack', '#react', '#motion', '#typescript']
 
-// Palavra do bloco pixelado. Qualquer texto em maiúsculas funciona (A–Z, 0–9).
 const PIXEL_WORD = 'ALEC'
 
-// 5 × 7 em negrito (mesma construção do modelo: linha OR linha deslocada).
 const GLYPH_BITS: Record<string, string> = {
   A: '01110100011000111111100011000110001',
   C: '01110100011000010000100001000101110',
@@ -34,7 +26,6 @@ function glyphRows(ch: string) {
   return rows
 }
 
-// 6 colunas por letra + 1 de respiro entre elas.
 const PIXEL_TRACK = 7
 const PIXEL_COLUMNS = Math.max(1, PIXEL_WORD.length * PIXEL_TRACK - 1)
 
@@ -202,8 +193,6 @@ function Scramble({ text, on }: { text: string; on: boolean }) {
       setTick(-1)
       return
     }
-    // Montado por baixo do fade da intro: o hero já está no estado final,
-    // então não faz sentido "embaralhar" as letras de novo.
     if (document.documentElement.classList.contains('intro-handoff')) {
       setTick(chars.length + 9)
       return
@@ -256,7 +245,6 @@ export function HeroCollage({ active = true }: { active?: boolean }) {
     return () => window.clearTimeout(t)
   }, [active])
 
-  // Paralaxe de ponteiro. Escrita direta no DOM, sem re-render por frame.
   useEffect(() => {
     const el = rootRef.current
     if (!el) return

@@ -9,10 +9,8 @@ import { LoadingPreview } from './components/loading/loading-preview';
 function App() {
   return (
     <BrowserRouter>
-      {/* Tela de carregamento de troca de rota (não é a introdução). */}
       <RouteTransitionProvider>
         <Routes>
-          {/* Preview manual da tela de carregamento — só em desenvolvimento. */}
           {import.meta.env.DEV && (
             <Route path='/__loading-preview' element={<LoadingPreview />} />
           )}

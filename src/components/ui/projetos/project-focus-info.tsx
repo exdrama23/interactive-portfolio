@@ -14,9 +14,7 @@ export interface ProjectCompany {
 export interface ProjectDetail {
   id: string
   title: string
-  /** true = aparece no carrossel da home; false = só no acervo /projetos */
   featured?: boolean
-  /** áreas do projeto, usadas no filtro da página /projetos */
   categories?: string[]
   kicker?: string
   caption?: string

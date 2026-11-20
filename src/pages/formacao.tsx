@@ -216,12 +216,6 @@ function SealWork({ letter, size }: { letter: string; size: number }) {
   )
 }
 
-/**
- * Selo em forma de logo: usa a própria logo do tema como "máscara", então ela
- * sai chapada na cor atual (`currentColor`) — igual aos selos vetoriais, sem
- * precisar de versão monocromática de cada arquivo.
- * Controlado só pelo JSON: `"seal": "logo"` no tema.
- */
 function SealLogo({ src, size }: { src: string; size: number }) {
   const mask = {
     WebkitMaskImage: `url(${src})`,
@@ -257,12 +251,6 @@ function Seal({ item, size }: { item: Credencial; size: number }) {
   return <SealWork letter={item.tema.monogram ?? '•'} size={size} />
 }
 
-/**
- * Caixa do selo-água grande. Os selos vetoriais são circulares e sangram para
- * fora do cartão de propósito (o corte faz parte do visual). O selo-logo é um
- * wordmark — se sangrasse, as letras sairiam cortadas — então ele cabe inteiro
- * dentro do cartão.
- */
 function watermarkStyle(tema: Tema, s: number, side: 'right' | 'left') {
   const isLogo = tema.seal === 'logo'
   if (side === 'right') {
@@ -279,7 +267,6 @@ function watermarkStyle(tema: Tema, s: number, side: 'right' | 'left') {
   }
 }
 
-/** 164 = largura do cartão (200) menos as margens internas. */
 function watermarkSize(tema: Tema, base: number, s: number) {
   return (tema.seal === 'logo' ? 164 : base) * s
 }
@@ -866,17 +853,8 @@ export function Formacao() {
     }
   }, [grupo])
 
-  // Pin nativo: a Formacao fica presa (position: sticky) exatamente durante a
-  // abertura da janela do Projetos, nos primeiros 50% do progresso dele
-  // (WINDOW_OPEN_END em projetos.tsx). Sticky e resolvido pelo compositor,
-  // entao nao existe o atraso de 1 frame do transform em JS (que fazia a
-  // secao tremer para cima e para baixo). O wrapper ganha a altura extra do
-  // pin e o Projetos compensa com margem negativa, entao a pagina nao cresce.
   useEffect(() => {
     if (reduceMotion) {
-      // Reset sincrono do pin ao trocar a preferencia de movimento: e um caso
-      // de borda unico (e nao um setState por render de efeito), entao o
-      // render extra aqui e irrelevante e evita o pin preso com a altura antiga.
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setPin(null)
       return
@@ -956,19 +934,11 @@ export function Formacao() {
     [contagem],
   )
 
-  // Ref "latest": o clique e o hashchange são listenings globais registrados
-  // uma única vez, então precisam da versão mais recente da função (que usa
-  // `trocar`, dependente do estado). A atribuição vive num efeito — escrever
-  // `.current` durante o render é o que o react-hooks aponta como erro.
   const irParaCertificacoes = useRef<() => void>(() => {})
   useEffect(() => {
     irParaCertificacoes.current = () => {
       trocar('certificados')
       window.requestAnimationFrame(() => {
-        // Mesmo destino de "Formações": o topo da seção. Antes o trilho era
-        // centralizado (`top - max(80, (vh - altura) / 2)`), então a seção
-        // parava na metade do caminho entre Formações e Projetos. Agora cai
-        // exatamente onde a seção repousa, só que com o cartão de certificado.
         const top = sectionScrollTop('formacao')
         if (top === null) return
         window.scrollTo({
@@ -1025,10 +995,6 @@ export function Formacao() {
         className="relative w-full origin-bottom-left overflow-hidden bg-black text-stone-200 antialiased selection:bg-stone-100 selection:text-black"
       >
 
-        {/* Âncora de "Certificações" no TOPO da seção: o portão de loading rola
-            até o elemento do hash, então a seção precisa parar no mesmo lugar
-            de "Formações" (e não 328px abaixo, no meio da passagem para
-            Projetos). */}
         <span id="certificacoes" aria-hidden="true" className="block h-0" />
 
         <div

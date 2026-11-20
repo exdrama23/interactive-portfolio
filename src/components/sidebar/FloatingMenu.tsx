@@ -14,9 +14,6 @@ const FloatingMenu: React.FC<ExtendedFloatingMenuProps> = ({
   const flatPath = 'M 100 -110 L 100 210 Q 100 50 100 -110 Z';
   const blobRef = React.useRef<HTMLDivElement>(null);
 
-  // O eixo Y vai por `translate` (propriedade separada) para não brigar com o
-  // `transform` que o framer usa na entrada (x: 100% → 0). Antes o `y` passado
-  // em `style` era ignorado quando havia `animate` no mesmo elemento.
   React.useEffect(() => {
     const apply = (value: number) => {
       if (blobRef.current) blobRef.current.style.translate = `0 ${value}px`;

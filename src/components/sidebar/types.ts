@@ -5,7 +5,6 @@ export type MenuState = 'idle' | 'edgeHover' | 'magneticFollow' | 'expanding' | 
 export interface MenuItemData {
   link: string;
   text: string;
-  /** Marca o item como rota principal, com um destaque discreto no menu. */
   highlight?: boolean;
 }
 
@@ -21,7 +20,6 @@ export interface MenuItemProps extends MenuItemData {
 }
 
 export interface FloatingMenuProps {
-  /** MotionValue: o movimento é animado fora do React (sem re-render por frame). */
   magneticY: MotionValue<number>;
   onClick: () => void;
 }
