@@ -20,6 +20,7 @@ import {
   createLayer,
   cropDoc,
   eraseConnected,
+  expandDoc,
   floodFill,
   hexOf,
   lineCells,
@@ -51,6 +52,16 @@ import {
   type ProjectFile,
 } from './exporters'
 import { NOX_PAL } from '../mascot/sprite-art'
+import {
+  clearFrameBridge,
+  clearFrameDraft,
+  decodeLayer,
+  encodeLayer,
+  FRAME_DRAFT_KEY,
+  readFrameBridge,
+  writeFrameBridge,
+  type FrameBridge,
+} from './frame-bridge'
 
 type Tool = 'pencil' | 'eraser' | 'fill' | 'pick' | 'pan' | 'move' | 'select'
 
@@ -88,13 +99,22 @@ interface ImportState {
   removeBg: boolean
   asReference: boolean
   detected: number
+  /** Traz cada pixel do arquivo como um pixel do editor, sem reduzir. */
+  exact: boolean
 }
 
 const entryBytes = (entry: Entry) =>
   entry.kind === 'pixels' ? entry.before.byteLength + entry.after.byteLength : 0
 
 export function PixelEditor() {
-  const [doc, setDoc] = useState<Doc>(() => loadDoc())
+  // Quando os quadros vem do importador do Nox, entram como uma camada por
+  // quadro e o autosave normal fica desligado para nao sobrescrever o projeto
+  // que o usuario ja tinha no editor.
+  const [frameBridge, setFrameBridge] = useState<FrameBridge | null>(() => readFrameBridge())
+  const [doc, setDoc] = useState<Doc>(() => {
+    if (!frameBridge) return loadDoc()
+    return readFrameDraft(frameBridge.clip) ?? docFromBridge(frameBridge)
+  })
   const [revision, setRevision] = useState(0)
   const [tool, setTool] = useState<Tool>('pencil')
   const [color, setColor] = useState('#171514')
@@ -169,10 +189,10 @@ export function PixelEditor() {
     canvas.getContext('2d')?.putImageData(image, 0, 0)
   }, [doc, revision])
 
-  const fitTo = (width: number, height: number) => {
+  const fitTo = (width: number, height: number, max = 64) => {
     if (!size.w || !size.h) return
     const factor = Math.min((size.w - 48) / width, (size.h - 48) / height)
-    const next = Math.max(0.25, Math.min(64, factor < 1 ? factor : Math.floor(factor)))
+    const next = Math.max(0.25, Math.min(max, factor < 1 ? factor : Math.floor(factor)))
     setZoom(next)
     setPan({ x: (size.w - width * next) / 2, y: (size.h - height * next) / 2 })
   }
@@ -672,6 +692,7 @@ export function PixelEditor() {
   }, [name])
 
   useEffect(() => {
+    if (frameBridge) return
     const cells = doc.width * doc.height * doc.layers.length
     if (cells > 2_000_000) return
     const timer = window.setTimeout(() => {
@@ -682,7 +703,24 @@ export function PixelEditor() {
       }
     }, 600)
     return () => window.clearTimeout(timer)
-  }, [doc, revision, name])
+  }, [doc, revision, name, frameBridge])
+
+  // Rascunho dos quadros em separado: o autosave normal fica intocado e o
+  // reload reabre a edicao exatamente como estava, sem banco.
+  useEffect(() => {
+    if (!frameBridge) return
+    const timer = window.setTimeout(() => {
+      try {
+        localStorage.setItem(
+          FRAME_DRAFT_KEY,
+          JSON.stringify({ clip: frameBridge.clip, project: projectOf(doc, name) }),
+        )
+      } catch {
+        setStatus('não deu para guardar o rascunho dos quadros; use "baixar quadros 1:1"')
+      }
+    }, 500)
+    return () => window.clearTimeout(timer)
+  }, [doc, revision, name, frameBridge])
 
   const resize = (width: number, height: number) => {
     if (!Number.isFinite(width) || !Number.isFinite(height) || width < 4 || height < 4 || width > MAX_CELLS || height > MAX_CELLS) {
@@ -713,11 +751,75 @@ export function PixelEditor() {
     }
   }
 
+  const frameIndices = useMemo(
+    () =>
+      doc.layers
+        .map((layer, index) => ({ layer, index }))
+        .filter(({ layer }) => isFrameLayer(layer)),
+    [doc.layers],
+  )
+
+  const selectFrame = (index: number) => {
+    const neighbor = doc.layers[index]
+    if (!neighbor) return
+    setDoc((current) => ({
+      ...current,
+      active: index,
+      layers: current.layers.map((layer, i) => {
+        if (!isFrameLayer(layer)) return layer
+        return { ...layer, visible: i === index }
+      }),
+    }))
+    setStatus(`editando ${neighbor.name}`)
+  }
+
+  const exportFramePngs = () => {
+    if (!frameBridge) return
+    const current = docRef.current
+    const frames = current.layers.filter(isFrameLayer)
+    if (!frames.length) return
+    frames.forEach((layer, index) => {
+      layerCanvas(current.width, current.height, layer.data).toBlob(
+        (blob) => blob && download(blob, `${frameBridge.clip}-${index + 1}.png`),
+      )
+    })
+    setStatus(`${frames.length} quadro(s) baixados em ${current.width}x${current.height}, sem reduzir`)
+  }
+
+  const sendFramesBack = () => {
+    if (!frameBridge) return
+    const current = docRef.current
+    const frames = current.layers
+      .filter(isFrameLayer)
+      .map((layer) => encodeLayer(current.width, current.height, layer.data))
+    if (!frames.length) {
+      setStatus('nenhum quadro para devolver')
+      return
+    }
+    if (!writeFrameBridge({ ...frameBridge, name, frames })) {
+      setStatus('os quadros não couberam no navegador; exporte o projeto como png')
+      return
+    }
+    clearFrameDraft()
+    window.location.assign('/__nox-import?nox=editor')
+  }
+
+  const leaveFrames = () => {
+    clearFrameBridge()
+    clearFrameDraft()
+    setFrameBridge(null)
+    setDoc(loadDoc())
+    const previous = localStorage.getItem(`${AUTOSAVE}-name`)
+    if (previous) setName(previous)
+    setStatus('quadros descartados; projeto anterior aberto')
+  }
+
   const importPreview = useMemo(() => {
     if (!importState) return null
     const cleaned = importState.removeBg
       ? removeBackground(importState.image, importState.tolerance)
       : importState.image
+    if (importState.exact) return sampleBlocks(cleaned, 1, 0, 0)
     return sampleBlocks(cleaned, importState.cell, importState.offsetX, importState.offsetY)
   }, [importState])
 
@@ -761,6 +863,9 @@ export function PixelEditor() {
         removeBg: true,
         asReference: false,
         detected: grid.cell,
+        // Arte que já cabe no canvas entra 1:1 por padrão: reimportar um PNG
+        // exportado daqui não pode ser reduzido de novo.
+        exact: image.width <= MAX_CELLS && image.height <= MAX_CELLS,
       })
     } catch (error) {
       setStatus(`não abriu: ${error instanceof Error ? error.message : String(error)}`)
@@ -775,16 +880,28 @@ export function PixelEditor() {
     }
     let final = { w: docRef.current.width, h: docRef.current.height }
     let note = ''
+    let grownNote = ''
     transact('importar imagem', (draft) => {
       const empty = isEmpty(draft)
+      const exact = Boolean(importState!.exact)
       let target = importPreview!
       if (empty) {
         // Tela vazia aceita o tamanho da arte reduzida, sem reamostrar de novo.
-        target = fitBlocks(target, MAX_CELLS, MAX_CELLS)
+        target = exact ? target : fitBlocks(target, MAX_CELLS, MAX_CELLS)
         draft.width = target.width
         draft.height = target.height
         draft.layers = []
         draft.active = 0
+      } else if (exact) {
+        // Arte 1:1 não pode ser cortada nem reduzida. Se ela não cabe no
+        // canvas atual, o canvas cresce e o desenho antigo fica centralizado.
+        if (target.width > draft.width || target.height > draft.height) {
+          const grown = expandDoc(draft, Math.max(draft.width, target.width), Math.max(draft.height, target.height))
+          draft.width = grown.width
+          draft.height = grown.height
+          draft.layers = grown.layers
+          grownNote = `canvas ampliado para ${draft.width}x${draft.height}`
+        }
       } else {
         target = fitBlocks(target, draft.width, draft.height)
       }
@@ -798,14 +915,32 @@ export function PixelEditor() {
         layer.locked = true
         layer.opacity = 0.6
       }
+      // No modo de quadros, uma arte do tamanho do quadro entra como quadro
+      // novo: aparece na lista, na vista e volta para o importador no envio.
+      // Camada solta ficava invisível na animação e era descartada no envio.
+      const asFrame =
+        Boolean(frameBridge) &&
+        !layer.reference &&
+        target.width === draft.width &&
+        target.height === draft.height
+      if (asFrame) {
+        layer.name = `quadro ${draft.layers.filter(isFrameLayer).length + 1}`
+        for (const other of draft.layers) {
+          if (isFrameLayer(other)) other.visible = false
+        }
+      }
       draft.layers.push(layer)
       draft.active = draft.layers.length - 1
       final = { w: draft.width, h: draft.height }
       note = empty
         ? `canvas ${draft.width}x${draft.height}, arte ${target.width}x${target.height}`
-        : `arte ${target.width}x${target.height} numa camada nova`
+        : `${grownNote ? `${grownNote}, ` : ''}arte ${target.width}x${target.height} ${
+            asFrame ? `no ${layer.name}` : 'numa camada nova'
+          }`
     })
-    fitTo(final.w, final.h)
+    // Arte 1:1 entra no tamanho real: ampliar aqui só faz o desenho parecer
+    // maior do que o PNG exportado. Quem quiser aproximar usa o + ou o ajustar.
+    fitTo(final.w, final.h, importState!.exact ? 1 : 4)
     setImportState(null)
     setStatus(`importada: ${note}`)
   }
@@ -912,6 +1047,10 @@ export function PixelEditor() {
   }, [])
 
   const sendToNox = async () => {
+    if (frameBridge) {
+      setStatus('estes quadros são 216x216; use "enviar ao importador" para não perder pixels')
+      return
+    }
     try {
       const rows = noxRows(docRef.current)
       const painted = rows.reduce((sum, row) => sum + [...row].filter((ch) => ch !== '.').length, 0)
@@ -1256,34 +1395,36 @@ export function PixelEditor() {
             </p>
           </section>
 
-          <section className="mt-auto space-y-1">
-            <div className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
-              para o Nox
-            </div>
-            <select
-              value={pose}
-              onChange={(event) => setPose(event.target.value)}
-              className="w-full rounded border border-zinc-700 bg-zinc-900 px-1 py-1 text-xs"
-            >
-              {poses.map((id) => (
-                <option key={id} value={id}>
-                  {id}
-                </option>
-              ))}
-            </select>
-            <canvas
-              ref={previewRef}
-              className="w-full rounded border border-zinc-700 bg-zinc-900"
-              style={{ imageRendering: 'pixelated', aspectRatio: `${NOX_W} / ${NOX_H}` }}
-            />
-            <button onClick={() => void sendToNox()} className={`${BTN} w-full`}>
-              enviar para 30x28
-            </button>
-            <p className="text-[11px] leading-4 text-zinc-600">
-              A prévia acima é exatamente o que vai ser gravado: camadas achatadas, cor dominante
-              de cada célula e a paleta do gato.
-            </p>
-          </section>
+          {!frameBridge && (
+            <section className="mt-auto space-y-1">
+              <div className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
+                para o Nox
+              </div>
+              <select
+                value={pose}
+                onChange={(event) => setPose(event.target.value)}
+                className="w-full rounded border border-zinc-700 bg-zinc-900 px-1 py-1 text-xs"
+              >
+                {poses.map((id) => (
+                  <option key={id} value={id}>
+                    {id}
+                  </option>
+                ))}
+              </select>
+              <canvas
+                ref={previewRef}
+                className="w-full rounded border border-zinc-700 bg-zinc-900"
+                style={{ imageRendering: 'pixelated', aspectRatio: `${NOX_W} / ${NOX_H}` }}
+              />
+              <button onClick={() => void sendToNox()} className={`${BTN} w-full`}>
+                enviar para 30x28
+              </button>
+              <p className="text-[11px] leading-4 text-zinc-600">
+                A prévia acima é exatamente o que vai ser gravado: camadas achatadas, cor dominante
+                de cada célula e a paleta do gato.
+              </p>
+            </section>
+          )}
         </aside>
 
         <div ref={boxRef} className="relative min-w-0 flex-1 overflow-hidden bg-zinc-900">
@@ -1304,8 +1445,10 @@ export function PixelEditor() {
                 <div className="flex items-baseline justify-between">
                   <h2 className="text-sm font-semibold">importar imagem</h2>
                   <span className="truncate text-xs text-zinc-500">
-                    {importState.name} · {importState.image.width}x{importState.image.height} · bloco
-                    detectado {importState.detected}px
+                    {importState.name} · {importState.image.width}x{importState.image.height}
+                    {importState.exact
+                      ? ' · pixels originais 1:1'
+                      : ` · bloco detectado ${importState.detected}px`}
                   </span>
                 </div>
 
@@ -1323,12 +1466,30 @@ export function PixelEditor() {
                   </div>
 
                   <div className="w-56 shrink-0 space-y-2">
+                    <label className="flex items-center gap-2 text-xs text-zinc-300">
+                      <input
+                        type="checkbox"
+                        checked={importState.exact}
+                        onChange={(event) =>
+                          setImportState((state) =>
+                            state ? { ...state, exact: event.target.checked } : state,
+                          )
+                        }
+                      />
+                      pixels originais (1:1)
+                    </label>
+                    <p className="text-[11px] leading-4 text-zinc-600">
+                      {importState.exact
+                        ? 'cada pixel do arquivo vira um pixel do editor. sem reduzir.'
+                        : 'a imagem é reduzida pela grade detectada. pixels são descartados.'}
+                    </p>
                     <label className="block text-[11px] text-zinc-500">
                       tamanho do bloco
                       <input
                         type="number"
                         min={1}
                         max={256}
+                        disabled={importState.exact}
                         value={importState.cell}
                         onChange={(event) =>
                           setImportState((state) =>
@@ -1337,7 +1498,7 @@ export function PixelEditor() {
                               : state,
                           )
                         }
-                        className="mt-1 w-full rounded border border-zinc-700 bg-zinc-900 px-1 py-1 text-xs text-zinc-200"
+                        className="mt-1 w-full rounded border border-zinc-700 bg-zinc-900 px-1 py-1 text-xs text-zinc-200 disabled:opacity-40"
                       />
                     </label>
                     <div className="flex gap-1">
@@ -1345,26 +1506,28 @@ export function PixelEditor() {
                         offset x
                         <input
                           type="number"
+                          disabled={importState.exact}
                           value={importState.offsetX}
                           onChange={(event) =>
                             setImportState((state) =>
                               state ? { ...state, offsetX: clampInt(event.target.value, -4096, 4096, state.offsetX) } : state,
                             )
                           }
-                          className="mt-1 w-full rounded border border-zinc-700 bg-zinc-900 px-1 py-1 text-xs text-zinc-200"
+                          className="mt-1 w-full rounded border border-zinc-700 bg-zinc-900 px-1 py-1 text-xs text-zinc-200 disabled:opacity-40"
                         />
                       </label>
                       <label className="block flex-1 text-[11px] text-zinc-500">
                         offset y
                         <input
                           type="number"
+                          disabled={importState.exact}
                           value={importState.offsetY}
                           onChange={(event) =>
                             setImportState((state) =>
                               state ? { ...state, offsetY: clampInt(event.target.value, -4096, 4096, state.offsetY) } : state,
                             )
                           }
-                          className="mt-1 w-full rounded border border-zinc-700 bg-zinc-900 px-1 py-1 text-xs text-zinc-200"
+                          className="mt-1 w-full rounded border border-zinc-700 bg-zinc-900 px-1 py-1 text-xs text-zinc-200 disabled:opacity-40"
                         />
                       </label>
                     </div>
@@ -1409,13 +1572,15 @@ export function PixelEditor() {
                       como referência
                     </label>
                     <div className="rounded border border-zinc-800 px-2 py-1 text-[11px] text-zinc-400">
-                      arte reduzida: {importPreview ? `${importPreview.width} x ${importPreview.height}` : '...'}
+                      {importState.exact ? 'arte original' : 'arte reduzida'}:{' '}
+                      {importPreview ? `${importPreview.width} x ${importPreview.height}` : '...'}
                       {importPreview && (
                         <span
                           className={
                             importEmpty
                               ? 'text-red-400'
-                              : importPreview.width <= NOX_W && importPreview.height <= NOX_H
+                              : importState.exact ||
+                                  (importPreview.width <= NOX_W && importPreview.height <= NOX_H)
                                 ? 'text-emerald-400'
                                 : 'text-amber-400'
                           }
@@ -1423,12 +1588,33 @@ export function PixelEditor() {
                           {' '}
                           {importEmpty
                             ? 'vazia'
-                            : importPreview.width <= NOX_W && importPreview.height <= NOX_H
-                              ? 'cabe em 30x28'
-                              : 'maior que 30x28'}
+                            : importState.exact
+                              ? '1:1'
+                              : importPreview.width <= NOX_W && importPreview.height <= NOX_H
+                                ? 'cabe em 30x28'
+                                : 'maior que 30x28'}
                         </span>
                       )}
                     </div>
+                    {frameBridge &&
+                      importPreview &&
+                      !importState.asReference &&
+                      importPreview.width === doc.width &&
+                      importPreview.height === doc.height && (
+                        <p className="text-[11px] leading-4 text-amber-300">
+                          modo de quadros: a arte entra como um quadro novo da animação.
+                        </p>
+                      )}
+                    {importState.exact &&
+                      importPreview &&
+                      !isEmpty(doc) &&
+                      (importPreview.width > doc.width || importPreview.height > doc.height) && (
+                        <p className="text-[11px] leading-4 text-emerald-400">
+                          a arte é maior que o canvas: ele vai crescer para{' '}
+                          {Math.max(doc.width, importPreview.width)}x
+                          {Math.max(doc.height, importPreview.height)} sem cortar pixels.
+                        </p>
+                      )}
                     {importEmpty && (
                       <p className="text-[11px] leading-4 text-red-400">
                         a prévia está vazia: tente outro tamanho de bloco, outro offset ou desligue o
@@ -1456,6 +1642,41 @@ export function PixelEditor() {
         </div>
 
         <aside className="flex w-64 shrink-0 flex-col gap-2 overflow-y-auto border-l border-zinc-800 p-3">
+          {frameBridge && (
+            <section className="rounded border border-amber-400/50 bg-amber-400/5 p-2">
+              <div className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-amber-300">
+                quadros · {frameBridge.clip}
+              </div>
+              <div className="mb-2 grid grid-cols-3 gap-1">
+                {frameIndices.map(({ layer, index }, order) => (
+                  <button
+                    key={layer.id}
+                    onClick={() => selectFrame(index)}
+                    className={`rounded border px-1 py-1 text-[11px] ${
+                      index === doc.active
+                        ? 'border-amber-400/70 bg-amber-400/10 text-amber-200'
+                        : 'border-zinc-700 text-zinc-400 hover:border-zinc-500'
+                    }`}
+                  >
+                    {order + 1}
+                  </button>
+                ))}
+              </div>
+              <button onClick={sendFramesBack} className={`${BTN} w-full border-amber-400/70 text-amber-200`}>
+                enviar ao importador
+              </button>
+              <button onClick={exportFramePngs} className={`${BTN} mt-1 w-full`}>
+                baixar quadros 1:1
+              </button>
+              <button onClick={leaveFrames} className={`${BTN} mt-1 w-full`}>
+                descartar quadros
+              </button>
+              <p className="mt-1 text-[10px] leading-3 text-zinc-500">
+                cada botão acima é um quadro. o rascunho é salvo sozinho neste navegador; o envio
+                mantém os pixels no tamanho original.
+              </p>
+            </section>
+          )}
           <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
             camadas
             <div className="flex gap-1">
@@ -1660,6 +1881,57 @@ export function PixelEditor() {
       </footer>
     </div>
   )
+}
+
+function readFrameDraft(clip: string): Doc | null {
+  try {
+    const raw = localStorage.getItem(FRAME_DRAFT_KEY)
+    if (!raw) return null
+    const draft = JSON.parse(raw) as { clip?: string; project?: ProjectFile }
+    if (draft.clip !== clip || !draft.project?.layers?.length) return null
+    return docOfProject(draft.project)
+  } catch {
+    return null
+  }
+}
+
+function layerCanvas(width: number, height: number, data: Uint32Array) {
+  const canvas = document.createElement('canvas')
+  canvas.width = width
+  canvas.height = height
+  const context = canvas.getContext('2d')
+  if (context) {
+    const image = context.createImageData(width, height)
+    const bytes = image.data
+    for (let i = 0; i < data.length; i++) {
+      const value = data[i]
+      const offset = i * 4
+      bytes[offset] = value & 255
+      bytes[offset + 1] = (value >>> 8) & 255
+      bytes[offset + 2] = (value >>> 16) & 255
+      bytes[offset + 3] = value >>> 24
+    }
+    context.putImageData(image, 0, 0)
+  }
+  return canvas
+}
+
+function isFrameLayer(layer: Doc['layers'][number]) {
+  return /^quadro \d+$/.test(layer.name)
+}
+
+function docFromBridge(bridge: FrameBridge): Doc {
+  const width = bridge.frames[0]?.width ?? 1
+  const height = bridge.frames[0]?.height ?? 1
+  const base = createDoc(width, height)
+  const layers = bridge.frames.map((frame, index) => {
+    const layer = createLayer(width, height, `quadro ${index + 1}`)
+    const decoded = decodeLayer(frame)
+    layer.data.set(decoded.subarray(0, Math.min(decoded.length, layer.data.length)))
+    layer.visible = index === 0
+    return layer
+  })
+  return { ...base, layers: layers.length ? layers : base.layers, active: 0 }
 }
 
 function loadDoc(): Doc {

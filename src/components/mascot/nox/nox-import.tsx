@@ -19,6 +19,14 @@ import {
 import { StudioNav } from '../studio-nav'
 import type { ClipStatus } from './animation/types'
 import {
+  clearFrameBridge,
+  clearFrameDraft,
+  decodeFrame,
+  encodeFrame,
+  readFrameBridge,
+  writeFrameBridge,
+} from '../../pixel-editor/frame-bridge'
+import {
   autoCuts,
   bandsFromCuts,
   colorDistance,
@@ -110,6 +118,9 @@ export function NoxImport() {
   const [clip, setClip] = useState('idle')
   const [mode, setMode] = useState<'strip' | 'frames'>('strip')
   const [sources, setSources] = useState<Source[]>([])
+  // Quadros que voltaram do editor de pixel art. Eles ja estao no canvas final
+  // e substituem a composicao ate o usuario carregar outra arte.
+  const [editedFrames, setEditedFrames] = useState<ImageData[] | null>(null)
   const [label, setLabel] = useState('')
   const [bgMode, setBgMode] = useState<BackgroundMode>('components')
   const [bgColors, setBgColors] = useState<Rgb[]>([])
@@ -154,6 +165,23 @@ export function NoxImport() {
       setConfigError(error instanceof Error ? error.message : String(error))
     })
   }, [loadConfig])
+
+  // Volta do editor de pixel art com os quadros ja editados.
+  useEffect(() => {
+    const bridge = readFrameBridge()
+    if (!bridge) return
+    clearFrameBridge()
+    const frames = bridge.frames.map(decodeFrame)
+    setEditedFrames(frames)
+    if (bridge.clip) setClip(bridge.clip)
+    setLabel(`${frames.length} quadro(s) editados no pixel editor`)
+    setResult({
+      kind: 'ok',
+      text: `${frames.length} quadro(s) editados carregados para ${bridge.clip || clip}. Gravar usa estes quadros.`,
+    })
+    // Só na carga da página.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
     const config = manifest?.clips[clip]
@@ -291,12 +319,20 @@ export function NoxImport() {
   )
 
   const canvases = useMemo(
-    () => composed.map((frame) => (frame.data ? imageDataToCanvas(frame.data) : null)),
-    [composed],
+    () =>
+      editedFrames
+        ? editedFrames.map((frame) => imageDataToCanvas(frame))
+        : composed.map((frame) => (frame.data ? imageDataToCanvas(frame.data) : null)),
+    [editedFrames, composed],
   )
 
   const issues = useMemo(() => {
     const list: string[] = []
+    if (editedFrames) {
+      if (!editedFrames.length) list.push('nenhum quadro editado')
+      if (editedFrames.length > 64) list.push('mais de 64 quadros; o build espera no máximo 64')
+      return list
+    }
     if (!sources.length) list.push('nenhuma imagem carregada')
     if (sources.length && !playPieces.length) list.push('nenhum quadro reconhecido')
     if (playPieces.length > 64) list.push('mais de 64 quadros; o build espera no máximo 64')
@@ -311,11 +347,12 @@ export function NoxImport() {
       list.push('clipe aéreo: o quadro sobe para fora do canvas')
     }
     return list
-  }, [sources.length, playPieces.length, composed, frameWidth, frameHeight, isAir, anchorY, preserve])
+  }, [editedFrames, sources.length, playPieces.length, composed, frameWidth, frameHeight, isAir, anchorY, preserve])
 
-  const canSave = Boolean(
-    manifest && sources.length && composed.length && composed.every((frame) => frame.data && !frame.clipped),
-  ) && issues.length === 0
+  const canSave = Boolean(manifest) && (editedFrames
+    ? editedFrames.length > 0 && editedFrames.length <= 64
+    : Boolean(sources.length && composed.length && composed.every((frame) => frame.data && !frame.clipped)) &&
+      issues.length === 0)
 
   const pick = async (files: FileList | null) => {
     if (!files?.length) return
@@ -327,6 +364,7 @@ export function NoxImport() {
       for (const file of chosen) {
         loaded.push({ name: file.name, data: await loadImageData(file) })
       }
+      setEditedFrames(null)
       setSources(loaded)
       setLabel(chosen.map((file) => file.name).join(', '))
       const suggestion = suggestBackground(loaded[0].data)
@@ -480,14 +518,39 @@ export function NoxImport() {
     setSelected(Math.max(0, selected - 1))
   }
 
+  const editInPixelEditor = () => {
+    const frames = editedFrames
+      ? editedFrames.map(encodeFrame)
+      : composed.every((frame) => frame.data)
+        ? composed.flatMap((frame) => (frame.data ? [encodeFrame(frame.data)] : []))
+        : []
+    if (!frames.length) {
+      setResult({ kind: 'error', text: 'nenhum quadro montado para editar' })
+      return
+    }
+    if (!writeFrameBridge({ clip, name: label || clip, frames })) {
+      setResult({
+        kind: 'error',
+        text: 'não deu para enviar os quadros ao editor: o navegador ficou sem espaço',
+      })
+      return
+    }
+    // Um envio novo começa limpo: rascunho antigo do mesmo clipe não pode
+    // reaparecer no lugar dos quadros que acabaram de ser montados.
+    clearFrameDraft()
+    window.location.assign('/__pixel-editor?nox=import')
+  }
+
   const save = async () => {
     if (!canSave) return
     setSaving(true)
     setResult(null)
     try {
-      const frames = composed.map((frame) =>
-        frame.data ? imageDataToCanvas(frame.data).toDataURL('image/png') : '',
-      )
+      const frames = editedFrames
+        ? editedFrames.map((frame) => imageDataToCanvas(frame).toDataURL('image/png'))
+        : composed.map((frame) =>
+            frame.data ? imageDataToCanvas(frame.data).toDataURL('image/png') : '',
+          )
       const response = await fetch('/__nox-import/save', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
@@ -954,14 +1017,14 @@ export function NoxImport() {
             </Panel>
           )}
 
-          <Panel title='quadros' note={`${playPieces.length} quadro(s) na ordem de reprodução`}>
-            {playPieces.length === 0 ? (
+          <Panel title='quadros' note={`${canvases.length} quadro(s) na ordem de reprodução`}>
+            {canvases.length === 0 ? (
               <p className='py-8 text-center text-xs text-zinc-600'>
                 Escolha um clipe e carregue a arte para ver os quadros.
               </p>
             ) : (
               <div className='flex flex-wrap gap-2'>
-                {playPieces.map((_, index) => (
+                {canvases.map((canvas, index) => (
                   <button
                     key={index}
                     onClick={() => setSelected(index)}
@@ -971,14 +1034,14 @@ export function NoxImport() {
                         : 'border-zinc-800 hover:border-zinc-600'
                     }`}
                   >
-                    <DataCanvas canvas={canvases[index] ?? null} className='block h-16 w-auto' />
+                    <DataCanvas canvas={canvas} className='block h-16 w-auto' />
                     <span className='mt-1 block text-center text-[10px] text-zinc-500'>{index + 1}</span>
                   </button>
                 ))}
               </div>
             )}
 
-            {mode === 'frames' && playPieces.length > 0 && (
+            {!editedFrames && mode === 'frames' && playPieces.length > 0 && (
               <div className='mt-3 flex flex-wrap gap-1'>
                 <button onClick={() => moveSelected(-1)} disabled={selected < 1} className={BTN}>
                   mover para trás
@@ -1013,7 +1076,25 @@ export function NoxImport() {
                 </select>
               </label>
               <span className='text-[11px] text-zinc-500'>{fps} fps · {loop ? 'loop' : 'uma vez'}</span>
+              <button onClick={editInPixelEditor} disabled={!canvases.length} className={BTN}>
+                editar no pixel editor
+              </button>
             </div>
+
+            {editedFrames && (
+              <p className='mb-3 flex flex-wrap items-center gap-2 rounded border border-amber-500/30 bg-amber-500/10 px-2 py-1.5 text-[11px] text-amber-200'>
+                usando {editedFrames.length} quadro(s) editados no pixel editor.
+                <button
+                  onClick={() => {
+                    setEditedFrames(null)
+                    setResult(null)
+                  }}
+                  className={BTN}
+                >
+                  descartar edição
+                </button>
+              </p>
+            )}
 
             <div
               className='mx-auto w-fit rounded-lg p-3'

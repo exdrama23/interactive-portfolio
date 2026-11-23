@@ -378,6 +378,23 @@ export function topColors(image: ImageData, limit: number) {
     .map(([value]) => value)
 }
 
+// Amplia o canvas mantendo o desenho existente inteiro, centralizado. Serve
+// para importar uma arte maior sem cortar os pixels que já estavam ali.
+export function expandDoc(doc: Doc, width: number, height: number): Doc {
+  const left = Math.floor((width - doc.width) / 2)
+  const top = Math.floor((height - doc.height) / 2)
+  const layers = doc.layers.map((layer) => {
+    const data = new Uint32Array(width * height)
+    for (let y = 0; y < doc.height; y++) {
+      for (let x = 0; x < doc.width; x++) {
+        data[(top + y) * width + left + x] = layer.data[y * doc.width + x]
+      }
+    }
+    return { ...layer, data }
+  })
+  return { ...doc, width, height, layers }
+}
+
 export function cropDoc(doc: Doc, box: { x: number; y: number; w: number; h: number }): Doc {
   const layers = doc.layers.map((layer) => {
     const data = new Uint32Array(box.w * box.h)
