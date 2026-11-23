@@ -773,6 +773,34 @@ export function PixelEditor() {
     setStatus(`editando ${neighbor.name}`)
   }
 
+  // Clicar numa camada também manda na vista. Num quadro, mostra aquele quadro;
+  // numa camada solta, ela vira um quadro para não existir camada invisível
+  // enquanto a animação está aberta.
+  const selectLayer = (index: number) => {
+    const layer = docRef.current.layers[index]
+    if (!layer) return
+    if (!frameBridge || layer.reference) {
+      setDoc((current) => ({ ...current, active: index }))
+      return
+    }
+    if (isFrameLayer(layer)) {
+      selectFrame(index)
+      return
+    }
+    const name = nextFrameName(docRef.current.layers.filter((_, i) => i !== index))
+    transact('camada como quadro', (draft) => {
+      const target = draft.layers[index]
+      if (!target) return
+      target.name = name
+      target.visible = true
+      for (const other of draft.layers) {
+        if (other !== target && isFrameLayer(other)) other.visible = false
+      }
+      draft.active = index
+    })
+    setStatus(`${name} criado a partir da camada`)
+  }
+
   const exportFramePngs = () => {
     if (!frameBridge) return
     const current = docRef.current
@@ -924,7 +952,7 @@ export function PixelEditor() {
         target.width === draft.width &&
         target.height === draft.height
       if (asFrame) {
-        layer.name = `quadro ${draft.layers.filter(isFrameLayer).length + 1}`
+        layer.name = nextFrameName(draft.layers)
         for (const other of draft.layers) {
           if (isFrameLayer(other)) other.visible = false
         }
@@ -1683,7 +1711,17 @@ export function PixelEditor() {
               <button
                 onClick={() =>
                   transact('nova camada', (draft) => {
-                    draft.layers.push(createLayer(draft.width, draft.height, `camada ${draft.layers.length + 1}`))
+                    const layer = createLayer(
+                      draft.width,
+                      draft.height,
+                      frameBridge ? nextFrameName(draft.layers) : `camada ${draft.layers.length + 1}`,
+                    )
+                    if (frameBridge) {
+                      for (const other of draft.layers) {
+                        if (isFrameLayer(other)) other.visible = false
+                      }
+                    }
+                    draft.layers.push(layer)
                     draft.active = draft.layers.length - 1
                   })
                 }
@@ -1697,12 +1735,20 @@ export function PixelEditor() {
                   transact('duplicar camada', (draft) => {
                     const source = draft.layers[draft.active]
                     if (!source) return
-                    draft.layers.splice(draft.active + 1, 0, {
+                    const asFrame = Boolean(frameBridge) && isFrameLayer(source)
+                    const copy = {
                       ...source,
                       id: `${source.id}-copia-${Date.now()}`,
-                      name: `${source.name} cópia`,
+                      name: asFrame ? nextFrameName(draft.layers) : `${source.name} cópia`,
+                      visible: true,
                       data: source.data.slice(),
-                    })
+                    }
+                    if (asFrame) {
+                      for (const other of draft.layers) {
+                        if (isFrameLayer(other)) other.visible = false
+                      }
+                    }
+                    draft.layers.splice(draft.active + 1, 0, copy)
                     draft.active += 1
                   })
                 }
@@ -1731,7 +1777,7 @@ export function PixelEditor() {
             {doc.layers.map((layer, index) => ({ layer, index })).reverse().map(({ layer, index }) => (
               <div
                 key={layer.id}
-                onClick={() => setDoc({ ...doc, active: index })}
+                onClick={() => selectLayer(index)}
                 className={`flex cursor-pointer items-center gap-1 rounded border px-1 py-1 text-xs ${
                   index === doc.active
                     ? 'border-amber-400/70 bg-amber-400/10'
@@ -1918,6 +1964,18 @@ function layerCanvas(width: number, height: number, data: Uint32Array) {
 
 function isFrameLayer(layer: Doc['layers'][number]) {
   return /^quadro \d+$/.test(layer.name)
+}
+
+function nextFrameName(layers: Doc['layers']) {
+  const used = new Set(
+    layers
+      .filter(isFrameLayer)
+      .map((layer) => Number(layer.name.replace(/^quadro /, '')))
+      .filter((value) => Number.isFinite(value)),
+  )
+  let number = 1
+  while (used.has(number)) number++
+  return `quadro ${number}`
 }
 
 function docFromBridge(bridge: FrameBridge): Doc {
