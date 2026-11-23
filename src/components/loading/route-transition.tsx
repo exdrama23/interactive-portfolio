@@ -168,11 +168,17 @@ export function RouteTransitionProvider({
       e.preventDefault()
       // Âncora na mesma página (#sobre) vira só "#sobre"; rota vira o caminho.
       const to = (samePath ? '' : url.pathname) + url.search + url.hash
+      // Páginas de estúdio marcadas com data-no-transition trocam de rota sem
+      // a tela de carregamento do site, que aqui só parece um piscar.
+      if (anchor.hasAttribute('data-no-transition')) {
+        if (to) navigate(to)
+        return
+      }
       transitionTo(to)
     }
     document.addEventListener('click', onClick, true)
     return () => document.removeEventListener('click', onClick, true)
-  }, [transitionTo])
+  }, [transitionTo, navigate])
 
   // Trava o scroll enquanto o portão está de pé.
   useEffect(() => {

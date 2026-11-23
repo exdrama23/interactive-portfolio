@@ -18,6 +18,7 @@ export function StudioNav({ current }: { current: string }) {
           <a
             key={link.href}
             href={link.href}
+            data-no-transition
             aria-current={active ? 'page' : undefined}
             className={`rounded border px-2 py-1 transition ${
               active
