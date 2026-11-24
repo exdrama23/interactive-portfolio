@@ -4,6 +4,7 @@ import { NOX_ANIMATIONS, getAnimation, isPlayable } from './animation/registry'
 import { drawFrame, loadNoxAssets, type NoxSheet } from './sprite-sheet'
 import palette from './assets/nox-palette.json'
 import { StudioNav } from '../studio-nav'
+import { writeStudioHandoff } from '../studio/nox-bridge'
 
 const PLAYABLE = Object.keys(NOX_ANIMATIONS.animations).filter(isPlayable)
 const ZOOMS = [2, 3, 4, 5, 6, 8]
@@ -132,6 +133,57 @@ export function NoxPreview() {
     ? `${currentFrame.w}x${currentFrame.h}`
     : `${NOX_ANIMATIONS.meta.frameWidth}x${NOX_ANIMATIONS.meta.frameHeight}`
 
+  // Leva o clipe que esta tocando para o studio principal, quadro a quadro e
+  // sem redimensionar. O studio recebe uma tira unica, que e o formato que o
+  // importador dele ja sabe dividir.
+  const sendToStudio = () => {
+    if (!assets) return
+    const clip = getAnimation(clipName)
+    if (!clip.frames.length) {
+      setError('esse clipe nao tem quadro para enviar')
+      return
+    }
+    const gutter = 4
+    const width =
+      clip.frames.reduce((sum, frame) => sum + frame.w, 0) + gutter * (clip.frames.length - 1)
+    const height = Math.max(...clip.frames.map((frame) => frame.h))
+    const canvas = document.createElement('canvas')
+    canvas.width = width
+    canvas.height = height
+    const context = canvas.getContext('2d')
+    if (!context) return
+    context.imageSmoothingEnabled = false
+    let left = 0
+    for (const frame of clip.frames) {
+      context.drawImage(
+        assets.sheet.image,
+        frame.x,
+        frame.y,
+        frame.w,
+        frame.h,
+        left,
+        0,
+        frame.w,
+        frame.h,
+      )
+      left += frame.w + gutter
+    }
+    const ok = writeStudioHandoff({
+      clip: clipName,
+      fps: clip.fps ?? 8,
+      loop: Boolean(clip.loop),
+      frames: clip.frames.length,
+      width,
+      height,
+      strip: canvas.toDataURL('image/png'),
+    })
+    if (!ok) {
+      setError('nao deu para enviar ao studio: o navegador ficou sem espaco')
+      return
+    }
+    window.location.assign('/__sprite-studio?from=nox')
+  }
+
   return (
     <div className='min-h-screen bg-zinc-950 px-6 py-8 text-zinc-100'>
       <header className='mx-auto flex max-w-6xl flex-wrap items-end justify-between gap-4'>
@@ -163,6 +215,14 @@ export function NoxPreview() {
             className='rounded border border-zinc-700 bg-zinc-900 px-3 py-1.5 hover:border-zinc-500'
           >
             {playing ? 'pausar' : 'tocar'}
+          </button>
+          <button
+            onClick={sendToStudio}
+            disabled={!assets || !current.frames.length}
+            title='leva os quadros deste clipe para o studio principal'
+            className='rounded border border-amber-500/60 bg-amber-500/10 px-3 py-1.5 font-medium text-amber-300 transition hover:border-amber-400 disabled:cursor-not-allowed disabled:opacity-40'
+          >
+            importar para o studio
           </button>
           <label className='flex items-center gap-1.5 rounded border border-zinc-700 bg-zinc-900 px-2 py-1.5'>
             zoom

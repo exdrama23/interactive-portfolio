@@ -14,6 +14,7 @@ import {
   frameRows,
   quantize,
   readImage,
+  readImageUrl,
   scoreFit,
   splitFrames,
   type Fit,
@@ -25,11 +26,21 @@ const PREVIEW = 4
 
 export type ImportTarget = 'current' | 'walk'
 
-interface Props {
-  onApply: (frames: string[][], target: ImportTarget) => void
+// Quadro que chegou do preview do Nox. Vem como tira pronta, sem passar por
+// arquivo: o studio le, mostra o encaixe e so aplica quando voce manda.
+export interface IncomingStrip {
+  label: string
+  strip: string
+  frames: number
 }
 
-export function Importer({ onApply }: Props) {
+interface Props {
+  onApply: (frames: string[][], target: ImportTarget) => void
+  incoming?: IncomingStrip | null
+  onIncomingUsed?: () => void
+}
+
+export function Importer({ onApply, incoming, onIncomingUsed }: Props) {
   const [data, setData] = useState<ImageData | null>(null)
   const [name, setName] = useState('')
   const [fit, setFit] = useState<Fit>({ cell: 1, offsetX: 0, offsetY: 0 })
@@ -67,6 +78,41 @@ export function Importer({ onApply }: Props) {
       setBusy(false)
     }
   }
+
+  // Tira que veio do preview do Nox: mesmo caminho do arquivo escolhido a mao,
+  // so que ja com os quadros montados na ordem do clipe.
+  useEffect(() => {
+    if (!incoming) return
+    let alive = true
+    setBusy(true)
+    setError('')
+    readImageUrl(incoming.strip)
+      .then((image) => {
+        if (!alive) return
+        const plain = { cell: 1, offsetX: 0, offsetY: 0 }
+        setData(image)
+        setName(`${incoming.label} · ${incoming.frames} quadro(s)`)
+        // A tira do preview ja e arte 1:1, nao uma referencia reescalonada: nao
+        // ha celula para adivinhar. Celula 1 mantem o desenho inteiro e deixa o
+        // encaixe na grade 30x28 ser uma reducao proporcional, sem cortar.
+        setFit(plain)
+        setScore(scoreFit(image, plain))
+        setFrame(0)
+        setTarget(incoming.frames >= 4 ? 'walk' : 'current')
+        onIncomingUsed?.()
+      })
+      .catch((problem) => {
+        if (alive) setError(problem instanceof Error ? problem.message : String(problem))
+      })
+      .finally(() => {
+        if (alive) setBusy(false)
+      })
+    return () => {
+      alive = false
+    }
+    // So a tira nova interessa; repetir o mesmo objeto nao deve recarregar.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [incoming?.strip])
 
   useEffect(() => {
     const canvas = rawRef.current

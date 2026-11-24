@@ -592,23 +592,35 @@ function colorDistance(a: string, b: string) {
   return Math.sqrt(2 * dr * dr + 4 * dg * dg + 3 * db * db)
 }
 
+function imageDataOf(image: HTMLImageElement): ImageData {
+  const width = image.naturalWidth || image.width
+  const height = image.naturalHeight || image.height
+  if (!width || !height) throw new Error('imagem sem tamanho')
+  const canvas = document.createElement('canvas')
+  canvas.width = width
+  canvas.height = height
+  const context = canvas.getContext('2d', { willReadFrequently: true })
+  if (!context) throw new Error('sem canvas 2d')
+  context.drawImage(image, 0, 0)
+  return context.getImageData(0, 0, width, height)
+}
+
 export async function readImage(file: File): Promise<ImageData> {
   const url = URL.createObjectURL(file)
   try {
     const image = new Image()
     image.src = url
     await image.decode()
-    const width = image.naturalWidth || image.width
-    const height = image.naturalHeight || image.height
-    if (!width || !height) throw new Error('imagem sem tamanho')
-    const canvas = document.createElement('canvas')
-    canvas.width = width
-    canvas.height = height
-    const context = canvas.getContext('2d', { willReadFrequently: true })
-    if (!context) throw new Error('sem canvas 2d')
-    context.drawImage(image, 0, 0)
-    return context.getImageData(0, 0, width, height)
+    return imageDataOf(image)
   } finally {
     URL.revokeObjectURL(url)
   }
+}
+
+// Mesma leitura, mas de uma URL que ja existe (a tira que vem do preview).
+export async function readImageUrl(url: string): Promise<ImageData> {
+  const image = new Image()
+  image.src = url
+  await image.decode()
+  return imageDataOf(image)
 }

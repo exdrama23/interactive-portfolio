@@ -8,7 +8,8 @@ import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointer
 import artRaw from '../sprite-art.ts?raw'
 import { NOX_PAL } from '../sprite-art'
 import { CAT_H, CAT_W, parseArt, writeArt, type StudioPose } from './format'
-import { Importer, type ImportTarget } from './importer'
+import { Importer, type ImportTarget, type IncomingStrip } from './importer'
+import { clearStudioHandoff, readStudioHandoff, type NoxStudioHandoff } from './nox-bridge'
 import { StudioNav } from '../studio-nav'
 
 // O índice de cada caractere é a posição na paleta, então a lista de cores
@@ -136,6 +137,15 @@ export function SpriteStudio() {
   const [hover, setHover] = useState<[number, number] | null>(null)
   const [clip, setClip] = useState(1)
   const [playing, setPlaying] = useState(true)
+  // Clipe que chegou do preview do Nox. Fica a vista ate ser aplicado ou
+  // descartado, para nao parecer que o importador abriu sozinho do nada.
+  const [handoff, setHandoff] = useState<NoxStudioHandoff | null>(() => readStudioHandoff())
+  const [incoming, setIncoming] = useState<IncomingStrip | null>(() => {
+    const value = readStudioHandoff()
+    return value
+      ? { label: `nox · ${value.clip}`, strip: value.strip, frames: value.frames }
+      : null
+  })
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const previewRef = useRef<HTMLCanvasElement>(null)
@@ -438,6 +448,29 @@ export function SpriteStudio() {
         <div className="border-b border-zinc-800 bg-zinc-900 px-6 py-2 text-sm text-amber-300">{status}</div>
       )}
 
+      {handoff && (
+        <div className="flex flex-wrap items-center gap-2 border-b border-amber-500/40 bg-amber-500/10 px-6 py-2 text-sm text-amber-200">
+          <span>
+            recebido do preview Nox: <strong>{handoff.clip}</strong> · {handoff.frames} quadro(s) ·{' '}
+            {handoff.width}x{handoff.height} · {handoff.fps} fps
+            {handoff.loop ? ' · loop' : ''}
+          </span>
+          <span className="text-amber-200/70">
+            a tira já está no importador abaixo; aplique no quadro atual ou em “andando”.
+          </span>
+          <button
+            onClick={() => {
+              clearStudioHandoff()
+              setHandoff(null)
+              setIncoming(null)
+            }}
+            className="ml-auto underline hover:text-amber-100"
+          >
+            descartar
+          </button>
+        </div>
+      )}
+
       <div className="flex flex-wrap items-start gap-6 p-6">
         <aside className="w-56 shrink-0">
           <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500">quadros</div>
@@ -591,7 +624,7 @@ export function SpriteStudio() {
             </label>
           </section>
 
-          <Importer onApply={applyImport} />
+          <Importer onApply={applyImport} incoming={incoming} onIncomingUsed={() => setIncoming(null)} />
 
           <section>
             <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500">animação</div>
