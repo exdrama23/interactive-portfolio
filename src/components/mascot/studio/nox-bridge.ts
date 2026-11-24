@@ -11,6 +11,10 @@ export interface NoxStudioHandoff {
   frames: number
   width: number
   height: number
+  // Canvas de cada quadro do clipe (antes do gutter). O studio usa isso para
+  // recortar cada quadro inteiro 1:1, com as margens e a ancora originais.
+  frameWidth: number
+  frameHeight: number
   // Tira horizontal com os quadros lado a lado, separados por uma coluna
   // transparente: o importador do studio ja divide imagem por colunas vazias.
   strip: string
@@ -42,6 +46,8 @@ export function readStudioHandoff(): NoxStudioHandoff | null {
       frames: Number(value.frames) || 1,
       width: Number(value.width) || 0,
       height: Number(value.height) || 0,
+      frameWidth: Number(value.frameWidth) || 0,
+      frameHeight: Number(value.frameHeight) || 0,
       strip: value.strip,
     }
   } catch {

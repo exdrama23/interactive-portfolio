@@ -8,6 +8,7 @@ import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointer
 import artRaw from '../sprite-art.ts?raw'
 import { NOX_PAL } from '../sprite-art'
 import { CAT_H, CAT_W, parseArt, writeArt, type StudioPose } from './format'
+import { framePng } from './import-art'
 import { Importer, type ImportTarget, type IncomingStrip } from './importer'
 import { clearStudioHandoff, readStudioHandoff, type NoxStudioHandoff } from './nox-bridge'
 import { StudioNav } from '../studio-nav'
@@ -143,7 +144,16 @@ export function SpriteStudio() {
   const [incoming, setIncoming] = useState<IncomingStrip | null>(() => {
     const value = readStudioHandoff()
     return value
-      ? { label: `nox · ${value.clip}`, strip: value.strip, frames: value.frames }
+      ? {
+          label: `nox · ${value.clip}`,
+          strip: value.strip,
+          frames: value.frames,
+          clip: value.clip,
+          fps: value.fps,
+          loop: value.loop,
+          frameWidth: value.frameWidth,
+          frameHeight: value.frameHeight,
+        }
       : null
   })
 
@@ -269,6 +279,66 @@ export function SpriteStudio() {
     )
     setDirty(true)
     setStatus(`importado: ${frames.length} quadro(s)`)
+  }
+
+  // Arte maior que a grade nao passa pelo texto: os quadros vao 1:1 para a
+  // pasta do clipe no Nox e o atlas e remontado. Nenhum pixel e reamostrado.
+  const applyNative = async (
+    frames: ImageData[],
+    meta: { clip: string; fps: number; loop: boolean },
+  ) => {
+    if (!frames.length) return
+    setBusy(true)
+    setStatus('gravando quadros 1:1 no Nox...')
+    try {
+      const configResponse = await fetch('/__nox-import/config')
+      const config = (await configResponse.json()) as {
+        ok: boolean
+        error?: string
+        manifest?: {
+          meta: { anchor: { x: number; y: number } }
+          clips: Record<string, { anchor?: { x: number; y: number } }>
+        }
+      }
+      if (!config.ok || !config.manifest) throw new Error(config.error ?? 'não li o clips.json')
+      const clip = config.manifest.clips[meta.clip]
+      if (!clip) throw new Error(`o clipe "${meta.clip}" não existe no Nox`)
+
+      const response = await fetch('/__nox-import/save', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          clip: meta.clip,
+          frames: frames.map(framePng),
+          fps: meta.fps,
+          loop: meta.loop,
+          status: 'ready',
+          frameWidth: frames[0].width,
+          frameHeight: frames[0].height,
+          anchor: clip.anchor ?? config.manifest.meta.anchor,
+          build: true,
+        }),
+      })
+      const data = (await response.json()) as {
+        ok: boolean
+        error?: string
+        saved?: string[]
+        build?: { ok: boolean; output: string }
+      }
+      if (!data.ok) throw new Error(data.error ?? 'falha ao gravar o clipe')
+      if (data.build && !data.build.ok) {
+        throw new Error(`quadros gravados, mas o atlas não montou: ${data.build.output}`)
+      }
+      setStatus(
+        `clipe ${meta.clip}: ${frames.length} quadro(s) ${frames[0].width}x${frames[0].height} gravados 1:1 no Nox`,
+      )
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      setStatus(`não gravou: ${message}`)
+      throw error
+    } finally {
+      setBusy(false)
+    }
   }
 
   const save = async () => {
@@ -456,7 +526,8 @@ export function SpriteStudio() {
             {handoff.loop ? ' · loop' : ''}
           </span>
           <span className="text-amber-200/70">
-            a tira já está no importador abaixo; aplique no quadro atual ou em “andando”.
+            a tira já está no importador abaixo. Arte maior que 30x28 é gravada 1:1 no clipe do Nox,
+            sem redimensionar.
           </span>
           <button
             onClick={() => {
@@ -624,7 +695,11 @@ export function SpriteStudio() {
             </label>
           </section>
 
-          <Importer onApply={applyImport} incoming={incoming} onIncomingUsed={() => setIncoming(null)} />
+          <Importer
+            onApply={applyImport}
+            onApplyNative={applyNative}
+            incoming={incoming}
+          />
 
           <section>
             <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500">animação</div>

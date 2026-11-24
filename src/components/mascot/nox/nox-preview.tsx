@@ -175,6 +175,8 @@ export function NoxPreview() {
       frames: clip.frames.length,
       width,
       height,
+      frameWidth: Math.max(...clip.frames.map((frame) => frame.w)),
+      frameHeight: Math.max(...clip.frames.map((frame) => frame.h)),
       strip: canvas.toDataURL('image/png'),
     })
     if (!ok) {

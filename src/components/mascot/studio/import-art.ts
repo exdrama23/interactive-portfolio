@@ -678,3 +678,43 @@ export async function readImageUrl(url: string): Promise<ImageData> {
   await image.decode()
   return imageDataOf(image)
 }
+
+// Recorta um retangulo da imagem lida, em pixels. Usado tanto pelo encaixe
+// (retangulo em celulas) quanto pela tira do preview (retangulo do quadro
+// inteiro, com margens). Com celula 1 o recorte e pixel por pixel.
+export function cropRect(data: ImageData, x: number, y: number, w: number, h: number): ImageData {
+  const canvas = document.createElement('canvas')
+  canvas.width = data.width
+  canvas.height = data.height
+  const context = canvas.getContext('2d', { willReadFrequently: true })
+  if (!context) throw new Error('sem canvas 2d')
+  context.putImageData(data, 0, 0)
+  return context.getImageData(
+    Math.round(x),
+    Math.round(y),
+    Math.max(1, Math.round(w)),
+    Math.max(1, Math.round(h)),
+  )
+}
+
+export function cropFrame(data: ImageData, frame: Frame, fit: Fit): ImageData {
+  return cropRect(
+    data,
+    fit.offsetX + frame.x * fit.cell,
+    fit.offsetY + frame.y * fit.cell,
+    frame.w * fit.cell,
+    frame.h * fit.cell,
+  )
+}
+
+// Data URL do quadro recortado, sem paleta e sem redimensionar: o PNG e o
+// proprio recorte. E o formato que o importador do Nox grava em disco.
+export function framePng(image: ImageData): string {
+  const canvas = document.createElement('canvas')
+  canvas.width = image.width
+  canvas.height = image.height
+  const context = canvas.getContext('2d')
+  if (!context) throw new Error('sem canvas 2d')
+  context.putImageData(image, 0, 0)
+  return canvas.toDataURL('image/png')
+}

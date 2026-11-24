@@ -10,6 +10,8 @@ import { CAT_H, CAT_W } from './format'
 import {
   cellsFrom,
   cornerColor,
+  cropFrame,
+  cropRect,
   fitForImage,
   frameRows,
   quantize,
@@ -32,21 +34,38 @@ export interface IncomingStrip {
   label: string
   strip: string
   frames: number
+  clip?: string
+  fps?: number
+  loop?: boolean
+  // Canvas de cada quadro antes do gutter. Sem isso, o recorte 1:1 perderia
+  // as margens transparentes que posicionam o gato na ancora.
+  frameWidth?: number
+  frameHeight?: number
+}
+
+interface NativeMeta {
+  clip: string
+  fps: number
+  loop: boolean
 }
 
 interface Props {
   onApply: (frames: string[][], target: ImportTarget) => void
+  // Arte maior que a grade 30x28 nao e encolhida: vai 1:1 para o clipe do Nox,
+  // que e o formato de imagem usado pelas animacoes novas.
+  onApplyNative?: (frames: ImageData[], meta: NativeMeta) => Promise<void>
   incoming?: IncomingStrip | null
   onIncomingUsed?: () => void
 }
 
-export function Importer({ onApply, incoming, onIncomingUsed }: Props) {
+export function Importer({ onApply, onApplyNative, incoming, onIncomingUsed }: Props) {
   const [data, setData] = useState<ImageData | null>(null)
   const [name, setName] = useState('')
   const [fit, setFit] = useState<Fit>({ cell: 1, offsetX: 0, offsetY: 0 })
   const [score, setScore] = useState(0)
   const [oneToOne, setOneToOne] = useState(true)
   const [busy, setBusy] = useState(false)
+  const [nativeBusy, setNativeBusy] = useState(false)
   const [error, setError] = useState('')
   const [target, setTarget] = useState<ImportTarget>('current')
   const [frame, setFrame] = useState(0)
@@ -161,6 +180,44 @@ export function Importer({ onApply, incoming, onIncomingUsed }: Props) {
 
   const chosen = poses[Math.min(frame, Math.max(0, poses.length - 1))]
 
+  // Tamanho real de cada quadro no arquivo. A grade 30x28 e o formato do
+  // mascote antigo; arte maior e do Nox de imagens e nao pode ser encolhida.
+  // O handoff traz o canvas do quadro; sem ele (arquivo avulso) o retangulo
+  // detectado e a referencia.
+  const first = frames[0]
+  const frameW = incoming?.frameWidth || (first ? Math.round(first.w * fit.cell) : 0)
+  const frameH = incoming?.frameHeight || (first ? Math.round(first.h * fit.cell) : 0)
+  const native = Boolean(data && frames.length && oneToOne && (frameW > CAT_W || frameH > CAT_H))
+
+  const applyNative = async () => {
+    if (!data || !frames.length || !onApplyNative) return
+    const clip = incoming?.clip
+    if (!clip) {
+      setError('esse arquivo não veio do preview do Nox; abra o clipe no preview e use "importar para o studio".')
+      return
+    }
+    setNativeBusy(true)
+    setError('')
+    try {
+      // Quadro inteiro, com margem: a ancora do Nox depende do canvas, nao do
+      // recorte justo do gato. A tira tem gutter de 4 px entre os quadros.
+      const gutter = 4
+      const fw = incoming?.frameWidth ?? 0
+      const fh = incoming?.frameHeight ?? 0
+      const crops =
+        fw && fh && incoming
+          ? Array.from({ length: incoming.frames }, (_, index) =>
+              cropRect(data, index * (fw + gutter), 0, fw, fh),
+            )
+          : frames.map((rect) => cropFrame(data, rect, fit))
+      await onApplyNative(crops, { clip, fps: incoming?.fps ?? 8, loop: incoming?.loop ?? true })
+    } catch (problem) {
+      setError(problem instanceof Error ? problem.message : String(problem))
+    } finally {
+      setNativeBusy(false)
+    }
+  }
+
   useEffect(() => {
     const canvas = outRef.current
     if (!canvas) return
@@ -244,11 +301,19 @@ export function Importer({ onApply, incoming, onIncomingUsed }: Props) {
             {cells?.columns}x{cells?.rows} células · {frames.length} quadro
             {frames.length === 1 ? '' : 's'}
           </p>
-          {cells && (cells.columns > CAT_W || cells.rows > CAT_H) && (
+          {native ? (
             <p className="text-[11px] leading-4 text-amber-300/80">
-              essa arte tem {cells.columns}x{cells.rows} pixels e a grade do studio é {CAT_W}x{CAT_H}.
-              Ela entra reduzida por média de área, sem cortar nem deformar.
+              essa arte tem {frameW}x{frameH} pixels, maior que a grade do studio ({CAT_W}x{CAT_H}).
+              Ela não é encolhida: aplicar grava os quadros 1:1 no clipe do Nox, igual ao editor de pixel.
             </p>
+          ) : (
+            cells &&
+            (cells.columns > CAT_W || cells.rows > CAT_H) && (
+              <p className="text-[11px] leading-4 text-amber-300/80">
+                essa arte tem {cells.columns}x{cells.rows} pixels e a grade do studio é {CAT_W}x{CAT_H}.
+                Ela entra reduzida por média de área, sem cortar nem deformar.
+              </p>
+            )
           )}
           <p className="text-[11px] leading-4 text-zinc-600">
             {oneToOne
@@ -272,32 +337,79 @@ export function Importer({ onApply, incoming, onIncomingUsed }: Props) {
             </select>
           )}
 
-          <div className="flex items-start gap-2">
-            <canvas
-              ref={outRef}
-              width={CAT_W * PREVIEW}
-              height={CAT_H * PREVIEW}
-              className="rounded ring-1 ring-zinc-800"
-              style={{ imageRendering: 'pixelated' }}
-            />
-            <div className="flex-1 space-y-1">
-              <select
-                value={target}
-                onChange={(event) => setTarget(event.target.value as ImportTarget)}
-                className="w-full rounded border border-zinc-700 bg-zinc-900 px-2 py-1 text-xs"
+          {native ? (
+            <div className="space-y-1.5">
+              <div className="flex items-start gap-2">
+                <canvas
+                  ref={outRef}
+                  width={CAT_W * PREVIEW}
+                  height={CAT_H * PREVIEW}
+                  className="rounded ring-1 ring-zinc-800 opacity-70"
+                  style={{ imageRendering: 'pixelated' }}
+                />
+                <div className="flex-1 space-y-1 text-[11px] leading-4 text-zinc-500">
+                  à esquerda, só a prévia de como ficaria na grade {CAT_W}x{CAT_H}. O botão abaixo
+                  grava sem passar por ela.
+                </div>
+              </div>
+              <button
+                onClick={() => void applyNative()}
+                disabled={!frames.length || nativeBusy || !incoming?.clip}
+                title={
+                  incoming?.clip
+                    ? `grava ${frames.length} quadro(s) ${frameW}x${frameH} no clipe ${incoming.clip}, sem redimensionar`
+                    : 'abra o clipe no preview do Nox para saber o destino'
+                }
+                className="w-full rounded-md border border-amber-500/60 bg-amber-500/10 px-3 py-1.5 text-sm font-medium text-amber-300 transition hover:border-amber-400 disabled:cursor-not-allowed disabled:opacity-40"
               >
-                <option value="current">quadro atual</option>
-                <option value="walk">andando (6 quadros)</option>
-              </select>
+                {nativeBusy
+                  ? 'gravando...'
+                  : incoming?.clip
+                    ? `aplicar 1:1 no clipe ${incoming.clip}`
+                    : 'aplicar 1:1 no clipe do Nox'}
+              </button>
+              {!incoming?.clip && (
+                <p className="text-[11px] leading-4 text-zinc-500">
+                  arte grande só vai para um clipe conhecido. Abra o clipe em /__nox-preview e use
+                  “importar para o studio”.
+                </p>
+              )}
               <button
                 onClick={() => onApply(poses.map((item) => item.rows), target)}
                 disabled={!poses.length}
-                className={`${BTN} w-full`}
+                className="w-full text-left text-[11px] text-zinc-500 underline decoration-zinc-700 underline-offset-2 hover:text-zinc-300"
               >
-                aplicar
+                ou reduzir para {CAT_W}x{CAT_H} e aplicar na grade do site
               </button>
             </div>
-          </div>
+          ) : (
+            <div className="flex items-start gap-2">
+              <canvas
+                ref={outRef}
+                width={CAT_W * PREVIEW}
+                height={CAT_H * PREVIEW}
+                className="rounded ring-1 ring-zinc-800"
+                style={{ imageRendering: 'pixelated' }}
+              />
+              <div className="flex-1 space-y-1">
+                <select
+                  value={target}
+                  onChange={(event) => setTarget(event.target.value as ImportTarget)}
+                  className="w-full rounded border border-zinc-700 bg-zinc-900 px-2 py-1 text-xs"
+                >
+                  <option value="current">quadro atual</option>
+                  <option value="walk">andando (6 quadros)</option>
+                </select>
+                <button
+                  onClick={() => onApply(poses.map((item) => item.rows), target)}
+                  disabled={!poses.length}
+                  className={`${BTN} w-full`}
+                >
+                  aplicar
+                </button>
+              </div>
+            </div>
+          )}
 
           {chosen && chosen.misses.length > 0 && (
             <div className="text-[11px] leading-4 text-amber-300/80">
