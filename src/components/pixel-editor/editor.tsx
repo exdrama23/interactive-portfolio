@@ -25,6 +25,7 @@ import {
   hexOf,
   lineCells,
   packHex,
+  packRgb,
   quantize,
   replaceColor,
   resizeDoc,
@@ -65,14 +66,14 @@ import {
 
 type Tool = 'pencil' | 'eraser' | 'fill' | 'pick' | 'pan' | 'move' | 'select'
 
-const TOOLS: [Tool, string, string][] = [
-  ['pencil', 'lápis', 'B'],
-  ['eraser', 'borracha', 'E'],
-  ['fill', 'balde', 'G'],
-  ['pick', 'conta-gotas', 'I'],
-  ['select', 'seleção', 'S'],
-  ['pan', 'mover vista', 'espaço'],
-  ['move', 'mover camada', 'M'],
+const TOOLS: [Tool, string, string, string][] = [
+  ['pencil', 'lápis', 'B', 'lápis'],
+  ['eraser', 'borracha', 'E', 'borracha'],
+  ['fill', 'balde', 'G', 'balde de tinta'],
+  ['pick', 'conta-gotas', 'I', 'conta-gotas (pegar cor)'],
+  ['select', 'seleção', 'S', 'seleção'],
+  ['pan', 'arrastar', 'espaço', 'arrastar a vista'],
+  ['move', 'mover', 'M', 'mover o conteúdo da camada'],
 ]
 
 const AUTOSAVE = 'nox-pixel-editor'
@@ -629,8 +630,15 @@ export function PixelEditor() {
     const image = imageRef.current
     if (!image || x < 0 || y < 0 || x >= image.width || y >= image.height) return
     const o = (y * image.width + x) * 4
-    if (image.data[o + 3] < 32) return
-    setColor(hexOf((image.data[o] << 16) | (image.data[o + 1] << 8) | image.data[o + 2]))
+    if (image.data[o + 3] < 32) {
+      setStatus('esse pixel e transparente')
+      return
+    }
+    // packRgb mantem R no byte baixo, que e o formato que hexOf espera.
+    // Montar a cor na mao aqui trocava vermelho e azul.
+    const picked = hexOf(packRgb(image.data[o], image.data[o + 1], image.data[o + 2]))
+    setColor(picked)
+    setStatus(`cor pega: ${picked}`)
   }
 
   const colors = useMemo(() => {
@@ -1233,19 +1241,28 @@ export function PixelEditor() {
       </header>
 
       <div className="flex min-h-0 flex-1">
-        <aside className="flex w-12 shrink-0 flex-col gap-1 border-r border-zinc-800 p-1">
-          {TOOLS.map(([id, label, key]) => (
+        <aside
+          role="toolbar"
+          aria-label="ferramentas"
+          aria-orientation="vertical"
+          className="flex w-16 shrink-0 flex-col gap-1 overflow-y-auto border-r border-zinc-800 p-1"
+        >
+          {TOOLS.map(([id, label, key, hint]) => (
             <button
               key={id}
+              type="button"
               onClick={() => setTool(id)}
-              title={`${label} (${key})`}
-              className={`flex h-9 items-center justify-center rounded border text-sm ${
+              title={`${hint} (${key})`}
+              aria-label={`${hint} (${key})`}
+              aria-pressed={tool === id}
+              className={`group flex min-h-11 flex-col items-center justify-center gap-0.5 rounded border px-1 py-1 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 ${
                 tool === id
                   ? 'border-amber-400/70 bg-amber-400/10 text-amber-200'
-                  : 'border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:bg-zinc-900'
+                  : 'border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:bg-zinc-900 hover:text-zinc-200'
               }`}
             >
-              {label.slice(0, 2)}
+              <ToolIcon tool={id} />
+              <span className="w-full text-center text-[9px] leading-[1.15] break-words">{label}</span>
             </button>
           ))}
         </aside>
@@ -1960,6 +1977,89 @@ function layerCanvas(width: number, height: number, data: Uint32Array) {
     context.putImageData(image, 0, 0)
   }
   return canvas
+}
+
+// Icones desenhados aqui para nao depender de fonte nem de imagem externa:
+// cada ferramenta fica reconhecivel pelo desenho e pelo rotulo embaixo.
+function ToolIcon({ tool }: { tool: Tool }) {
+  const common = {
+    width: 18,
+    height: 18,
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 1.7,
+    strokeLinecap: 'round' as const,
+    strokeLinejoin: 'round' as const,
+    'aria-hidden': true,
+    focusable: 'false' as const,
+  }
+  switch (tool) {
+    case 'pencil':
+      return (
+        <svg {...common}>
+          <path d="M21.2 6.8a1 1 0 0 0-4-4L3.8 16.2a2 2 0 0 0-.5.8l-1.3 4.4a.5.5 0 0 0 .6.6l4.4-1.3a2 2 0 0 0 .8-.5z" />
+          <path d="M15 5l4 4" />
+        </svg>
+      )
+    case 'eraser':
+      return (
+        <svg {...common}>
+          <path d="M7 21l-4.3-4.3a2.4 2.4 0 0 1 0-3.4l9.6-9.6a2.4 2.4 0 0 1 3.4 0l5.6 5.6a2.4 2.4 0 0 1 0 3.4L13 21" />
+          <path d="M22 21H7" />
+          <path d="M5 11l9 9" />
+        </svg>
+      )
+    case 'fill':
+      return (
+        <svg {...common}>
+          <path d="M19 11 11 3 2.4 11.6a2 2 0 0 0 0 2.8l5.2 5.2a2 2 0 0 0 2.8 0z" />
+          <path d="M5 2l5 5" />
+          <path d="M2 13h15" />
+          <path d="M22 20a2 2 0 1 1-4 0c0-1.6 1.7-2.4 2-4 .3 1.6 2 2.4 2 4z" />
+        </svg>
+      )
+    case 'pick':
+      return (
+        <svg {...common}>
+          <path d="M2 22l1-1h3l9-9" />
+          <path d="M3 21v-3l9-9" />
+          <path d="M15 6l3.4-3.4a2.1 2.1 0 1 1 3 3L18 9l.4.4a2.1 2.1 0 1 1-3 3l-3.8-3.8a2.1 2.1 0 1 1 3-3z" />
+        </svg>
+      )
+    case 'select':
+      return (
+        <svg {...common}>
+          <path d="M5 3a2 2 0 0 0-2 2" />
+          <path d="M19 3a2 2 0 0 1 2 2" />
+          <path d="M21 19a2 2 0 0 1-2 2" />
+          <path d="M5 21a2 2 0 0 1-2-2" />
+          <path d="M9 3h1M9 21h1M14 3h1M14 21h1" />
+          <path d="M3 9v1M21 9v1M3 14v1M21 14v1" />
+        </svg>
+      )
+    case 'pan':
+      return (
+        <svg {...common}>
+          <path d="M18 11V6a2 2 0 0 0-4 0v5" />
+          <path d="M14 10V4a2 2 0 0 0-4 0v6" />
+          <path d="M10 10.5V6a2 2 0 0 0-4 0v8" />
+          <path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.9-6-2.3l-3.6-3.6a2 2 0 0 1 2.8-2.8L7 15" />
+        </svg>
+      )
+    case 'move':
+    default:
+      return (
+        <svg {...common}>
+          <path d="M12 2v20" />
+          <path d="m15 19-3 3-3-3" />
+          <path d="M2 12h20" />
+          <path d="m5 9-3 3 3 3" />
+          <path d="m9 5 3-3 3 3" />
+          <path d="m19 9 3 3-3 3" />
+        </svg>
+      )
+  }
 }
 
 function isFrameLayer(layer: Doc['layers'][number]) {
