@@ -10,7 +10,7 @@ import { CAT_H, CAT_W } from './format'
 import {
   cellsFrom,
   cornerColor,
-  detectFit,
+  fitForImage,
   frameRows,
   quantize,
   readImage,
@@ -45,6 +45,7 @@ export function Importer({ onApply, incoming, onIncomingUsed }: Props) {
   const [name, setName] = useState('')
   const [fit, setFit] = useState<Fit>({ cell: 1, offsetX: 0, offsetY: 0 })
   const [score, setScore] = useState(0)
+  const [oneToOne, setOneToOne] = useState(true)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [target, setTarget] = useState<ImportTarget>('current')
@@ -66,11 +67,12 @@ export function Importer({ onApply, incoming, onIncomingUsed }: Props) {
     setError('')
     try {
       const image = await readImage(file)
-      const found = detectFit(image)
+      const found = fitForImage(image)
       setData(image)
       setName(file.name)
       setFit(found.fit)
       setScore(found.score)
+      setOneToOne(found.oneToOne)
       setFrame(0)
     } catch (problem) {
       setError(problem instanceof Error ? problem.message : String(problem))
@@ -89,14 +91,15 @@ export function Importer({ onApply, incoming, onIncomingUsed }: Props) {
     readImageUrl(incoming.strip)
       .then((image) => {
         if (!alive) return
-        const plain = { cell: 1, offsetX: 0, offsetY: 0 }
+        const found = fitForImage(image)
         setData(image)
         setName(`${incoming.label} · ${incoming.frames} quadro(s)`)
-        // A tira do preview ja e arte 1:1, nao uma referencia reescalonada: nao
-        // ha celula para adivinhar. Celula 1 mantem o desenho inteiro e deixa o
-        // encaixe na grade 30x28 ser uma reducao proporcional, sem cortar.
-        setFit(plain)
-        setScore(scoreFit(image, plain))
+        // A tira do preview ja e arte 1:1: cada pixel e um pixel. A reducao
+        // para a grade 30x28 acontece depois, por media de area, nunca por
+        // adivinhacao de celula.
+        setFit(found.fit)
+        setScore(found.score)
+        setOneToOne(found.oneToOne)
         setFrame(0)
         setTarget(incoming.frames >= 4 ? 'walk' : 'current')
         onIncomingUsed?.()
@@ -182,6 +185,8 @@ export function Importer({ onApply, incoming, onIncomingUsed }: Props) {
     if (!Number.isFinite(value)) return
     const next = { ...fit, [key]: value }
     setFit(next)
+    // Mexer na célula é escolher a grade na mão: deixa de ser o modo 1:1.
+    if (key === 'cell') setOneToOne(value === 1)
     if (data) setScore(scoreFit(data, next))
   }
 
@@ -235,12 +240,20 @@ export function Importer({ onApply, incoming, onIncomingUsed }: Props) {
           </div>
 
           <p className="text-[11px] text-zinc-500">
-            encaixe {(score * 100).toFixed(1)}% · {cells?.columns}x{cells?.rows} células ·{' '}
-            {frames.length} quadro{frames.length === 1 ? '' : 's'}
+            {oneToOne ? 'pixels originais 1:1' : `encaixe ${(score * 100).toFixed(1)}%`} ·{' '}
+            {cells?.columns}x{cells?.rows} células · {frames.length} quadro
+            {frames.length === 1 ? '' : 's'}
           </p>
+          {cells && (cells.columns > CAT_W || cells.rows > CAT_H) && (
+            <p className="text-[11px] leading-4 text-amber-300/80">
+              essa arte tem {cells.columns}x{cells.rows} pixels e a grade do studio é {CAT_W}x{CAT_H}.
+              Ela entra reduzida por média de área, sem cortar nem deformar.
+            </p>
+          )}
           <p className="text-[11px] leading-4 text-zinc-600">
-            A célula é um chute quando o arquivo veio reescalonado. Se a prévia sair torta, ajuste
-            até o desenho ficar limpo.
+            {oneToOne
+              ? 'cada pixel da imagem vira uma célula, igual ao editor de pixel. Não há grade para adivinhar.'
+              : 'A célula é um chute quando o arquivo veio reescalonado. Se a prévia sair torta, ajuste até o desenho ficar limpo.'}
           </p>
 
           <canvas ref={rawRef} className="block rounded ring-1 ring-zinc-800" style={{ imageRendering: 'pixelated' }} />

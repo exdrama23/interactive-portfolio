@@ -277,6 +277,19 @@ function refinePhase(data: ImageData, cell: number, start: Fit, fine: boolean) {
   return { fit: best, score: bestScore }
 }
 
+// Mesma regra do editor de pixel: arte de ate 1024 px entra em 1:1, cada pixel
+// vira uma celula, sem adivinhar grade. So a referencia maior que isso passa
+// pelo detectFit, que tenta achar o bloco da imagem reescalonada.
+export const ONE_TO_ONE_MAX = 1024
+
+export function fitForImage(data: ImageData): { fit: Fit; score: number; oneToOne: boolean } {
+  if (data.width <= ONE_TO_ONE_MAX && data.height <= ONE_TO_ONE_MAX) {
+    // Nota 1 de proposito: com celula de 1 px nao existe "encaixe" para medir.
+    return { fit: { cell: 1, offsetX: 0, offsetY: 0 }, score: 1, oneToOne: true }
+  }
+  return { ...detectFit(data), oneToOne: false }
+}
+
 export function detectFit(data: ImageData): { fit: Fit; score: number } {
   // Arte já no tamanho real não tem repetição para medir: a célula é 1 e ponto.
   if (data.width <= 64 && data.height <= 64) {
@@ -509,20 +522,61 @@ export function frameRows(
   const scale = Math.min(1, width / w, height / h)
   const outW = Math.max(1, Math.round(w * scale))
   const outH = Math.max(1, Math.round(h * scale))
-  const left = Math.max(0, Math.floor((width - outW) / 2))
-  const top = Math.max(0, height - outH)
+  // Arte que já cabe na grade sem redução fica onde estava: mover para o
+  // rodapé fazia um desenho 30x28 voltar 3 px mais baixo, quebrando o 1:1.
+  const exact = scale === 1 && x0 + w <= width && y0 + h <= height
+  const left = exact ? x0 : Math.max(0, Math.floor((width - outW) / 2))
+  const top = exact ? y0 : Math.max(0, height - outH)
   const out: (string | null)[][] = Array.from({ length: height }, () => Array<string | null>(width).fill(null))
 
+  // Reduzir escolhendo um pixel por célula inventa buraco e serrilhado. Cada
+  // célula de destino recebe a média da área que ela cobre, como o editor de
+  // pixel faz ao encaixar uma arte maior numa grade: nenhum pixel é jogado
+  // fora e a silhueta continua inteira. Em 1:1 a área é 1x1, então a cor sai
+  // exata, sem média nenhuma.
   for (let y = 0; y < outH; y++) {
-    const sy = y0 + Math.min(h - 1, Math.floor((y * h) / outH))
+    const sy0 = y0 + Math.floor((y * h) / outH)
+    const sy1 = Math.max(sy0 + 1, y0 + Math.floor(((y + 1) * h) / outH))
     for (let x = 0; x < outW; x++) {
-      const sx = x0 + Math.min(w - 1, Math.floor((x * w) / outW))
+      const sx0 = x0 + Math.floor((x * w) / outW)
+      const sx1 = Math.max(sx0 + 1, x0 + Math.floor(((x + 1) * w) / outW))
       if (top + y >= height || left + x >= width) continue
-      out[top + y][left + x] = cells.cell[sy][sx]
+      out[top + y][left + x] = averageColor(cells, sx0, sx1, sy0, sy1, empty)
     }
   }
 
   return out
+}
+
+// Média das células preenchidas da área. Transparente não entra na conta: se
+// entrasse, o contorno do gato escureceria contra o fundo.
+function averageColor(
+  cells: Cells,
+  x0: number,
+  x1: number,
+  y0: number,
+  y1: number,
+  empty: (value: string | null) => boolean,
+): string | null {
+  let r = 0
+  let g = 0
+  let b = 0
+  let n = 0
+  for (let y = y0; y < y1; y++) {
+    const line = cells.cell[y]
+    if (!line) continue
+    for (let x = x0; x < x1; x++) {
+      const value = line[x]
+      if (!value || empty(value)) continue
+      const [cr, cg, cb] = channels(value)
+      r += cr
+      g += cg
+      b += cb
+      n++
+    }
+  }
+  if (!n) return null
+  return hex(r / n, g / n, b / n)
 }
 
 export interface Quantized {
